@@ -18,7 +18,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,
-      lerp: 0.7,
+      lerp: 0.1,
       wheelMultiplier: 1,
       touchMultiplier: 1.5,
       smoothWheel: true,
