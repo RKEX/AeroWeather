@@ -15,15 +15,13 @@ type RootLayoutProps = {
 };
 
 const RootLayout = ({ children }: Readonly<RootLayoutProps>) => {
-
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.2,
-      smoothWheel: true,
-      smoothTouch: true,
+      duration: 1.1,
+      lerp: 0.1,
       wheelMultiplier: 1,
       touchMultiplier: 1.5,
-      lerp: 0.08
+      smoothWheel: true,
     });
 
     function raf(time: number) {
@@ -45,7 +43,6 @@ const RootLayout = ({ children }: Readonly<RootLayoutProps>) => {
       suppressHydrationWarning
     >
       <body className="overflow-x-hidden bg-transparent">
-
         {/* SKY BACKGROUND */}
         <SkyBackground />
 
@@ -58,7 +55,6 @@ const RootLayout = ({ children }: Readonly<RootLayoutProps>) => {
           <Analytics />
           <SpeedInsights />
         </main>
-
       </body>
     </html>
   );
