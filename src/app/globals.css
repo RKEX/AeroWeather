@@ -124,3 +124,35 @@
     @apply bg-background text-foreground;
   }
 }
+/* ===== Scroll Performance Optimization ===== */
+
+html,
+body {
+  scroll-behavior: auto;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* GPU acceleration for smoother scrolling */
+main {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Optimize animated layers */
+canvas,
+video,
+img {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Mobile smooth scrolling */
+body {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent animation jank */
+* {
+  backface-visibility: hidden;
+}
