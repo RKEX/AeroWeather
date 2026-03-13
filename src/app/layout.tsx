@@ -1,5 +1,7 @@
 import SkyBackground from "@/components/weather/sky-background";
 import { geistMono, geistSans } from "@/lib/fonts";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ReactNode } from "react";
 import "./globals.css";
 
@@ -21,7 +23,11 @@ const RootLayout = ({ children }: Readonly<RootLayoutProps>) => {
         <div className="fixed inset-0 -z-40 bg-black/35 backdrop-blur-[2px]" />
 
         {/* APP */}
-        <main className="relative z-10">{children}</main>
+        <main className="relative z-10">
+          {children}
+          <Analytics />
+          <SpeedInsights />
+        </main>
       </body>
     </html>
   );
