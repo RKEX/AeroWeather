@@ -1,8 +1,13 @@
+"use client";
+
+import { ReactNode, useEffect } from "react";
+import Lenis from "lenis";
+
 import SkyBackground from "@/components/weather/sky-background";
 import { geistMono, geistSans } from "@/lib/fonts";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { ReactNode } from "react";
+
 import "./globals.css";
 
 type RootLayoutProps = {
@@ -10,12 +15,37 @@ type RootLayoutProps = {
 };
 
 const RootLayout = ({ children }: Readonly<RootLayoutProps>) => {
+
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      smoothWheel: true,
+      smoothTouch: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 1.5,
+      lerp: 0.08
+    });
+
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
+
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      suppressHydrationWarning>
+      suppressHydrationWarning
+    >
       <body className="overflow-x-hidden bg-transparent">
+
         {/* SKY BACKGROUND */}
         <SkyBackground />
 
@@ -28,6 +58,7 @@ const RootLayout = ({ children }: Readonly<RootLayoutProps>) => {
           <Analytics />
           <SpeedInsights />
         </main>
+
       </body>
     </html>
   );
