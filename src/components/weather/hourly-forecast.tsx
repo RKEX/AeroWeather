@@ -101,7 +101,7 @@ export function HourlyForecast({ weather, dayIndex = -1 }: HourlyForecastProps) 
 
       {/* Timeline cards */}
       <div
-        className="scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent mb-6 flex gap-4 overflow-x-auto pb-4">
+        className="glass-scroll mb-6 flex gap-4 overflow-x-auto pb-4">
         {data.slice(0, 12).map((hour, i) => {
           const Icon = getWeatherIcon(hour.code, true);
           const itemBg = "bg-white/10 border-white/15 hover:bg-white/20 shadow-lg backdrop-blur-2xl";

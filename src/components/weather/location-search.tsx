@@ -4,8 +4,8 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { searchLocations } from "@/lib/geocode";
 import { LocationResult } from "@/types/weather";
 import { Loader2, MapPin, Search } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 interface LocationSearchProps {
   onSelect: (location: LocationResult) => void;
@@ -83,10 +83,12 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
         />
       </div>
 
-      {/* Dropdown (NO blur — solid background) */}
+      {/* Dropdown (Solid opaque background with isolation) */}
       {open && results.length > 0 && (
-        <div className="absolute top-full right-0 left-0 mt-2 overflow-hidden rounded-2xl border border-white/10 bg-slate-900 shadow-[0_25px_80px_rgba(0,0,0,0.6)]">
-          <ul className="scrollbar-thin scrollbar-thumb-white/20 max-h-60 w-full overflow-y-auto p-2">
+        <div className="absolute top-full right-0 left-0 z-[999] isolate mt-2 rounded-2xl border border-white/10 bg-[#030712] shadow-2xl">
+          <ul 
+            className="glass-scroll flex max-h-60 w-full flex-col overflow-y-auto p-2"
+            data-lenis-prevent>
             {results.map((loc) => (
               <li
                 key={`${loc.id}-${loc.latitude}`}

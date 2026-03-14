@@ -1,6 +1,6 @@
+import { Footer } from "@/components/footer";
 import RootClientLayout from "@/components/layout/root-client-layout";
 import SkyBackground from "@/components/weather/sky-background";
-import { Footer } from "@/components/footer";
 import { geistMono, geistSans } from "@/lib/fonts";
 import { defaultSEO } from "@/lib/seo-config";
 import { Analytics } from "@vercel/analytics/next";
@@ -11,22 +11,50 @@ import { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(defaultSEO.url),
+
   title: {
     default: defaultSEO.title,
-    template: `%s | AeroWeather`,
+    template: "%s | AeroWeather",
   },
+
   description: defaultSEO.description,
   keywords: defaultSEO.keywords,
-  authors: [{ name: "Rick Das" }],
+
+  authors: [
+    {
+      name: "Rick Das",
+    },
+  ],
+
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+
   openGraph: {
     title: defaultSEO.title,
     description: defaultSEO.description,
     url: defaultSEO.url,
     siteName: "AeroWeather",
-    images: [{ url: defaultSEO.ogImage, width: 1200, height: 630 }],
+    images: [
+      {
+        url: defaultSEO.ogImage,
+        width: 1200,
+        height: 630,
+      },
+    ],
     locale: "en_US",
     type: "website",
   },
+
   twitter: {
     card: "summary_large_image",
     title: defaultSEO.title,
@@ -34,19 +62,17 @@ export const metadata: Metadata = {
     images: [defaultSEO.ogImage],
     creator: defaultSEO.twitterHandle,
   },
+
   icons: {
-  icon: [
-    {
-      url: "/icon.svg",
-      type: "image/svg+xml",
-    },
-  ],
-  apple: [
-    {
-      url: "/icon.svg",
-    },
-  ],
-},
+    icon: [
+      {
+        url: "/favicon.ico",
+        sizes: "any",
+      },
+    ],
+    shortcut: "/favicon.ico",
+  },
+
   verification: {
     google: "5AQfg1BzRq4wAzL9_4IVKwgKmM6ubXUn9PpPVkletgA",
   },
@@ -70,13 +96,14 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
           {/* DARK OVERLAY */}
           <div className="fixed inset-0 -z-40 bg-black/35 backdrop-blur-[2px]" />
 
-          {/* APP */}
+          {/* MAIN APP */}
           <main className="relative z-10 min-h-screen">
             {children}
             <Analytics />
             <SpeedInsights />
           </main>
 
+          {/* FOOTER */}
           <Footer />
         </RootClientLayout>
       </body>

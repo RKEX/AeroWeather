@@ -84,7 +84,7 @@ export default function ClientDashboard({
       opacity: 1,
       y: 0,
       scale: 1,
-      filter: "blur(0px)",
+      filter: "none",
       transition: { 
         duration: 0.45, 
         ease: [0.22, 1, 0.36, 1] 
@@ -105,7 +105,7 @@ export default function ClientDashboard({
         className="relative z-10 container mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 md:py-12">
         <motion.header 
           variants={itemVariants}
-          className="flex w-full flex-col items-center justify-between gap-6 md:flex-row">
+          className="relative z-50 flex w-full flex-col items-center justify-between gap-6 md:flex-row">
           <div className="flex items-center gap-3">
             <div className="rounded-2xl border border-white/15 bg-white/10 p-3 shadow-xl backdrop-blur-2xl">
               <Navigation className="h-6 w-6 text-white" />
