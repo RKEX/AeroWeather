@@ -27,6 +27,10 @@ export const metadata: Metadata = {
     },
   ],
 
+  alternates: {
+    canonical: defaultSEO.url,
+  },
+
   robots: {
     index: true,
     follow: true,
@@ -87,23 +91,20 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      suppressHydrationWarning>
+      suppressHydrationWarning
+    >
       <body className="overflow-x-hidden bg-transparent font-sans">
         <RootClientLayout>
-          {/* SKY BACKGROUND */}
           <SkyBackground />
 
-          {/* DARK OVERLAY */}
           <div className="fixed inset-0 -z-40 bg-black/35 backdrop-blur-[2px]" />
 
-          {/* MAIN APP */}
           <main className="relative z-10 min-h-screen">
             {children}
             <Analytics />
             <SpeedInsights />
           </main>
 
-          {/* FOOTER */}
           <Footer />
         </RootClientLayout>
       </body>
