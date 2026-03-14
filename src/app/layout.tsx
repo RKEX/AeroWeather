@@ -1,11 +1,11 @@
-import { ReactNode } from "react";
-import { Metadata } from "next";
+import RootClientLayout from "@/components/layout/root-client-layout";
 import SkyBackground from "@/components/weather/sky-background";
 import { geistMono, geistSans } from "@/lib/fonts";
+import { defaultSEO } from "@/lib/seo-config";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import RootClientLayout from "@/components/layout/root-client-layout";
-import { defaultSEO } from "@/lib/seo-config";
+import { Metadata } from "next";
+import { ReactNode } from "react";
 
 import "./globals.css";
 
@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   icons: {
     icon: "/icon.svg",
     apple: "/icon.svg",
+  },
+  verification: {
+    google: "5AQfg1BzRq4wAzL9_4IVKwgKmM6ubXUn9PpPVkletgA",
   },
 };
 
@@ -28,8 +31,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      suppressHydrationWarning
-    >
+      suppressHydrationWarning>
       <body className="overflow-x-hidden bg-transparent">
         <RootClientLayout>
           {/* SKY BACKGROUND */}
