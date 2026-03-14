@@ -138,7 +138,7 @@ export default function ClientDashboard({
             <motion.div
               key={currentCity}
               variants={itemVariants}
-              className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+              className="grid grid-cols-1 gap-6 lg:grid-cols-12 will-change-[transform,opacity]">
               <div className="flex flex-col gap-6 lg:col-span-8">
                 <motion.div variants={itemVariants}>
                   <WeatherHero

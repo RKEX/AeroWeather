@@ -40,7 +40,7 @@ export async function POST(req: Request) {
 
     const mailOptions = {
       from: `"${name}" <${email}>`,
-      to: "rickd7587@gmail.com",
+      to: receiver,
       subject: `New Contact Message from ${name} via AeroWeather`,
       text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
       html: `
