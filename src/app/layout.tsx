@@ -35,9 +35,18 @@ export const metadata: Metadata = {
     creator: defaultSEO.twitterHandle,
   },
   icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
-  },
+  icon: [
+    {
+      url: "/icon.svg",
+      type: "image/svg+xml",
+    },
+  ],
+  apple: [
+    {
+      url: "/icon.svg",
+    },
+  ],
+},
   verification: {
     google: "5AQfg1BzRq4wAzL9_4IVKwgKmM6ubXUn9PpPVkletgA",
   },
