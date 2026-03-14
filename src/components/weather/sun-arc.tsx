@@ -5,71 +5,87 @@ import { Sunrise, Sunset } from "lucide-react";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { GlassCard } from "@/components/ui/glass-card";
 
-export function SunArc({ weather }: { weather: WeatherData }) {
-    const isNight = weather.current.isDay === 0;
-    const textPrimary = isNight ? "text-white" : "text-slate-900";
-    const textSecondary = isNight ? "text-white/60" : "text-slate-600";
-    const glassCard = isNight
-        ? "bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-2xl"
-        : "bg-white/70 backdrop-blur-xl border border-slate-200 text-slate-900 shadow-lg";
+export function SunArc({ weather, dayIndex = -1 }: { weather: WeatherData, dayIndex?: number }) {
+    const textPrimary = "text-white";
+    const textTertiary = "text-white/60";
 
-    const [progress, setProgress] = useState(0);
+    const [currentTime, setCurrentTime] = useState(new Date());
 
-    const sunriseStr = weather.daily.sunrise[0];
-    const sunsetStr = weather.daily.sunset[0];
+    const isForecast = dayIndex >= 0;
+    const actualIndex = isForecast ? dayIndex : 0;
+    
+    const sunriseStr = weather.daily.sunrise[actualIndex];
+    const sunsetStr = weather.daily.sunset[actualIndex];
 
+    // Update current time every minute
     useEffect(() => {
-        if (!sunriseStr || !sunsetStr) return;
-        
-        const now = new Date().getTime();
-        const sunrise = new Date(sunriseStr).getTime();
-        const sunset = new Date(sunsetStr).getTime();
-
-        let rawProgress = (now - sunrise) / (sunset - sunrise);
-        rawProgress = Math.max(0, Math.min(1, rawProgress)); // Clamp between 0 and 1
-        
-        // Slight delay for animation effect
-        setTimeout(() => setProgress(rawProgress), 500);
-
-    }, [sunriseStr, sunsetStr]);
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 60000);
+        return () => clearInterval(timer);
+    }, []);
 
     if (!sunriseStr || !sunsetStr) return null;
 
-    // SVG Arc Path 
-    const r = 120; // radius
-    const cx = 150; // center x
-    const cy = 130; // base y
+    const sunrise = new Date(sunriseStr);
+    const sunset = new Date(sunsetStr);
+
+    let progress = (currentTime.getTime() - sunrise.getTime()) / (sunset.getTime() - sunrise.getTime());
+    progress = Math.max(0, Math.min(1, progress));
+
+    let statusText = "";
+    if (currentTime < sunrise) {
+        const diff = Math.round((sunrise.getTime() - currentTime.getTime()) / 60000);
+        statusText = diff < 60 ? `Sunrise in ${diff}m` : "Waiting for sunrise";
+    } else if (currentTime < sunset) {
+        const diff = Math.round((sunset.getTime() - currentTime.getTime()) / 60000);
+        statusText = diff < 60 ? `Sunset in ${diff}m` : "Sun is up";
+    } else {
+        statusText = "Sun has set";
+    }
+
+    // SVG Arc Path Configuration
+    const r = 100; // Refined radius
+    const cx = 150; // Center X remains 150 for the 300px viewBox
+    const cy = 110; // Refined base Y for a natural arc height
     
     // Calculate sun position on the arc
-    // Angle goes from 180deg (PI) to 0
     const angle = Math.PI - (progress * Math.PI);
     const sunX = cx + r * Math.cos(angle);
     const sunY = cy - r * Math.sin(angle);
 
     return (
-        <div className={`rounded-3xl p-6 w-full overflow-hidden relative backdrop-blur-xl transition-all ${glassCard}`}>
+        <GlassCard className="p-6 w-full overflow-hidden relative transition-all">
             <h3 className={`text-xl font-medium mb-4 drop-shadow-sm ${textPrimary}`}>Sunrise & Sunset</h3>
-            <div className="relative w-75 h-37.5 mx-auto mt-6">
-                
-                {/* Background Arc */}
-                <svg width="300" height="150" viewBox="0 0 300 150" className="absolute top-0 left-0">
+            
+            <div className="relative w-full max-w-[340px] h-36 mx-auto mt-6 px-5">
+                {/* SVG Container for the Arc */}
+                <svg width="100%" height="120" viewBox="0 0 300 120" className="overflow-visible">
+                    <defs>
+                        <linearGradient id="sunGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#facc15" />
+                            <stop offset="100%" stopColor="#f59e0b" />
+                        </linearGradient>
+                    </defs>
+
+                    {/* Background Arc - Thin & Subtle */}
                     <path
-                        d="M 30,130 A 120,120 0 0,1 270,130"
+                        d={`M ${cx - r},${cy} A ${r},${r} 0 0,1 ${cx + r},${cy}`}
                         fill="none"
-                        stroke={isNight ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)"}
-                        strokeWidth="2"
+                        stroke="rgba(255,255,255,0.08)"
+                        strokeWidth="1.5"
                         strokeDasharray="4 4"
                     />
-                </svg>
 
-                {/* Animated Path fill container using a clip logic or simple animated stroke */}
-                <svg width="300" height="150" viewBox="0 0 300 150" className="absolute top-0 left-0">
+                    {/* Progress Arc - Elegant & Gradient */}
                     <motion.path
-                        d="M 30,130 A 120,120 0 0,1 270,130"
+                        d={`M ${cx - r},${cy} A ${r},${r} 0 0,1 ${cx + r},${cy}`}
                         fill="none"
-                        stroke="rgba(250, 204, 21, 0.8)" /* yellow-400 */
-                        strokeWidth="3"
+                        stroke="url(#sunGradient)"
+                        strokeWidth="2"
+                        strokeLinecap="round"
                         initial={{ pathLength: 0 }}
                         animate={{ pathLength: progress }}
                         transition={{ duration: 1.5, ease: "easeOut" }}
@@ -79,31 +95,40 @@ export function SunArc({ weather }: { weather: WeatherData }) {
                 {/* Glowing Sun Position */}
                 {progress > 0 && progress < 1 && (
                      <motion.div
-                        className="absolute w-8 h-8 -ml-4 -mt-4 bg-yellow-400 rounded-full shadow-[0_0_20px_rgba(250,204,21,0.8)]"
-                        initial={{ x: 30, y: 130, opacity: 0 }}
-                        animate={{ x: sunX, y: sunY, opacity: 1 }}
+                        className="absolute w-6 h-6 -ml-3 -mt-3 bg-yellow-400 rounded-full"
+                        style={{
+                            boxShadow: "0 0 12px rgba(250, 204, 21, 0.6), 0 0 30px rgba(250, 204, 21, 0.35)",
+                        }}
+                        initial={{ left: "50%", top: "110px", opacity: 0 }}
+                        animate={{ 
+                            left: `${(sunX / 300) * 100}%`, 
+                            top: `${sunY}px`,
+                            opacity: 1 
+                        }}
                         transition={{ duration: 1.5, ease: "easeOut" }}
                      />
                 )}
 
-                {/* Base Line */}
-                <div className={`absolute bottom-5 left-0 right-0 h-px ${isNight ? 'bg-white/20' : 'bg-black/10'}`}></div>
+                {/* Markers & Baseline */}
+                <div className="absolute top-[110px] left-0 right-0 flex justify-between items-end px-2">
+                    <div className="flex flex-col items-center gap-1.5 translate-y-1">
+                        <Sunrise className="w-4 h-4 text-yellow-500/80" />
+                        <span className={`text-[11px] font-semibold tracking-wide ${textPrimary}`}>{format(sunrise, 'h:mm a')}</span>
+                    </div>
+                    
+                    {/* Minimal Baseline */}
+                    <div className="flex-1 h-px bg-white/5 mx-4 translate-y-[-6px]"></div>
 
-                <div className="absolute bottom-0 left-5 transform -translate-x-1/2 flex flex-col items-center">
-                    <Sunrise className="w-5 h-5 text-yellow-500 mb-1" />
-                    <span className={`text-sm font-medium ${textPrimary}`}>{format(new Date(sunriseStr), 'h:mm a')}</span>
-                </div>
-                <div className="absolute bottom-0 left-70 transform -translate-x-1/2 flex flex-col items-center">
-                    <Sunset className="w-5 h-5 text-orange-500 mb-1" />
-                    <span className={`text-sm font-medium ${textPrimary}`}>{format(new Date(sunsetStr), 'h:mm a')}</span>
+                    <div className="flex flex-col items-center gap-1.5 translate-y-1">
+                        <Sunset className="w-4 h-4 text-orange-500/80" />
+                        <span className={`text-[11px] font-semibold tracking-wide ${textPrimary}`}>{format(sunset, 'h:mm a')}</span>
+                    </div>
                 </div>
             </div>
-            {progress >= 1 && (
-                 <p className={`text-center text-sm mt-2 ${textSecondary}`}>The sun has set.</p>
-            )}
-            {progress === 0 && (
-                 <p className={`text-center text-sm mt-2 ${textSecondary}`}>Waiting for sunrise.</p>
-            )}
-        </div>
+
+            <p className={`text-center text-sm mt-8 font-medium tracking-wide ${textTertiary}`}>
+                {statusText}
+            </p>
+        </GlassCard>
     );
 }

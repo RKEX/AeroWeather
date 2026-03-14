@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 import { searchLocations } from "@/lib/geocode";
 import { LocationResult } from "@/types/weather";
-import { Search, MapPin, Loader2 } from "lucide-react";
-import { useDebounce } from "@/hooks/useDebounce";
+import { Loader2, MapPin, Search } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface LocationSearchProps {
   onSelect: (location: LocationResult) => void;
@@ -18,6 +19,7 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const debouncedQuery = useDebounce(query, 500);
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchLocations() {
@@ -25,21 +27,26 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
         setResults([]);
         return;
       }
+
       setLoading(true);
       const data = await searchLocations(debouncedQuery);
       setResults(data);
       setLoading(false);
       setOpen(true);
     }
+
     fetchLocations();
   }, [debouncedQuery]);
-
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         setOpen(false);
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -49,38 +56,52 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
     setResults([]);
     setOpen(false);
     onSelect(location);
+    router.push(`/weather/${location.name.toLowerCase().replace(/\s+/g, "-")}`);
   };
 
   return (
-    <div className="relative w-full max-w-md mx-auto z-50" ref={containerRef}>
-      <div className="relative flex items-center w-full">
+    <div
+      className="relative z-50 mx-auto w-full max-w-md"
+      ref={containerRef}>
+      {/* Search Input (glass + blur থাকবে) */}
+      <div className="relative flex w-full items-center">
         <div className="absolute left-3 text-white/70">
-          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
+          {loading ?
+            <Loader2 className="h-5 w-5 animate-spin" />
+          : <Search className="h-5 w-5" />}
         </div>
+
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => { if (results.length > 0) setOpen(true) }}
+          onFocus={() => {
+            if (results.length > 0) setOpen(true);
+          }}
           placeholder="Search for a city..."
-          className="w-full pl-10 pr-4 py-3 bg-white/10 dark:bg-black/20 backdrop-blur-md border border-white/20 dark:border-white/10 rounded-2xl text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]"
+          className="w-full rounded-2xl border border-white/25 bg-white/15 py-3 pr-4 pl-10 text-white shadow-[0_10px_40px_rgba(0,0,0,0.45)] backdrop-blur-2xl placeholder:text-white/60 focus:ring-2 focus:ring-white/30 focus:outline-none"
         />
       </div>
 
+      {/* Dropdown (NO blur — solid background) */}
       {open && results.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white/10 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] divide-y divide-white/10">
-          <ul className="max-h-60 overflow-y-auto w-full p-2 scrollbar-thin scrollbar-thumb-white/20">
+        <div className="absolute top-full right-0 left-0 mt-2 overflow-hidden rounded-2xl border border-white/10 bg-slate-900 shadow-[0_25px_80px_rgba(0,0,0,0.6)]">
+          <ul className="scrollbar-thin scrollbar-thumb-white/20 max-h-60 w-full overflow-y-auto p-2">
             {results.map((loc) => (
-              <li key={`${loc.id}-${loc.latitude}`} className="w-full">
+              <li
+                key={`${loc.id}-${loc.latitude}`}
+                className="w-full">
                 <button
                   onClick={() => handleSelect(loc)}
-                  className="w-full text-left px-4 py-3 hover:bg-white/10 text-white rounded-xl transition-colors flex items-center gap-3"
-                >
-                  <MapPin className="w-4 h-4 opacity-50 flex-shrink-0" />
-                  <div className="flex flex-col min-w-0">
-                    <span className="font-medium truncate">{loc.name}</span>
-                    <span className="text-xs text-white/60 truncate">
-                      {loc.admin1 ? `${loc.admin1}, ` : ""}{loc.country}
+                  className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-white transition-colors hover:bg-white/10">
+                  <MapPin className="h-4 w-4 shrink-0 opacity-60" />
+
+                  <div className="flex min-w-0 flex-col">
+                    <span className="truncate font-medium">{loc.name}</span>
+
+                    <span className="truncate text-xs text-white/70">
+                      {loc.admin1 ? `${loc.admin1}, ` : ""}
+                      {loc.country}
                     </span>
                   </div>
                 </button>

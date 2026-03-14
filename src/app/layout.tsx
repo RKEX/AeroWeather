@@ -1,41 +1,29 @@
-"use client";
-
-import { ReactNode, useEffect } from "react";
-import Lenis from "lenis";
-
+import { ReactNode } from "react";
+import { Metadata } from "next";
 import SkyBackground from "@/components/weather/sky-background";
 import { geistMono, geistSans } from "@/lib/fonts";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import RootClientLayout from "@/components/layout/root-client-layout";
+import { defaultSEO } from "@/lib/seo-config";
 
 import "./globals.css";
+
+export const metadata: Metadata = {
+  title: defaultSEO.title,
+  description: defaultSEO.description,
+  keywords: defaultSEO.keywords,
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
+};
 
 type RootLayoutProps = {
   children: ReactNode;
 };
 
 export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
-  useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.2,
-      lerp: 0.1,
-      wheelMultiplier: 1,
-      touchMultiplier: 1.5,
-      smoothWheel: true,
-    });
-
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
-
-    return () => {
-      lenis.destroy();
-    };
-  }, []);
-
   return (
     <html
       lang="en"
@@ -43,18 +31,20 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
       suppressHydrationWarning
     >
       <body className="overflow-x-hidden bg-transparent">
-        {/* SKY BACKGROUND */}
-        <SkyBackground />
+        <RootClientLayout>
+          {/* SKY BACKGROUND */}
+          <SkyBackground />
 
-        {/* DARK OVERLAY */}
-        <div className="fixed inset-0 -z-40 bg-black/35 backdrop-blur-[2px]" />
+          {/* DARK OVERLAY */}
+          <div className="fixed inset-0 -z-40 bg-black/35 backdrop-blur-[2px]" />
 
-        {/* APP */}
-        <main className="relative z-10">
-          {children}
-          <Analytics />
-          <SpeedInsights />
-        </main>
+          {/* APP */}
+          <main className="relative z-10">
+            {children}
+            <Analytics />
+            <SpeedInsights />
+          </main>
+        </RootClientLayout>
       </body>
     </html>
   );

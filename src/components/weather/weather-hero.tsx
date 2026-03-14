@@ -1,75 +1,84 @@
 "use client";
 
+import React from "react";
+
 import { WeatherData } from "@/types/weather";
 import { getWeatherIcon, getWeatherConditionText } from "@/lib/weather-theme";
-import { Wind, Droplets, Eye, Thermometer, Info } from "lucide-react";
-import { generateWeatherInsight } from "@/lib/ai-insight";
-import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { Wind, Droplets, Eye, Thermometer } from "lucide-react";
+import { GlassCard } from "@/components/ui/glass-card";
 
 interface WeatherHeroProps {
   weather: WeatherData;
   locationName: string;
+  dayIndex?: number;
 }
 
-export function WeatherHero({ weather, locationName }: WeatherHeroProps) {
+export function WeatherHero({ weather, locationName, dayIndex = -1 }: WeatherHeroProps) {
+  const isForecast = dayIndex >= 0;
   const current = weather.current;
-  const conditionText = getWeatherConditionText(current.weatherCode);
-  const WeatherIcon = useMemo(() => getWeatherIcon(current.weatherCode, current.isDay), [current.weatherCode, current.isDay]);
+  const daily = weather.daily;
+  
+  const weatherCode = isForecast ? daily.weatherCode[dayIndex] : current.weatherCode;
+  const temperature = isForecast ? daily.temperature2mMax[dayIndex] : current.temperature2m;
+  const isDay = isForecast ? 1 : current.isDay; // Assume day icon for forecast days
+  
+  const conditionText = getWeatherConditionText(weatherCode);
+  const textPrimary = "text-white";
+  const textTertiary = "text-white/60";
 
-  const isNight = current.isDay === 0;
-  const textPrimary = isNight ? "text-white" : "text-slate-900";
-  const textSecondary = isNight ? "text-white/70" : "text-slate-700";
-  const glassCard = isNight
-    ? "bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-2xl"
-    : "bg-white/70 backdrop-blur-xl border border-slate-200 text-slate-900 shadow-lg";
+  // Daily aggregates for metrics if forecast
+  const humidity = isForecast ? 
+    Math.round(weather.hourly.relativeHumidity2m.slice(dayIndex * 24, (dayIndex + 1) * 24).reduce((a, b) => a + b, 0) / 24) : 
+    current.relativeHumidity2m;
+  
+  const wind = isForecast ? 
+    Math.round(daily.precipitationSum[dayIndex]) : // We don't have max wind in current daily? Actually we can calculate it
+    current.windSpeed10m;
+
+  const apparent = isForecast ? temperature : current.apparentTemperature;
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className={`relative w-full rounded-3xl overflow-hidden p-8 ${glassCard}`}
+    <GlassCard 
+      className="p-8"
     >
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="flex flex-col items-center md:items-start text-center md:text-left">
                 <h2 className={`text-3xl font-medium tracking-tight mb-1 drop-shadow-sm ${textPrimary}`}>{locationName}</h2>
-                <div className={`flex items-center gap-2 mb-6 font-medium drop-shadow-sm ${textSecondary}`}>
+                <div className={`flex items-center gap-2 mb-6 font-medium drop-shadow-sm ${textTertiary}`}>
                     <span className="text-lg">{conditionText}</span>
                 </div>
 
                 <div className="flex items-center gap-6">
-                    <WeatherIcon className={`w-24 h-24 drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] ${isNight ? "text-white" : "text-slate-900"}`} />
+                    {React.createElement(getWeatherIcon(weatherCode, isDay), { 
+                        className: "w-24 h-24 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] text-white" 
+                    })}
                     <div className={`text-8xl font-light tracking-tighter drop-shadow-xl ${textPrimary}`}>
-                        {Math.round(current.temperature2m)}&deg;
+                        {Math.round(temperature)}&deg;
                     </div>
                 </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 w-full md:w-auto">
-                <WeatherMetric icon={Thermometer} label="Feels Like" value={`${Math.round(current.apparentTemperature)}°`} isNight={isNight} />
-                <WeatherMetric icon={Droplets} label="Humidity" value={`${Math.round(current.relativeHumidity2m)}%`} isNight={isNight} />
-                <WeatherMetric icon={Wind} label="Wind" value={`${Math.round(current.windSpeed10m)} km/h`} isNight={isNight} />
-                <WeatherMetric icon={Eye} label="Visibility" value={weather.hourly?.visibility?.[0] ? `${(weather.hourly.visibility[0] / 1000).toFixed(1)} km` : 'N/A'} isNight={isNight} />
+                <WeatherMetric icon={Thermometer} label="Feels Like" value={`${Math.round(apparent)}°`} />
+                <WeatherMetric icon={Droplets} label="Humidity" value={`${Math.round(humidity)}%`} />
+                <WeatherMetric icon={Wind} label="Wind" value={isForecast ? 'Forecast' : `${Math.round(wind)} km/h`} />
+                <WeatherMetric icon={Eye} label="Visibility" value={!isForecast && weather.hourly?.visibility?.[0] ? `${(weather.hourly.visibility[0] / 1000).toFixed(1)} km` : 'Forecast'} />
             </div>
         </div>
-    </motion.div>
+    </GlassCard>
   );
 }
 
-function WeatherMetric({ icon: Icon, label, value, isNight }: { icon: React.ElementType, label: string, value: string | number, isNight: boolean }) {
-    const metricGlass = isNight 
-        ? "bg-white/10 border-white/10 hover:bg-white/20" 
-        : "bg-black/5 border-black/5 hover:bg-black/10";
-    const textMain = isNight ? "text-white" : "text-slate-900";
-    const textSub = isNight ? "text-white/60" : "text-slate-600";
+function WeatherMetric({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string | number }) {
+    const textMain = "text-white";
+    const textSub = "text-white/60";
 
     return (
-        <div className={`flex min-w-17.5 flex-col items-center justify-center rounded-2xl border p-3 transition-colors backdrop-blur-md ${metricGlass}`}>
-            <Icon className={`w-6 h-6 drop-shadow-sm ${textMain}`} />
+        <div className="flex min-w-17.5 flex-col items-center justify-center rounded-2xl border border-white/15 bg-white/10 p-3 transition-all hover:bg-white/20 shadow-lg backdrop-blur-2xl">
+            <Icon className={`w-6 h-6 drop-shadow-md ${textMain}`} />
             <div className="text-center mt-2">
                 <p className={`text-xs mb-0.5 font-medium uppercase tracking-wider ${textSub}`}>{label}</p>
-                <p className={`font-bold text-lg drop-shadow-sm ${textMain}`}>{value}</p>
+                <p className={`font-bold text-lg drop-shadow-md ${textMain}`}>{value}</p>
             </div>
         </div>
     )

@@ -4,9 +4,11 @@ import { WeatherData } from "@/types/weather";
 import { generateWeatherInsight } from "@/lib/ai-insight";
 import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
+import { GlassCard } from "@/components/ui/glass-card";
 
 interface AiWeatherInsightProps {
   weather: WeatherData;
+  dayIndex?: number;
 }
 
 /**
@@ -61,23 +63,16 @@ function accentColors(insight: string): {
   };
 }
 
-export function AiWeatherInsight({ weather }: AiWeatherInsightProps) {
-  const isNight = weather.current.isDay === 0;
-  const textPrimary = isNight ? "text-white" : "text-slate-900";
-  const textSecondary = isNight ? "text-white/50" : "text-slate-500";
-  const glassCard = isNight
-    ? "bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-2xl"
-    : "bg-white/70 backdrop-blur-xl border border-slate-200 text-slate-900 shadow-lg";
+export function AiWeatherInsight({ weather, dayIndex = -1 }: AiWeatherInsightProps) {
+  const textPrimary = "text-white";
+  const textTertiary = "text-white/60";
 
-  const insight = generateWeatherInsight(weather);
+  const insight = generateWeatherInsight(weather, dayIndex);
   const colors = accentColors(insight);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className={`relative w-full overflow-hidden rounded-3xl backdrop-blur-xl transition-all p-6 ${glassCard} ${isNight ? colors.glow : ''}`}
+    <GlassCard
+      className="relative w-full overflow-hidden p-6"
     >
       {/* Animated gradient border accent (top edge) */}
       <div
@@ -85,7 +80,7 @@ export function AiWeatherInsight({ weather }: AiWeatherInsightProps) {
       />
 
       {/* Subtle inner glow blob */}
-      <div className={`pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full blur-2xl ${isNight ? 'bg-white/5' : 'bg-black/5'}`} />
+      <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full blur-2xl bg-white/5" />
 
       <div className="relative flex items-start gap-4">
         {/* AI Icon Badge */}
@@ -95,7 +90,7 @@ export function AiWeatherInsight({ weather }: AiWeatherInsightProps) {
 
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
-            <span className={`text-xs font-semibold uppercase tracking-widest ${textSecondary}`}>
+            <span className={`text-xs font-semibold uppercase tracking-widest ${textTertiary}`}>
               AI Insight
             </span>
             {/* Animated sky glow indicator */}
@@ -116,6 +111,6 @@ export function AiWeatherInsight({ weather }: AiWeatherInsightProps) {
           </motion.p>
         </div>
       </div>
-    </motion.div>
+    </GlassCard>
   );
 }

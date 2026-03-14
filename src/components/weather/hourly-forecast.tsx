@@ -13,6 +13,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { GlassCard } from "@/components/ui/glass-card";
 
 /* ---------- Custom Tooltip ---------- */
 
@@ -52,25 +53,30 @@ function CustomTooltip({
 
 interface HourlyForecastProps {
   weather: WeatherData;
+  dayIndex?: number;
 }
 
 /* ---------- Main Component ---------- */
 
-export function HourlyForecast({ weather }: HourlyForecastProps) {
-  const isNight = weather.current.isDay === 0;
-  const textPrimary = isNight ? "text-white" : "text-slate-900";
-  const textSecondary = isNight ? "text-white/70" : "text-slate-700";
-  const glassCard =
-    isNight ?
-      "bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-2xl"
-    : "bg-white/70 backdrop-blur-xl border border-slate-200 text-slate-900 shadow-lg";
+export function HourlyForecast({ weather, dayIndex = -1 }: HourlyForecastProps) {
+  const textPrimary = "text-white";
+  const textSecondary = "text-white/80";
 
-  const nowIndex = weather.hourly.time.findIndex(
-    (t) => new Date(t) > new Date(),
-  );
+  const isForecast = dayIndex >= 0;
+  
+  let startIndex: number;
+  let endIndex: number;
 
-  const startIndex = Math.max(0, nowIndex - 1);
-  const endIndex = startIndex + 24;
+  if (isForecast) {
+    startIndex = dayIndex * 24;
+    endIndex = startIndex + 24;
+  } else {
+    const nowIndex = weather.hourly.time.findIndex(
+      (t) => new Date(t) > new Date(),
+    );
+    startIndex = Math.max(0, nowIndex - 1);
+    endIndex = startIndex + 24;
+  }
 
   const data = weather.hourly.time
     .slice(startIndex, endIndex)
@@ -88,20 +94,17 @@ export function HourlyForecast({ weather }: HourlyForecastProps) {
     });
 
   return (
-    <div className={`w-full rounded-3xl p-6 backdrop-blur-xl ${glassCard}`}>
+    <GlassCard className="w-full p-6">
       <h3 className={`mb-6 text-xl font-medium drop-shadow-sm ${textPrimary}`}>
         Hourly Forecast
       </h3>
 
       {/* Timeline cards */}
       <div
-        className={`scrollbar-thin ${isNight ? "scrollbar-thumb-white/20" : "scrollbar-thumb-slate-300"} scrollbar-track-transparent mb-6 flex gap-4 overflow-x-auto pb-4`}>
+        className="scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent mb-6 flex gap-4 overflow-x-auto pb-4">
         {data.slice(0, 12).map((hour, i) => {
           const Icon = getWeatherIcon(hour.code, true);
-          const itemBg =
-            isNight ?
-              "bg-white/5 border-white/5 hover:bg-white/10"
-            : "bg-black/5 border-black/5 hover:bg-black/10";
+          const itemBg = "bg-white/10 border-white/15 hover:bg-white/20 shadow-lg backdrop-blur-2xl";
 
           return (
             <div
@@ -143,12 +146,12 @@ export function HourlyForecast({ weather }: HourlyForecastProps) {
                 y2="1">
                 <stop
                   offset="5%"
-                  stopColor="#facc15"
+                  stopColor="#eab308"
                   stopOpacity={0.3}
                 />
                 <stop
                   offset="95%"
-                  stopColor="#facc15"
+                  stopColor="#eab308"
                   stopOpacity={0}
                 />
               </linearGradient>
@@ -203,6 +206,6 @@ export function HourlyForecast({ weather }: HourlyForecastProps) {
           </AreaChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </GlassCard>
   );
 }

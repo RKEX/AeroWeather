@@ -8,6 +8,7 @@ import { Droplets } from "lucide-react";
 import { motion } from "framer-motion";
 import { ElementType } from "react";
 import Link from "next/link";
+import { GlassCard } from "@/components/ui/glass-card";
 
 /* ─────────── Types ─────────── */
 
@@ -18,8 +19,8 @@ interface DailyForecastProps {
 /* ─────────── Helpers ─────────── */
 
 function tempColor(temp: number): string {
-  if (temp < 15) return "text-blue-300";
-  if (temp > 30) return "text-orange-300";
+  if (temp < 15) return "text-blue-400";
+  if (temp > 30) return "text-orange-400";
   return "text-white";
 }
 
@@ -33,13 +34,13 @@ export function DetailMetric({
   value: string | number;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/5 p-4 transition-all hover:bg-white/10">
+    <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 transition-all hover:bg-white/20 shadow-lg backdrop-blur-2xl">
       {Icon && <Icon className="h-5 w-5 shrink-0 text-white/60" />}
       <div className="min-w-0">
         <p className="mb-0.5 truncate text-[10px] uppercase tracking-widest text-white/50">
           {label}
         </p>
-        <p className="text-lg font-semibold leading-none">{value}</p>
+        <p className="text-lg font-semibold leading-none text-white">{value}</p>
       </div>
     </div>
   );
@@ -48,12 +49,8 @@ export function DetailMetric({
 /* ─────────── Main Component ─────────── */
 
 export function DailyForecast({ weather }: DailyForecastProps) {
-  const isNight = weather.current.isDay === 0;
-  const textPrimary = isNight ? "text-white" : "text-slate-900";
-  const textSecondary = isNight ? "text-white/70" : "text-slate-700";
-  const glassCard = isNight
-    ? "bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-2xl"
-    : "bg-white/70 backdrop-blur-xl border border-slate-200 text-slate-900 shadow-lg";
+  const textPrimary = "text-white";
+  const textSecondary = "text-white/80";
 
   const daily = weather.daily;
   const hourly = weather.hourly;
@@ -95,14 +92,14 @@ export function DailyForecast({ weather }: DailyForecastProps) {
   });
 
   return (
-    <div className={`flex w-full flex-col gap-3 rounded-3xl p-6 backdrop-blur-xl ${glassCard}`}>
+    <GlassCard className="flex w-full flex-col gap-3 p-6">
       <h3 className={`mb-2 text-xl font-semibold tracking-tight drop-shadow-sm ${textPrimary}`}>7-Day Forecast</h3>
 
       <div className="flex flex-col gap-2">
         {forecastDays.map((day, i) => {
           const Icon = getWeatherIcon(day.code, true);
           const label = i === 0 ? "Tomorrow" : format(day.date, "EEE, MMM d");
-          const itemBg = isNight ? "bg-white/5 border-transparent hover:bg-white/10" : "bg-black/5 border-transparent hover:bg-black/10";
+          const itemBg = "bg-white/10 border-white/15 hover:bg-white/20";
 
           return (
             <Link key={i} href={`/weather/${day.slug}`} className="outline-none">
@@ -129,11 +126,11 @@ export function DailyForecast({ weather }: DailyForecastProps) {
                 {/* High / Low */}
                 <div className="flex gap-2 font-semibold">
                   <span className={tempColor(day.maxTemp)}>{day.maxTemp}°</span>
-                  <span className={`${isNight ? 'text-white/40' : 'text-slate-400'}`}>{day.minTemp}°</span>
+                  <span className="text-slate-400">{day.minTemp}°</span>
                 </div>
 
                 {/* Chevron hint */}
-                <svg className={`h-4 w-4 shrink-0 ${isNight ? 'text-white/30' : 'text-slate-300'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-4 w-4 shrink-0 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </motion.div>
@@ -141,7 +138,7 @@ export function DailyForecast({ weather }: DailyForecastProps) {
           );
         })}
       </div>
-    </div>
+    </GlassCard>
   );
 }
 

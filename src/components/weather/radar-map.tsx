@@ -5,16 +5,12 @@ import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Play, Pause } from 'lucide-react';
 import { format } from "date-fns";
+import { GlassCard } from "@/components/ui/glass-card";
 
 export function RadarMap({ lat, lon, isNight = true }: { lat: number, lon: number, isNight?: boolean }) {
-    const textPrimary = isNight ? "text-white" : "text-slate-900";
-    const glassCard = isNight
-        ? "bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-2xl"
-        : "bg-white/70 backdrop-blur-xl border border-slate-200 text-slate-900 shadow-lg";
-
     const [timestamps, setTimestamps] = useState<number[]>([]);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
-    const [isPlaying, setIsPlaying] = useState<boolean>(true);
+    const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
     useEffect(() => {
         fetch("https://api.rainviewer.com/public/weather-maps.json")
@@ -38,11 +34,11 @@ export function RadarMap({ lat, lon, isNight = true }: { lat: number, lon: numbe
     if (timestamps.length === 0) return null;
 
     return (
-        <div className={`relative w-full max-w-full h-105 rounded-3xl overflow-hidden backdrop-blur-xl transition-all ${glassCard} flex flex-col`}>
+        <GlassCard className="relative w-full max-w-full h-105 overflow-hidden flex flex-col">
             {/* Header / Info */}
             <div className="absolute top-4 left-4 z-1000 pointer-events-none">
-                <h3 className={`text-xl font-medium drop-shadow-md ${textPrimary}`}>Live Radar</h3>
-                <p className={`text-sm opacity-80 drop-shadow-sm ${textPrimary}`}>
+                <h3 className={`text-xl font-medium drop-shadow-md text-white`}>Live Radar</h3>
+                <p className={`text-sm text-white/80 drop-shadow-sm`}>
                     {format(new Date(timestamps[currentIndex] * 1000), 'h:mm a')}
                 </p>
             </div>
@@ -71,10 +67,10 @@ export function RadarMap({ lat, lon, isNight = true }: { lat: number, lon: numbe
             </MapContainer>
 
             {/* Premium Controls */}
-            <div className="absolute bottom-4 left-4 right-4 z-1000 flex items-center gap-4 bg-black/40 backdrop-blur-md p-3 rounded-2xl border border-white/10 shadow-xl">
+            <div className="absolute bottom-4 left-4 right-4 z-1000 flex items-center gap-4 bg-white/10 backdrop-blur-2xl p-3 rounded-2xl border border-white/15 shadow-[0_10px_40px_rgba(0,0,0,0.35)]">
                 <button 
                     onClick={() => setIsPlaying(!isPlaying)}
-                    className="p-2 bg-white/20 hover:bg-white/30 rounded-xl transition-colors text-white"
+                    className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all text-white border border-white/10"
                 >
                     {isPlaying ? <Pause className="w-5 h-5 fill-white" /> : <Play className="w-5 h-5 fill-white" />}
                 </button>
@@ -100,6 +96,6 @@ export function RadarMap({ lat, lon, isNight = true }: { lat: number, lon: numbe
                     background: transparent !important;
                 }
             `}</style>
-        </div>
+        </GlassCard>
     );
 }
