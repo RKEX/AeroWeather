@@ -22,7 +22,7 @@ export async function getWeatherData(lat: number, lon: number): Promise<WeatherD
     weatherUrl.searchParams.append("daily", "weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum,precipitation_probability_max");
     weatherUrl.searchParams.append("forecast_days", "10");
 
-    const weatherRes = await fetch(weatherUrl.toString(), { next: { revalidate: 300 } }); // Cache for 5 mins
+    const weatherRes = await fetch(weatherUrl.toString(), { next: { revalidate: 60 } }); // Cache for 60 seconds
     
     if (!weatherRes.ok) throw new Error("Failed to fetch weather data");
     const weatherData = await weatherRes.json();
@@ -36,7 +36,7 @@ export async function getWeatherData(lat: number, lon: number): Promise<WeatherD
 
     let aqiData = null;
     try {
-        const aqiRes = await fetch(aqiUrl.toString(), { next: { revalidate: 3600 } }); // Cache AQI longer
+        const aqiRes = await fetch(aqiUrl.toString(), { next: { revalidate: 3600 } }); // Cache AQI for 1 hour
         if (aqiRes.ok) {
            const aqiJson = await aqiRes.json();
            aqiData = aqiJson.current;

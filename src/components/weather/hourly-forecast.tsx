@@ -130,7 +130,7 @@ export function HourlyForecast({ weather, dayIndex = -1 }: HourlyForecastProps) 
       </div>
 
       {/* Chart */}
-      <div className="mt-4 h-62.5 w-full">
+      <div className="mt-4 h-[250px] w-full">
         <ResponsiveContainer
           width="100%"
           height="100%">

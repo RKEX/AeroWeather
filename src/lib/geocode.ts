@@ -12,7 +12,7 @@ export async function searchLocations(query: string): Promise<LocationResult[]> 
     url.searchParams.append("language", "en");
     url.searchParams.append("format", "json");
 
-    const response = await fetch(url.toString());
+    const response = await fetch(url.toString(), { next: { revalidate: 3600 } });
     if (!response.ok) {
       throw new Error(`Geocoding failed: ${response.statusText}`);
     }

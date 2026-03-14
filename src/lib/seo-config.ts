@@ -1,7 +1,9 @@
 export const defaultSEO = {
   title: "AeroWeather - Ultra Accurate Weather Forecast",
-  description:
-    "Check real-time weather forecasts, hourly predictions, radar maps, and AI weather insights for cities worldwide.",
+  description: "Check real-time weather forecasts, hourly predictions, radar maps, and AI weather insights for cities worldwide.",
+  url: "https://aeroweather.vercel.app",
+  ogImage: "https://aeroweather.vercel.app/og-image.png",
+  twitterHandle: "@aeroweather",
   keywords: [
     "weather forecast",
     "weather today",

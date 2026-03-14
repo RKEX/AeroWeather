@@ -1,23 +1,20 @@
 "use client";
 
-import { AiWeatherInsight } from "@/components/weather/ai-weather-insight";
-import { AqiCard } from "@/components/weather/aqi-card";
-import { DailyForecast } from "@/components/weather/daily-forecast";
-import { HourlyForecast } from "@/components/weather/hourly-forecast";
 import { LocationSearch } from "@/components/weather/location-search";
-import { SunArc } from "@/components/weather/sun-arc";
 import { WeatherHero } from "@/components/weather/weather-hero";
 import { useWeather } from "@/hooks/useWeather";
 import { LocationResult, WeatherData } from "@/types/weather";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, Variants } from "framer-motion";
 import { Navigation } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
-const RadarMap = dynamic(
-  () => import("@/components/weather/radar-map").then((m) => m.RadarMap),
-  { ssr: false },
-);
+const RadarMap = dynamic(() => import("@/components/weather/radar-map").then(mod => mod.RadarMap), { ssr: false });
+const HourlyForecast = dynamic(() => import("@/components/weather/hourly-forecast").then(mod => mod.HourlyForecast), { ssr: false });
+const AiWeatherInsight = dynamic(() => import("@/components/weather/ai-weather-insight").then(mod => mod.AiWeatherInsight), { ssr: false });
+const DailyForecast = dynamic(() => import("@/components/weather/daily-forecast").then(mod => mod.DailyForecast), { ssr: false });
+const AqiCard = dynamic(() => import("@/components/weather/aqi-card").then(mod => mod.AqiCard), { ssr: false });
+const SunArc = dynamic(() => import("@/components/weather/sun-arc").then(mod => mod.SunArc), { ssr: false });
 
 export default function ClientDashboard({
   initialWeather,
@@ -70,14 +67,45 @@ export default function ClientDashboard({
   const textTertiary = "text-white/60";
   const currentCity = hasMounted ? activeLocation.name : initialLocation.name;
 
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 30, scale: 0.96, filter: "blur(10px)" },
+    show: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      filter: "blur(0px)",
+      transition: { 
+        duration: 0.45, 
+        ease: [0.22, 1, 0.36, 1] 
+      },
+    },
+  };
+
   return (
     <div className="relative min-h-screen overflow-x-hidden transition-colors duration-1000">
       {/* Background glows matching DayDetailPage but with increased depth */}
       <div className="pointer-events-none fixed top-1/4 left-1/4 h-[50vw] w-[50vw] rounded-full bg-white/10 mix-blend-overlay blur-[150px] opacity-40" />
       <div className="pointer-events-none fixed right-1/4 bottom-1/4 h-[40vw] w-[40vw] rounded-full bg-white/5 mix-blend-overlay blur-[120px] opacity-30" />
 
-      <main className="relative z-10 container mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 md:py-12">
-        <header className="flex w-full flex-col items-center justify-between gap-6 md:flex-row">
+      <motion.main
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="relative z-10 container mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 md:py-12">
+        <motion.header 
+          variants={itemVariants}
+          className="flex w-full flex-col items-center justify-between gap-6 md:flex-row">
           <div className="flex items-center gap-3">
             <div className="rounded-2xl border border-white/15 bg-white/10 p-3 shadow-xl backdrop-blur-2xl">
               <Navigation className="h-6 w-6 text-white" />
@@ -95,48 +123,61 @@ export default function ClientDashboard({
           <div className="w-full max-w-xl flex-1 md:w-auto">
             <LocationSearch onSelect={handleLocationSelect} />
           </div>
-        </header>
+        </motion.header>
 
         {error && !displayWeather && (
-          <div className="rounded-xl border border-red-500/50 bg-red-500/20 p-4 text-center text-white">
+          <motion.div 
+            variants={itemVariants}
+            className="rounded-xl border border-red-500/50 bg-red-500/20 p-4 text-center text-white">
             {error}
-          </div>
+          </motion.div>
         )}
 
         <AnimatePresence mode="wait">
           {displayWeather && (
             <motion.div
               key={currentCity}
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5, staggerChildren: 0.1 }}
+              variants={itemVariants}
               className="grid grid-cols-1 gap-6 lg:grid-cols-12">
               <div className="flex flex-col gap-6 lg:col-span-8">
-                <WeatherHero
-                  weather={displayWeather}
-                  locationName={currentCity}
-                />
-                <AiWeatherInsight weather={displayWeather} />
-                <HourlyForecast weather={displayWeather} />
-                <RadarMap
-                  lat={hasMounted ? activeLocation.lat : initialLocation.lat}
-                  lon={hasMounted ? activeLocation.lon : initialLocation.lon}
-                  isNight={isNight}
-                />
+                <motion.div variants={itemVariants}>
+                  <WeatherHero
+                    weather={displayWeather}
+                    locationName={currentCity}
+                  />
+                </motion.div>
+                <motion.div variants={itemVariants}>
+                  <AiWeatherInsight weather={displayWeather} />
+                </motion.div>
+                <motion.div variants={itemVariants}>
+                  <HourlyForecast weather={displayWeather} />
+                </motion.div>
+                <motion.div variants={itemVariants}>
+                  <RadarMap
+                    lat={hasMounted ? activeLocation.lat : initialLocation.lat}
+                    lon={hasMounted ? activeLocation.lon : initialLocation.lon}
+                    isNight={isNight}
+                  />
+                </motion.div>
               </div>
               <div className="flex flex-col gap-6 lg:col-span-4">
-                <DailyForecast weather={displayWeather} />
-                <SunArc weather={displayWeather} />
-                <AqiCard
-                  aqiData={displayWeather.airQuality}
-                  isNight={isNight}
-                />
+                <motion.div variants={itemVariants}>
+                  <DailyForecast weather={displayWeather} />
+                </motion.div>
+                <motion.div variants={itemVariants}>
+                  <SunArc weather={displayWeather} />
+                </motion.div>
+                <motion.div variants={itemVariants}>
+                  <AqiCard
+                    aqiData={displayWeather.airQuality}
+                    isNight={isNight}
+                  />
+                </motion.div>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </main>
+      </motion.main>
     </div>
   );
 }

@@ -14,11 +14,13 @@ import {
 import { WeatherData } from "@/types/weather";
 import { useWeather } from "@/hooks/useWeather";
 
-import { WeatherHero } from "@/components/weather/weather-hero";
-import { AiWeatherInsight } from "@/components/weather/ai-weather-insight";
-import { HourlyForecast } from "@/components/weather/hourly-forecast";
-import { DailyForecast } from "@/components/weather/daily-forecast";
-import { SunArc } from "@/components/weather/sun-arc";
+import dynamic from "next/dynamic";
+
+const WeatherHero = dynamic(() => import("@/components/weather/weather-hero").then(mod => mod.WeatherHero));
+const AiWeatherInsight = dynamic(() => import("@/components/weather/ai-weather-insight").then(mod => mod.AiWeatherInsight), { ssr: false });
+const HourlyForecast = dynamic(() => import("@/components/weather/hourly-forecast").then(mod => mod.HourlyForecast), { ssr: false });
+const DailyForecast = dynamic(() => import("@/components/weather/daily-forecast").then(mod => mod.DailyForecast), { ssr: false });
+const SunArc = dynamic(() => import("@/components/weather/sun-arc").then(mod => mod.SunArc), { ssr: false });
 
 interface WeatherSlugClientProps {
   initialWeather: WeatherData;
@@ -116,7 +118,7 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
               href="/"
               className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur-md transition-colors hover:bg-white/15">
               <ArrowLeft className="h-4 w-4" />
-              Back Dashboard
+              Back to Home
             </Link>
             <div className="text-right">
                <h2 className="text-2xl font-bold">{format(new Date(displayWeather.daily.time[actualDayIndex] + "T00:00:00"), "EEEE, MMM do")}</h2>

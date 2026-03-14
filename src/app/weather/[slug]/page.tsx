@@ -3,6 +3,7 @@ import { searchLocations } from "@/lib/geocode";
 import { getWeatherData } from "@/lib/weather-api";
 import { WeatherSlugClient } from "@/components/weather/weather-slug-client";
 import { Metadata } from "next";
+export const runtime = "edge";
 
 interface Props {
   params: Promise<{ slug: string }>;
