@@ -2,7 +2,11 @@ import { Footer } from "@/components/footer";
 import RootClientLayout from "@/components/layout/root-client-layout";
 import SkyBackground from "@/components/weather/sky-background";
 import { geistMono, geistSans } from "@/lib/fonts";
-import { personSchema } from "@/lib/schema/person";
+import {
+  organizationSchema,
+  personSchema,
+  websiteSchema,
+} from "@/lib/schema/person";
 import { defaultSEO } from "@/lib/seo-config";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -25,8 +29,12 @@ export const metadata: Metadata = {
   authors: [
     {
       name: "Rick Das",
+      url: "https://github.com/RKEX",
     },
   ],
+
+  creator: "Rick Das",
+  publisher: "AeroWeather",
 
   alternates: {
     canonical: defaultSEO.url,
@@ -54,6 +62,7 @@ export const metadata: Metadata = {
         url: defaultSEO.ogImage,
         width: 1200,
         height: 630,
+        alt: "AeroWeather - Ultra Accurate Weather Forecast by Rick Das",
       },
     ],
     locale: "en_US",
@@ -66,6 +75,7 @@ export const metadata: Metadata = {
     description: defaultSEO.description,
     images: [defaultSEO.ogImage],
     creator: defaultSEO.twitterHandle,
+    site: "@aeroweather",
   },
 
   icons: {
@@ -100,11 +110,29 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
     >
       <body className="overflow-x-hidden bg-transparent font-sans">
 
-        {/* Person Structured Data for SEO */}
+        {/* ── Structured Data (JSON-LD) ── */}
+
+        {/* 1. Person Schema — Rick Das founder identity + social links */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(personSchema),
+          }}
+        />
+
+        {/* 2. Organization Schema — AeroWeather brand entity */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationSchema),
+          }}
+        />
+
+        {/* 3. Website Schema — enables Google Search sitelinks box */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(websiteSchema),
           }}
         />
 
