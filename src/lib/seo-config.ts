@@ -1,28 +1,31 @@
 export const defaultSEO = {
   title: "AeroWeather - Ultra Accurate Weather Forecast",
-  description: "Check real-time weather forecasts, hourly predictions, radar maps, and AI weather insights for cities worldwide.",
-  url: "https://aeroweather.vercel.app",
-  ogImage: "https://aeroweather.vercel.app/og-image.png",
+
+  description:
+    "AeroWeather provides real-time weather forecasts, hourly predictions, 7-day outlooks, radar maps, and AI-powered weather insights for cities worldwide.",
+
+  url: "https://www.aeroweather.app",
+
+  ogImage: "https://www.aeroweather.app/og-image.png",
+
   twitterHandle: "@aeroweather",
+
   keywords: [
     "weather forecast",
+    "live weather forecast",
     "weather today",
-    "hourly weather",
-    "7 day forecast",
-    "live weather",
+    "hourly weather forecast",
+    "7 day weather forecast",
     "weather radar",
+    "AI weather forecast",
     "temperature forecast",
     "humidity forecast",
     "wind speed weather",
     "rain forecast",
+
     "kolkata weather",
     "delhi weather",
     "mumbai weather",
-    "london weather",
-    "tokyo weather",
-    "new york weather",
-    "singapore weather",
-    "dubai weather",
     "bangalore weather",
     "chennai weather",
     "hyderabad weather",
@@ -42,6 +45,13 @@ export const defaultSEO = {
     "coimbatore weather",
     "kochi weather",
     "visakhapatnam weather",
+
+    "london weather",
+    "new york weather",
+    "tokyo weather",
+    "seoul weather",
+    "singapore weather",
+    "dubai weather",
     "paris weather",
     "berlin weather",
     "rome weather",
@@ -56,6 +66,6 @@ export const defaultSEO = {
     "shanghai weather",
     "beijing weather",
     "bangkok weather",
-    "jakarta weather"
+    "jakarta weather",
   ],
 };

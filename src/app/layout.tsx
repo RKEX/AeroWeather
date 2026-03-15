@@ -2,6 +2,7 @@ import { Footer } from "@/components/footer";
 import RootClientLayout from "@/components/layout/root-client-layout";
 import SkyBackground from "@/components/weather/sky-background";
 import { geistMono, geistSans } from "@/lib/fonts";
+import { personSchema } from "@/lib/schema/person";
 import { defaultSEO } from "@/lib/seo-config";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -94,6 +95,15 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
       suppressHydrationWarning
     >
       <body className="overflow-x-hidden bg-transparent font-sans">
+
+        {/* Person Structured Data for SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(personSchema),
+          }}
+        />
+
         <RootClientLayout>
           <SkyBackground />
 
@@ -107,6 +117,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
 
           <Footer />
         </RootClientLayout>
+
       </body>
     </html>
   );
