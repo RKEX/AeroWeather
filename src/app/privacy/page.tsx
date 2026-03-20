@@ -1,6 +1,12 @@
 import { GlassCard } from "@/components/ui/glass-card";
 import Link from "next/link";
 import { Shield, MapPin, Database, Share2, Mail, LucideIcon } from "lucide-react";
+import { constructMetadata, metadataConfig } from "@/config/metadata";
+
+export const metadata = constructMetadata({
+  title: metadataConfig.privacy.title,
+  description: metadataConfig.privacy.description,
+});
 
 export default function PrivacyPage() {
   const textSecondary = "text-white/70";

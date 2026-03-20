@@ -1,0 +1,123 @@
+import { Metadata } from "next";
+import { defaultSEO } from "@/lib/seo-config";
+
+export const SITE_CONFIG = {
+  name: "AeroWeather",
+  description: defaultSEO.description,
+  url: defaultSEO.url,
+  ogImage: defaultSEO.ogImage,
+  links: {
+    github: defaultSEO.founder.github,
+    instagram: defaultSEO.founder.instagramUrl,
+  },
+  author: defaultSEO.author,
+  twitterHandle: defaultSEO.twitterHandle,
+};
+
+export const metadataConfig = {
+  home: {
+    title: "AeroWeather - Live Weather Radar & Precision Forecasts",
+    description: defaultSEO.description,
+    keywords: defaultSEO.keywords,
+  },
+  weather: {
+    title: "Detailed Weather Forecast - AeroWeather",
+    description: "In-depth weather analysis, hourly breakdowns, and 7-day outlooks for your specific location.",
+    keywords: ["hourly forecast", "weather details", "precision weather", "local outlook"],
+  },
+  about: {
+    title: "About AeroWeather - Our Mission",
+    description: "Learn about the technology and passion behind AeroWeather's precision forecasting system.",
+  },
+  contact: {
+    title: "Contact Us - AeroWeather Support",
+    description: "Get in touch with the AeroWeather team for support, feedback, or business inquiries.",
+  },
+  privacy: {
+    title: "Privacy Policy - AeroWeather",
+    description: "How we protect your data and respect your privacy at AeroWeather.",
+  },
+  terms: {
+    title: "Terms of Service - AeroWeather",
+    description: "The terms and conditions for using the AeroWeather platform.",
+  },
+};
+
+/**
+ * Helper to generate Next.js Metadata objects from our config
+ */
+export function constructMetadata({
+  title,
+  description,
+  image = SITE_CONFIG.ogImage,
+  noIndex = false,
+  keywords = [],
+}: {
+  title?: string;
+  description?: string;
+  image?: string;
+  noIndex?: boolean;
+  keywords?: string[];
+} = {}): Metadata {
+  return {
+    title: {
+      default: title ? `${title} | AeroWeather` : SITE_CONFIG.name,
+      template: "%s | AeroWeather",
+    },
+    description: description || SITE_CONFIG.description,
+    keywords: [...(metadataConfig.home.keywords), ...keywords],
+    authors: [
+      {
+        name: SITE_CONFIG.author,
+        url: SITE_CONFIG.links.github,
+      },
+    ],
+    creator: SITE_CONFIG.author,
+    publisher: SITE_CONFIG.name,
+    metadataBase: new URL(SITE_CONFIG.url),
+    openGraph: {
+      title: title || SITE_CONFIG.name,
+      description: description || SITE_CONFIG.description,
+      url: SITE_CONFIG.url,
+      siteName: SITE_CONFIG.name,
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+          alt: `${SITE_CONFIG.name} - Ultra Accurate Weather Forecast`,
+        },
+      ],
+      locale: "en_US",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: title || SITE_CONFIG.name,
+      description: description || SITE_CONFIG.description,
+      images: [image],
+      creator: SITE_CONFIG.twitterHandle,
+    },
+    icons: {
+      icon: [
+        {
+          url: "/favicon.ico",
+          sizes: "any",
+        },
+      ],
+      shortcut: "/favicon.ico",
+    },
+    verification: {
+      google: "5AQfg1BzRq4wAzL9_4IVKwgKmM6ubXUn9PpPVkletgA",
+    },
+    other: {
+      "google-adsense-account": "ca-pub-3928601593161247",
+    },
+    ...(noIndex && {
+      robots: {
+        index: false,
+        follow: false,
+      },
+    }),
+  };
+}

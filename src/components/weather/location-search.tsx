@@ -6,6 +6,7 @@ import { LocationResult } from "@/types/weather";
 import { Loader2, MapPin, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { prefetchWeather } from "@/lib/prefetch";
 
 interface LocationSearchProps {
   onSelect: (location: LocationResult) => void;
@@ -37,6 +38,7 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
 
     fetchLocations();
   }, [debouncedQuery]);
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -63,7 +65,6 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
     <div
       className="relative z-50 mx-auto w-full max-w-md"
       ref={containerRef}>
-      {/* Search Input (glass + blur থাকবে) */}
       <div className="relative flex w-full items-center">
         <div className="absolute left-3 text-white/70">
           {loading ?
@@ -83,7 +84,6 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
         />
       </div>
 
-      {/* Dropdown (Solid opaque background with isolation) */}
       {open && results.length > 0 && (
         <div className="absolute top-full right-0 left-0 z-[999] isolate mt-2 rounded-2xl border border-white/10 bg-[#030712] shadow-2xl">
           <ul 
@@ -95,6 +95,8 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
                 className="w-full">
                 <button
                   onClick={() => handleSelect(loc)}
+                  onMouseEnter={() => prefetchWeather(loc.latitude, loc.longitude)}
+                  onFocus={() => prefetchWeather(loc.latitude, loc.longitude)}
                   className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-white transition-colors hover:bg-white/10">
                   <MapPin className="h-4 w-4 shrink-0 opacity-60" />
 

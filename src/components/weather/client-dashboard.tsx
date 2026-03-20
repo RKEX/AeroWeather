@@ -7,6 +7,7 @@ import { LocationResult, WeatherData } from "@/types/weather";
 import { AnimatePresence, motion, Variants } from "framer-motion";
 import { Navigation } from "lucide-react";
 import dynamic from "next/dynamic";
+import { usePerformance } from "@/components/Providers/performance-provider";
 
 const RadarMap = dynamic(() => import("@/components/weather/radar-map").then(mod => mod.RadarMap), { 
   ssr: false,
@@ -22,7 +23,7 @@ const AiWeatherInsight = dynamic(() => import("@/components/weather/ai-weather-i
 });
 const DailyForecast = dynamic(() => import("@/components/weather/daily-forecast").then(mod => mod.DailyForecast), { 
   ssr: false,
-  loading: () => <div className="h-[500px] w-full animate-pulse bg-white/10 rounded-3xl border border-white/10" />
+  loading: () => <div className="h-125 w-full animate-pulse bg-white/10 rounded-3xl border border-white/10" />
 });
 const AqiCard = dynamic(() => import("@/components/weather/aqi-card").then(mod => mod.AqiCard), { 
   ssr: false,
@@ -47,6 +48,8 @@ function ClientDashboard({
 }) {
   const [activeLocation, setActiveLocation] = useState(initialLocation);
   const [hasMounted, setHasMounted] = useState(false);
+  const { tier } = usePerformance();
+  const isLowEnd = tier === "LOW";
 
   useEffect(() => {
     setHasMounted(true);
@@ -97,37 +100,41 @@ function ClientDashboard({
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.15,
+        staggerChildren: isLowEnd ? 0.05 : 0.15,
         delayChildren: 0.1,
       },
     },
   };
 
   const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 30, scale: 0.96, filter: "blur(10px)" },
+    hidden: isLowEnd ? { opacity: 0 } : { opacity: 0, y: 30, scale: 0.96, filter: "blur(10px)" },
     show: {
       opacity: 1,
       y: 0,
       scale: 1,
       filter: "none",
       transition: { 
-        duration: 0.45, 
+        duration: isLowEnd ? 0.2 : 0.45, 
         ease: [0.22, 1, 0.36, 1] 
       },
     },
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden transition-colors duration-1000">
-      {/* Background glows matching DayDetailPage but with increased depth */}
-      <div className="pointer-events-none fixed top-1/4 left-1/4 h-[50vw] w-[50vw] rounded-full bg-white/10 mix-blend-overlay blur-[150px] opacity-40" />
-      <div className="pointer-events-none fixed right-1/4 bottom-1/4 h-[40vw] w-[40vw] rounded-full bg-white/5 mix-blend-overlay blur-[120px] opacity-30" />
+    <div className={`relative min-h-screen overflow-x-hidden transition-colors duration-1000 ${isLowEnd ? 'performance-low' : ''}`}>
+      {/* Background glows - Disable on LOW tier for performance */}
+      {!isLowEnd && (
+        <>
+          <div className="pointer-events-none fixed top-1/4 left-1/4 h-[50vw] w-[50vw] rounded-full bg-white/10 mix-blend-overlay blur-[150px] opacity-40 gpu-accel" />
+          <div className="pointer-events-none fixed right-1/4 bottom-1/4 h-[40vw] w-[40vw] rounded-full bg-white/5 mix-blend-overlay blur-[120px] opacity-30 gpu-accel" />
+        </>
+      )}
 
       <motion.main
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="relative z-10 container mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 md:py-12">
+        className="relative z-10 container mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 md:py-12 gpu-accel">
         <motion.header 
           variants={itemVariants}
           className="relative z-50 flex w-full flex-col items-center justify-between gap-6 md:flex-row">

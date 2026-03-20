@@ -9,6 +9,8 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
+import { constructMetadata } from "@/config/metadata";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const decodedSlug = decodeURIComponent(slug);
@@ -23,10 +25,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (dayIndex >= 0) {
     const dayName = decodedSlug.charAt(0).toUpperCase() + decodedSlug.slice(1);
-    return {
-      title: `${dayName} Weather Forecast | AeroWeather`,
+    return constructMetadata({
+      title: `${dayName} Weather Forecast`,
       description: `Get the detailed weather forecast for ${decodedSlug} including temperature, metrics, and AI insights.`,
-    };
+      keywords: [dayName.toLowerCase(), "forecast", "weather"],
+    });
   }
 
   // 2. Otherwise assume it's a city
@@ -34,19 +37,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const locations = await searchLocations(decodedSlug);
     if (locations && locations.length > 0) {
       const city = locations[0].name;
-      return {
-        title: `${city} Weather Today | AeroWeather`,
+      return constructMetadata({
+        title: `${city} Weather Today`,
         description: `Live weather forecast for ${city} including hourly temperature, 7-day forecast, humidity, wind speed, and radar.`,
-      };
+        keywords: [city.toLowerCase(), "local weather", "storm tracker"],
+      });
     }
   } catch (e) {
     console.error("Metadata geocoding error:", e);
   }
 
-  return {
-    title: "Weather Forecast | AeroWeather",
+  return constructMetadata({
+    title: "Weather Forecast",
     description: "Check current weather and forecasts for any city.",
-  };
+  });
 }
 
 export default async function WeatherSlugPage({ params }: Props) {

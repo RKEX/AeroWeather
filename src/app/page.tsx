@@ -1,4 +1,10 @@
+import { constructMetadata, metadataConfig } from "@/config/metadata";
 import { getWeatherData } from "@/lib/weather-api";
+
+export const metadata = constructMetadata({
+  title: metadataConfig.home.title,
+  description: metadataConfig.home.description,
+});
 import { WeatherSkeleton } from "@/components/weather/weather-skeleton";
 import { Suspense } from "react";
 import ClientDashboard from "@/components/weather/client-dashboard";

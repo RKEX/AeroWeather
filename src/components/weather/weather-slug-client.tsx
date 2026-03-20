@@ -2,7 +2,7 @@
 
 import { format } from "date-fns";
 import { motion } from "framer-motion";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -13,6 +13,7 @@ import {
 } from "@/lib/weather-theme";
 import { WeatherData } from "@/types/weather";
 import { useWeather } from "@/hooks/useWeather";
+import { WeatherSkeleton } from "@/components/weather/weather-skeleton";
 
 import dynamic from "next/dynamic";
 
@@ -37,7 +38,6 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
     name: locationName
   });
 
-  // 1. Identify if it's a day slug
   const dummyDates = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
@@ -47,9 +47,6 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
 
   useEffect(() => {
     setHasMounted(true);
-    
-    // Only hydrate from localStorage if it's a day-based slug (today, tomorrow, etc.)
-    // For city slugs like /weather/london, we want to stick to the URL's city.
     if (isDaySlug) {
       const saved = localStorage.getItem("aeroweather_location");
       if (saved) {
@@ -63,7 +60,6 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
     }
   }, [isDaySlug]);
 
-  // Use the useWeather hook to re-fetch if the location changed after mount
   const { weather, loading } = useWeather(
     hasMounted && isDaySlug ? activeLocation.lat : null,
     hasMounted && isDaySlug ? activeLocation.lon : null
@@ -99,12 +95,11 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
 
   if (hasMounted && isDaySlug && loading && !weather) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-10 w-10 animate-spin text-sky-400" />
-          <p className="text-white/60 animate-pulse">Syncing location weather...</p>
+      <main className="relative min-h-screen bg-slate-950 px-4 py-8 md:py-12">
+        <div className="mx-auto max-w-7xl">
+          <WeatherSkeleton />
         </div>
-      </div>
+      </main>
     );
   }
 

@@ -1,6 +1,12 @@
 import { GlassCard } from "@/components/ui/glass-card";
 import Link from "next/link";
 import { Scale, ShieldCheck, AlertTriangle, FileText, Mail, LucideIcon } from "lucide-react";
+import { constructMetadata, metadataConfig } from "@/config/metadata";
+
+export const metadata = constructMetadata({
+  title: metadataConfig.terms.title,
+  description: metadataConfig.terms.description,
+});
 
 export default function TermsPage() {
   const textSecondary = "text-white/70";
