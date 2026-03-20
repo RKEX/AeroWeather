@@ -137,11 +137,10 @@ export function PerformanceProvider({ children }: { children: React.ReactNode })
   return (
     <PerformanceContext.Provider value={value}>
       <div 
-        className={`performance-wrapper ${quality.toLowerCase()}-mode ${tier === "LOW" ? "reduce-motion" : ""}`}
+        className={`performance-wrapper ${quality.toLowerCase()}-mode ${tier === "LOW" ? "reduce-motion" : ""} contents`}
         style={{ 
           WebkitBackfaceVisibility: "hidden",
           backfaceVisibility: "hidden",
-          perspective: 1000,
         }}
       >
         {children}

@@ -31,9 +31,14 @@ export function WeatherHero({ weather, locationName, dayIndex = -1 }: WeatherHer
     Math.round(weather.hourly.relativeHumidity2m.slice(dayIndex * 24, (dayIndex + 1) * 24).reduce((a, b) => a + b, 0) / 24) : 
     current.relativeHumidity2m;
   
-  const wind = isForecast ? 
-    Math.round(daily.precipitationSum[dayIndex]) : // We don't have max wind in current daily? Actually we can calculate it
-    current.windSpeed10m;
+  // For forecast mode, compute max wind speed from the hourly data slice for that day
+  const wind = isForecast
+    ? (() => {
+        const startH = dayIndex * 24;
+        const slice = weather.hourly.windSpeed10m.slice(startH, startH + 24);
+        return slice.length > 0 ? Math.round(Math.max(...slice)) : 0;
+      })()
+    : current.windSpeed10m;
 
   const apparent = isForecast ? temperature : current.apparentTemperature;
 
@@ -61,7 +66,7 @@ export function WeatherHero({ weather, locationName, dayIndex = -1 }: WeatherHer
             <div className="grid grid-cols-2 gap-4 w-full md:w-auto">
                 <WeatherMetric icon={Thermometer} label="Feels Like" value={`${Math.round(apparent)}°`} />
                 <WeatherMetric icon={Droplets} label="Humidity" value={`${Math.round(humidity)}%`} />
-                <WeatherMetric icon={Wind} label="Wind" value={isForecast ? 'Forecast' : `${Math.round(wind)} km/h`} />
+                <WeatherMetric icon={Wind} label="Wind" value={`${wind} km/h`} />
                 <WeatherMetric icon={Eye} label="Visibility" value={!isForecast && weather.hourly?.visibility?.[0] ? `${(weather.hourly.visibility[0] / 1000).toFixed(1)} km` : 'Forecast'} />
             </div>
         </div>

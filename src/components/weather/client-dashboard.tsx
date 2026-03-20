@@ -122,13 +122,7 @@ function ClientDashboard({
 
   return (
     <div className={`relative min-h-screen overflow-x-hidden transition-colors duration-1000 ${isLowEnd ? 'performance-low' : ''}`}>
-      {/* Background glows - Disable on LOW tier for performance */}
-      {!isLowEnd && (
-        <>
-          <div className="pointer-events-none fixed top-1/4 left-1/4 h-[50vw] w-[50vw] rounded-full bg-white/10 mix-blend-overlay blur-[150px] opacity-40 gpu-accel" />
-          <div className="pointer-events-none fixed right-1/4 bottom-1/4 h-[40vw] w-[40vw] rounded-full bg-white/5 mix-blend-overlay blur-[120px] opacity-30 gpu-accel" />
-        </>
-      )}
+
 
       <motion.main
         variants={containerVariants}

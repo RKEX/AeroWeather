@@ -32,11 +32,7 @@ interface WeatherSlugClientProps {
 export function WeatherSlugClient({ initialWeather, locationName, slug }: WeatherSlugClientProps) {
   const router = useRouter();
   const [hasMounted, setHasMounted] = useState(false);
-  const [activeLocation, setActiveLocation] = useState({
-    lat: 40.7128, // Default placeholders, will be updated from initial or local
-    lon: -74.006,
-    name: locationName
-  });
+  const [savedLocation, setSavedLocation] = useState<{ lat: number; lon: number; name: string } | null>(null);
 
   const dummyDates = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
@@ -52,7 +48,7 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          setActiveLocation(parsed);
+          setSavedLocation(parsed);
         } catch (e) {
           console.error("Failed to parse saved location", e);
         }
@@ -60,13 +56,14 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
     }
   }, [isDaySlug]);
 
-  const { weather, loading } = useWeather(
-    hasMounted && isDaySlug ? activeLocation.lat : null,
-    hasMounted && isDaySlug ? activeLocation.lon : null
-  );
+  // Only fetch live data for day slugs when we have a valid saved location
+  const fetchLat = hasMounted && isDaySlug && savedLocation ? savedLocation.lat : null;
+  const fetchLon = hasMounted && isDaySlug && savedLocation ? savedLocation.lon : null;
+
+  const { weather, loading } = useWeather(fetchLat, fetchLon);
 
   const displayWeather = (hasMounted && isDaySlug && weather) ? weather : initialWeather;
-  const displayName = (hasMounted && isDaySlug) ? activeLocation.name : locationName;
+  const displayName = (hasMounted && isDaySlug && savedLocation) ? savedLocation.name : locationName;
 
   const dayIndex = resolveDayIndex(slug, displayWeather.daily.time);
   const actualDayIndex = dayIndex >= 0 ? dayIndex : 0;

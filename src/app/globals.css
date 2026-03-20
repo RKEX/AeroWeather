@@ -121,10 +121,11 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    /* ✅ bg-background সরানো — white background override বন্ধ */
+    @apply text-foreground;
+    background: transparent;
   }
 }
-/* ===== Scroll Performance Optimization ===== */
 
 html,
 body {
@@ -133,7 +134,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* GPU acceleration for smoother scrolling */
 main {
   transform: translateZ(0);
   will-change: transform;
@@ -145,13 +145,10 @@ main {
   }
 }
 
-/* Mobile smooth scrolling */
 body {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Prevent animation jank */
-/* ===== Glassmorphism Scrollbars ===== */
 .glass-scroll {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
@@ -178,7 +175,6 @@ body {
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* ===== Performance Optimizations ===== */
 .gpu-accel {
   transform: translateZ(0);
   will-change: transform;
@@ -192,12 +188,10 @@ body {
   -webkit-backdrop-filter: none !important;
 }
 
-/* Optimize and Defer heavy paint operations */
 .animate-in {
   will-change: transform, opacity;
 }
 
-/* SMOOTH RADAR */
 .leaflet-container {
   will-change: transform;
   transform: translateZ(0);
