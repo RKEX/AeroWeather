@@ -4,12 +4,29 @@ import { WeatherData } from "@/types/weather";
 import { Wind } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 
+import { memo } from "react";
+
 interface AqiCardProps {
     aqiData?: WeatherData['airQuality'];
     isNight?: boolean;
 }
 
-export function AqiCard({ aqiData }: AqiCardProps) {
+const Pollutant = memo(({ label, value, unit }: { label: string, value: number, unit: string }) => {
+    const itemBg = "bg-white/10 border-white/15 shadow-lg backdrop-blur-2xl";
+    const textMain = "text-white";
+    const textSub = "text-white/80";
+    const textUnit = "text-white/60";
+
+    return (
+        <div className={`rounded-2xl p-3 border flex flex-col transition-all hover:bg-white/20 ${itemBg}`}>
+            <span className={`text-xs mb-1 ${textSub}`}>{label}</span>
+            <span className={`font-medium ${textMain}`}>{value.toFixed(1)} <span className={`text-[10px] ${textUnit}`}>{unit}</span></span>
+        </div>
+    );
+});
+Pollutant.displayName = "Pollutant";
+
+export const AqiCard = memo(({ aqiData }: AqiCardProps) => {
     if (!aqiData) return null;
     const textPrimary = "text-white";
     const textSecondary = "text-white/80";
@@ -56,18 +73,5 @@ export function AqiCard({ aqiData }: AqiCardProps) {
             </div>
         </GlassCard>
     );
-}
-
-function Pollutant({ label, value, unit }: { label: string, value: number, unit: string }) {
-    const itemBg = "bg-white/10 border-white/15 shadow-lg backdrop-blur-2xl";
-    const textMain = "text-white";
-    const textSub = "text-white/80";
-    const textUnit = "text-white/60";
-
-    return (
-        <div className={`rounded-2xl p-3 border flex flex-col transition-all hover:bg-white/20 ${itemBg}`}>
-            <span className={`text-xs mb-1 ${textSub}`}>{label}</span>
-            <span className={`font-medium ${textMain}`}>{value.toFixed(1)} <span className={`text-[10px] ${textUnit}`}>{unit}</span></span>
-        </div>
-    );
-}
+});
+AqiCard.displayName = "AqiCard";

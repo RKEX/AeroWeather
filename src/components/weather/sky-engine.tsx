@@ -449,8 +449,14 @@ export default function SkyEngine({ initialWeatherCode = 0 }: SkyEngineProps) {
       raf = requestAnimationFrame(render);
     };
 
-    render();
+    let isActive = true;
+    const timer = setTimeout(() => {
+      if (isActive) render();
+    }, 500);
+
     return () => {
+      isActive = false;
+      clearTimeout(timer);
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", onResize);
     };

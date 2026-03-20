@@ -326,9 +326,14 @@ export function WeatherBackground({ weatherCode = 0 }: WeatherBackgroundProps) {
       raf = requestAnimationFrame(render);
     };
 
-    render();
+    let isActive = true;
+    const timer = setTimeout(() => {
+      if (isActive) render();
+    }, 600); // Slightly more delay than SkyEngine
 
     return () => {
+      isActive = false;
+      clearTimeout(timer);
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", onResize);
     };

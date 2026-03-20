@@ -14,10 +14,11 @@ import {
   YAxis,
 } from "recharts";
 import { GlassCard } from "@/components/ui/glass-card";
+import { memo } from "react";
 
 /* ---------- Custom Tooltip ---------- */
 
-function CustomTooltip({
+const CustomTooltip = memo(({
   active,
   payload,
   label,
@@ -25,7 +26,7 @@ function CustomTooltip({
   active?: boolean;
   payload?: { value?: number }[];
   label?: string;
-}) {
+}) => {
   if (!active || !payload || payload.length === 0) return null;
 
   return (
@@ -47,7 +48,8 @@ function CustomTooltip({
       )}
     </div>
   );
-}
+});
+CustomTooltip.displayName = "CustomTooltip";
 
 /* ---------- Props ---------- */
 
@@ -58,7 +60,7 @@ interface HourlyForecastProps {
 
 /* ---------- Main Component ---------- */
 
-export function HourlyForecast({ weather, dayIndex = -1 }: HourlyForecastProps) {
+const HourlyForecastComponent = ({ weather, dayIndex = -1 }: HourlyForecastProps) => {
   const textPrimary = "text-white";
   const textSecondary = "text-white/80";
 
@@ -130,7 +132,7 @@ export function HourlyForecast({ weather, dayIndex = -1 }: HourlyForecastProps) 
       </div>
 
       {/* Chart */}
-      <div className="mt-4 h-[250px] w-full">
+      <div className="mt-4 h-62.5 w-full">
         <ResponsiveContainer
           width="100%"
           height="100%">
@@ -208,4 +210,7 @@ export function HourlyForecast({ weather, dayIndex = -1 }: HourlyForecastProps) 
       </div>
     </GlassCard>
   );
-}
+};
+
+export const HourlyForecast = memo(HourlyForecastComponent);
+HourlyForecast.displayName = "HourlyForecast";

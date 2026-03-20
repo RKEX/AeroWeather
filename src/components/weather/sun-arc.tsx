@@ -7,7 +7,9 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { GlassCard } from "@/components/ui/glass-card";
 
-export function SunArc({ weather, dayIndex = -1 }: { weather: WeatherData, dayIndex?: number }) {
+import { memo } from "react";
+
+const SunArcComponent = ({ weather, dayIndex = -1 }: { weather: WeatherData, dayIndex?: number }) => {
     const textPrimary = "text-white";
     const textTertiary = "text-white/60";
 
@@ -131,4 +133,7 @@ export function SunArc({ weather, dayIndex = -1 }: { weather: WeatherData, dayIn
             </p>
         </GlassCard>
     );
-}
+};
+
+export const SunArc = memo(SunArcComponent);
+SunArc.displayName = "SunArc";

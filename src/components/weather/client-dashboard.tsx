@@ -1,22 +1,44 @@
 "use client";
 
+import { memo, useEffect, useState } from "react";
 import { LocationSearch } from "@/components/weather/location-search";
-import { WeatherHero } from "@/components/weather/weather-hero";
 import { useWeather } from "@/hooks/useWeather";
 import { LocationResult, WeatherData } from "@/types/weather";
 import { AnimatePresence, motion, Variants } from "framer-motion";
 import { Navigation } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
 
-const RadarMap = dynamic(() => import("@/components/weather/radar-map").then(mod => mod.RadarMap), { ssr: false });
-const HourlyForecast = dynamic(() => import("@/components/weather/hourly-forecast").then(mod => mod.HourlyForecast), { ssr: false });
-const AiWeatherInsight = dynamic(() => import("@/components/weather/ai-weather-insight").then(mod => mod.AiWeatherInsight), { ssr: false });
-const DailyForecast = dynamic(() => import("@/components/weather/daily-forecast").then(mod => mod.DailyForecast), { ssr: false });
-const AqiCard = dynamic(() => import("@/components/weather/aqi-card").then(mod => mod.AqiCard), { ssr: false });
-const SunArc = dynamic(() => import("@/components/weather/sun-arc").then(mod => mod.SunArc), { ssr: false });
+const RadarMap = dynamic(() => import("@/components/weather/radar-map").then(mod => mod.RadarMap), { 
+  ssr: false,
+  loading: () => <div className="h-105 w-full animate-pulse bg-white/10 rounded-3xl border border-white/10" />
+});
+const HourlyForecast = dynamic(() => import("@/components/weather/hourly-forecast").then(mod => mod.HourlyForecast), { 
+  ssr: false,
+  loading: () => <div className="h-48 w-full animate-pulse bg-white/10 rounded-3xl border border-white/10" />
+});
+const AiWeatherInsight = dynamic(() => import("@/components/weather/ai-weather-insight").then(mod => mod.AiWeatherInsight), { 
+  ssr: false,
+  loading: () => <div className="h-32 w-full animate-pulse bg-white/10 rounded-3xl border border-white/10" />
+});
+const DailyForecast = dynamic(() => import("@/components/weather/daily-forecast").then(mod => mod.DailyForecast), { 
+  ssr: false,
+  loading: () => <div className="h-[500px] w-full animate-pulse bg-white/10 rounded-3xl border border-white/10" />
+});
+const AqiCard = dynamic(() => import("@/components/weather/aqi-card").then(mod => mod.AqiCard), { 
+  ssr: false,
+  loading: () => <div className="h-64 w-full animate-pulse bg-white/10 rounded-3xl border border-white/10" />
+});
+const SunArc = dynamic(() => import("@/components/weather/sun-arc").then(mod => mod.SunArc), { 
+  ssr: false,
+  loading: () => <div className="h-48 w-full animate-pulse bg-white/10 rounded-3xl border border-white/10" />
+});
 
-export default function ClientDashboard({
+const WeatherHero = dynamic(() => import("@/components/weather/weather-hero").then(mod => mod.WeatherHero), { 
+  ssr: true,
+  loading: () => <div className="h-64 w-full animate-pulse bg-white/10 rounded-3xl border border-white/10" />
+});
+
+function ClientDashboard({
   initialWeather,
   initialLocation,
 }: {
@@ -31,7 +53,10 @@ export default function ClientDashboard({
     const saved = localStorage.getItem("aeroweather_location");
     if (saved) {
       try {
-        setActiveLocation(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        if (parsed.lat !== activeLocation.lat || parsed.lon !== activeLocation.lon) {
+          setActiveLocation(parsed);
+        }
       } catch (e) {
         console.error("Failed to parse saved location", e);
       }
@@ -181,3 +206,5 @@ export default function ClientDashboard({
     </div>
   );
 }
+
+export default memo(ClientDashboard);

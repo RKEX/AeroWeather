@@ -7,7 +7,9 @@ import { Play, Pause } from 'lucide-react';
 import { format } from "date-fns";
 import { GlassCard } from "@/components/ui/glass-card";
 
-export function RadarMap({ lat, lon, isNight = true }: { lat: number, lon: number, isNight?: boolean }) {
+import { memo } from 'react';
+
+const RadarMapComponent = ({ lat, lon, isNight = true }: { lat: number, lon: number, isNight?: boolean }) => {
     const [timestamps, setTimestamps] = useState<number[]>([]);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -98,4 +100,7 @@ export function RadarMap({ lat, lon, isNight = true }: { lat: number, lon: numbe
             `}</style>
         </GlassCard>
     );
-}
+};
+
+export const RadarMap = memo(RadarMapComponent);
+RadarMap.displayName = "RadarMap";

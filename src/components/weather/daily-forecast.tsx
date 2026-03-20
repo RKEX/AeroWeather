@@ -6,7 +6,7 @@ import { getWeatherIcon } from "@/lib/weather-theme";
 import { getDaySlug } from "@/lib/day-slug";
 import { Droplets } from "lucide-react";
 import { motion } from "framer-motion";
-import { ElementType } from "react";
+import { ElementType, memo, useMemo } from "react";
 import Link from "next/link";
 import { GlassCard } from "@/components/ui/glass-card";
 
@@ -24,7 +24,7 @@ function tempColor(temp: number): string {
   return "text-white";
 }
 
-export function DetailMetric({
+export const DetailMetric = memo(({
   icon: Icon,
   label,
   value,
@@ -32,7 +32,7 @@ export function DetailMetric({
   icon?: ElementType;
   label: string;
   value: string | number;
-}) {
+}) => {
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 transition-all hover:bg-white/20 shadow-lg backdrop-blur-2xl">
       {Icon && <Icon className="h-5 w-5 shrink-0 text-white/60" />}
@@ -44,52 +44,55 @@ export function DetailMetric({
       </div>
     </div>
   );
-}
+});
+DetailMetric.displayName = "DetailMetric";
 
 /* ─────────── Main Component ─────────── */
 
-export function DailyForecast({ weather }: DailyForecastProps) {
+const DailyForecastComponent = ({ weather }: DailyForecastProps) => {
   const textPrimary = "text-white";
   const textSecondary = "text-white/80";
 
   const daily = weather.daily;
   const hourly = weather.hourly;
 
-  /* aggregate hourly data per day */
-  const getAggregates = (dayIdx: number) => {
-    const start = dayIdx * 24;
-    const humSlice = hourly.relativeHumidity2m.slice(start, start + 24);
-    const windSlice = hourly.windSpeed10m.slice(start, start + 24);
-    const avgHumidity =
-      humSlice.length > 0
-        ? Math.round(humSlice.reduce((a, b) => a + b, 0) / humSlice.length)
-        : 0;
-    const maxWind =
-      windSlice.length > 0 ? Math.round(Math.max(...windSlice)) : 0;
-    return { avgHumidity, maxWind };
-  };
-
   /* build 7-day array starting tomorrow (index 1) */
-  const forecastDays = daily.time.slice(1, 8).map((time, i) => {
-    const globalIdx = i + 1;
-    const aggs = getAggregates(globalIdx);
-    const date = new Date(time + "T00:00:00");
-    return {
-      date,
-      slug: getDaySlug(date),
-      maxTemp: Math.round(daily.temperature2mMax[globalIdx]),
-      minTemp: Math.round(daily.temperature2mMin[globalIdx]),
-      code: daily.weatherCode[globalIdx],
-      precipProb: daily.precipitationProbabilityMax[globalIdx] ?? 0,
-      sunrise: daily.sunrise?.[globalIdx],
-      sunset: daily.sunset?.[globalIdx],
-      uvIndexMax: daily.uvIndexMax?.[globalIdx]
-        ? Math.round(daily.uvIndexMax[globalIdx])
-        : 0,
-      avgHumidity: aggs.avgHumidity,
-      maxWind: aggs.maxWind,
+  const forecastDays = useMemo(() => {
+    /* aggregate hourly data per day */
+    const getAggregates = (dayIdx: number) => {
+      const start = dayIdx * 24;
+      const humSlice = hourly.relativeHumidity2m.slice(start, start + 24);
+      const windSlice = hourly.windSpeed10m.slice(start, start + 24);
+      const avgHumidity =
+        humSlice.length > 0
+          ? Math.round(humSlice.reduce((a, b) => a + b, 0) / humSlice.length)
+          : 0;
+      const maxWind =
+        windSlice.length > 0 ? Math.round(Math.max(...windSlice)) : 0;
+      return { avgHumidity, maxWind };
     };
-  });
+
+    return daily.time.slice(1, 8).map((time, i) => {
+      const globalIdx = i + 1;
+      const aggs = getAggregates(globalIdx);
+      const date = new Date(time + "T00:00:00");
+      return {
+        date,
+        slug: getDaySlug(date),
+        maxTemp: Math.round(daily.temperature2mMax[globalIdx]),
+        minTemp: Math.round(daily.temperature2mMin[globalIdx]),
+        code: daily.weatherCode[globalIdx],
+        precipProb: daily.precipitationProbabilityMax[globalIdx] ?? 0,
+        sunrise: daily.sunrise?.[globalIdx],
+        sunset: daily.sunset?.[globalIdx],
+        uvIndexMax: daily.uvIndexMax?.[globalIdx]
+          ? Math.round(daily.uvIndexMax[globalIdx])
+          : 0,
+        avgHumidity: aggs.avgHumidity,
+        maxWind: aggs.maxWind,
+      };
+    });
+  }, [daily, hourly]);
 
   return (
     <GlassCard className="flex w-full flex-col gap-3 p-6">
@@ -140,7 +143,10 @@ export function DailyForecast({ weather }: DailyForecastProps) {
       </div>
     </GlassCard>
   );
-}
+};
+
+export const DailyForecast = memo(DailyForecastComponent);
+DailyForecast.displayName = "DailyForecast";
 
 // Re-export helpers so the day detail page can reuse them
 export { tempColor };
