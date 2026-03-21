@@ -51,6 +51,8 @@ type NavigatorWithMemory = Navigator & {
   deviceMemory?: number;
 };
 
+type Timer = ReturnType<typeof setTimeout>;
+
 function detectDeviceTier(): {
   mobile: boolean;
   lowEnd: boolean;
@@ -80,7 +82,7 @@ export default function SkyEngine({ weather = "clear", className }: SkyEnginePro
   const visibilityHandlerRef = useRef<(() => void) | null>(null);
   const initializedRef = useRef(false);
   const mountCountRef = useRef(0);
-  const terminateTimerRef = useRef<number | null>(null);
+  const terminateTimerRef = useRef<Timer | null>(null);
   const readyRef = useRef(false);
   const renderScaleRef = useRef(1);
 
@@ -96,7 +98,7 @@ export default function SkyEngine({ weather = "clear", className }: SkyEnginePro
 
     mountCountRef.current += 1;
     if (terminateTimerRef.current !== null) {
-      window.clearTimeout(terminateTimerRef.current);
+      clearTimeout(terminateTimerRef.current);
       terminateTimerRef.current = null;
     }
 
@@ -210,7 +212,7 @@ export default function SkyEngine({ weather = "clear", className }: SkyEnginePro
         return;
       }
 
-      terminateTimerRef.current = window.setTimeout(() => {
+      terminateTimerRef.current = setTimeout(() => {
         if (mountCountRef.current > 0) {
           return;
         }

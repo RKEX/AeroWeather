@@ -610,10 +610,12 @@ export default function SkyEngine({ initialWeatherCode = 0 }: SkyEngineProps) {
     const onVisibilityChange = () => { pausedByVisibility = document.visibilityState !== "visible"; };
     document.addEventListener("visibilitychange", onVisibilityChange);
 
-    let resizeTimer = 0;
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const onResize = () => {
-      window.clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(() => {
+      if (resizeTimer !== null) {
+        clearTimeout(resizeTimer);
+      }
+      resizeTimer = setTimeout(() => {
         resizeCanvas();
         rebuildStatic();
       }, 150);
@@ -736,7 +738,9 @@ export default function SkyEngine({ initialWeatherCode = 0 }: SkyEngineProps) {
     return () => {
       unsubscribeRaf();
       observer.disconnect();
-      window.clearTimeout(resizeTimer);
+      if (resizeTimer !== null) {
+        clearTimeout(resizeTimer);
+      }
       window.removeEventListener("resize", onResize);
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };

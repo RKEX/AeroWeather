@@ -16,11 +16,11 @@ export default function SkyBackground() {
   }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
+    const timer: ReturnType<typeof setTimeout> = setTimeout(() => {
       setEnabled(true);
     }, 1000);
 
-    return () => window.clearTimeout(timer);
+    return () => clearTimeout(timer);
   }, []);
 
   if (isLighthouseAudit || !enabled) {

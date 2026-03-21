@@ -34,6 +34,7 @@ const SunArc = dynamic(() => import("@/components/weather/sun-arc").then(mod => 
 });
 
 type IdleHandle = number;
+type Timer = ReturnType<typeof setTimeout>;
 
 function scheduleIdleTask(callback: () => void, timeout = 200): () => void {
   if (typeof window !== "undefined" && "requestIdleCallback" in window) {
@@ -47,8 +48,8 @@ function scheduleIdleTask(callback: () => void, timeout = 200): () => void {
     };
   }
 
-  const timer = window.setTimeout(callback, Math.min(timeout, 120));
-  return () => window.clearTimeout(timer);
+  const timer: Timer = setTimeout(callback, Math.min(timeout, 120));
+  return () => clearTimeout(timer);
 }
 
 function ClientDashboard({

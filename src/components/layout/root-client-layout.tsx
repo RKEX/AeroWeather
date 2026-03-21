@@ -13,7 +13,7 @@ export default function RootClientLayout({
     let lenis: Lenis | null = null;
     let unsubscribeRaf: (() => void) | null = null;
 
-    const timer = window.setTimeout(() => {
+    const timer: ReturnType<typeof setTimeout> = setTimeout(() => {
       const reducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)",
       ).matches;
@@ -41,7 +41,7 @@ export default function RootClientLayout({
     }, 100);
 
     return () => {
-      window.clearTimeout(timer);
+      clearTimeout(timer);
       unsubscribeRaf?.();
       lenis?.destroy();
     };
