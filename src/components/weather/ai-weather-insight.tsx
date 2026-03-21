@@ -93,26 +93,17 @@ export function AiWeatherInsight({ weather, dayIndex = -1 }: AiWeatherInsightPro
             </div>
           </div>
 
-          {/* ✅ framer-motion সরানো হয়েছে — CSS animation-fill-mode দিয়ে fade-in */}
           <p
             key={insight}
             className={`text-base font-medium leading-relaxed ${textPrimary}`}
-            style={{
-              animation: "ai-fade-in 0.4s ease-out both",
-            }}
+            style={{ animation: "ai-fade-in 0.4s ease-out both" }}
           >
             {insight}
           </p>
         </div>
       </div>
 
-      {/* ✅ Inline keyframe — zero JS, GPU composited opacity */}
-      <style>{`
-        @keyframes ai-fade-in {
-          from { opacity: 0; }
-          to   { opacity: 1; }
-        }
-      `}</style>
+      <style>{`@keyframes ai-fade-in { from { opacity: 0; } to { opacity: 1; } }`}</style>
     </GlassCard>
   );
 }

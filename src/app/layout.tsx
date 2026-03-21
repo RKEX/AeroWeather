@@ -5,9 +5,9 @@ import { SettingsProvider } from "@/components/Providers/settings-provider";
 import SkyBackground from "@/components/weather/sky-background";
 import { geistMono, geistSans } from "@/lib/fonts";
 import {
-    organizationSchema,
-    personSchema,
-    websiteSchema,
+  organizationSchema,
+  personSchema,
+  websiteSchema,
 } from "@/lib/schema/person";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -33,7 +33,12 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       suppressHydrationWarning>
       <head>
-        {/* Preconnect external APIs used by weather and radar calls to reduce fetch setup latency. */}
+        {/* ✅ DNS prefetch — rainviewer map lazy load এর জন্য */}
+        <link rel="dns-prefetch" href="https://api.rainviewer.com" />
+        <link rel="dns-prefetch" href="https://tilecache.rainviewer.com" />
+        <link rel="dns-prefetch" href="https://tile.openstreetmap.org" />
+
+        {/* ✅ Preconnect শুধু critical APIs — max 3টা */}
         <link
           rel="preconnect"
           href="https://api.open-meteo.com"
@@ -44,11 +49,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
           href="https://air-quality-api.open-meteo.com"
           crossOrigin="anonymous"
         />
-        <link
-          rel="preconnect"
-          href="https://api.rainviewer.com"
-          crossOrigin="anonymous"
-        />
+        <link rel="dns-prefetch" href="https://nominatim.openstreetmap.org" />
       </head>
       <body className="bg-transparent font-sans">
         <PerformanceProvider>

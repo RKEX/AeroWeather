@@ -8,7 +8,8 @@ const nextConfig: NextConfig = {
     removeConsole: true,
   },
   experimental: {
-    optimizePackageImports: ["lucide-react", "date-fns", "framer-motion"],
+    // ✅ framer-motion সরানো হয়েছে — আর use হচ্ছে না
+    optimizePackageImports: ["lucide-react", "date-fns"],
   },
   images: {
     formats: ["image/avif", "image/webp"],
