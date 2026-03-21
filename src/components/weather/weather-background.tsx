@@ -4,14 +4,22 @@ import { useEffect, useRef } from "react";
 
 interface WeatherBackgroundProps {
   weatherCode?: number;
+  timezone?: string; // ✅ নতুন prop
 }
 
 type TimePeriod = "morning" | "day" | "sunset" | "night";
 type Condition = "clear" | "cloudy" | "rain" | "storm" | "snow" | "fog";
 
 /* ── Helpers ── */
-function getTimePeriod(): TimePeriod {
-  const h = new Date().getHours();
+// ✅ FIX: timezone অনুযায়ী time period বের করো
+function getTimePeriod(timezone?: string): TimePeriod {
+  let h: number;
+  if (timezone) {
+    const locStr = new Date().toLocaleString("en-US", { timeZone: timezone });
+    h = new Date(locStr).getHours();
+  } else {
+    h = new Date().getHours();
+  }
   if (h >= 6 && h < 10) return "morning";
   if (h >= 10 && h < 17) return "day";
   if (h >= 17 && h < 20) return "sunset";
@@ -37,18 +45,15 @@ const SKY_GRADIENTS: Record<TimePeriod, [string, string, string]> = {
 };
 
 /* ── Moon Phase Calculation ── */
-// Returns a phase value from 0.0 to 1.0
-// 0.0 = New Moon, 0.5 = Full Moon, 1.0 = Next New Moon
 function getMoonPhase(): number {
   const LUNAR_MONTH = 29.53058867;
-  // Known new moon: Jan 11, 2024, 11:57 UTC
   const knownNewMoon = new Date(Date.UTC(2024, 0, 11, 11, 57)).getTime();
   const now = Date.now();
   const diffDays = (now - knownNewMoon) / (1000 * 60 * 60 * 24);
   return (diffDays % LUNAR_MONTH) / LUNAR_MONTH;
 }
 
-/* ── Particle objects (plain interfaces, no classes) ── */
+/* ── Particle objects ── */
 type CloudLayer = "far" | "mid" | "near";
 interface Star  { x: number; y: number; r: number; tw: number; twSpeed: number; dx: number }
 interface Cloud { x: number; y: number; scale: number; speed: number; opacity: number; layer: CloudLayer }
@@ -63,22 +68,22 @@ const mkStar  = (W: number, H: number): Star  => ({
   r: Math.random()*1.4+0.2, 
   tw: Math.random()*Math.PI*2, 
   twSpeed: 0.01+Math.random()*0.02,
-  dx: (Math.random() * 0.05 + 0.02) // slow parallax drift
+  dx: (Math.random() * 0.05 + 0.02)
 });
 const mkCloud = (W: number, H: number, layer: CloudLayer): Cloud => {
   let scale = 1, speed = 0.1, opacity = 0.1;
   if (layer === "far") {
-    scale = 0.4 + Math.random() * 0.3;     // smallest
-    speed = 0.05 + Math.random() * 0.05;   // slowest
-    opacity = 0.05 + Math.random() * 0.05; // faintest
+    scale = 0.4 + Math.random() * 0.3;
+    speed = 0.05 + Math.random() * 0.05;
+    opacity = 0.05 + Math.random() * 0.05;
   } else if (layer === "mid") {
     scale = 0.8 + Math.random() * 0.4;
     speed = 0.15 + Math.random() * 0.1;
     opacity = 0.10 + Math.random() * 0.08;
   } else {
-    scale = 1.4 + Math.random() * 0.6;     // largest
-    speed = 0.3 + Math.random() * 0.2;     // fastest
-    opacity = 0.15 + Math.random() * 0.1;  // most solid
+    scale = 1.4 + Math.random() * 0.6;
+    speed = 0.3 + Math.random() * 0.2;
+    opacity = 0.15 + Math.random() * 0.1;
   }
   return { 
     x: Math.random() * W * 1.5 - W * 0.25, 
@@ -89,13 +94,26 @@ const mkCloud = (W: number, H: number, layer: CloudLayer): Cloud => {
 const mkDrop  = (W: number, H: number): Drop  => ({ 
   x: Math.random() * W * 1.5, 
   y: Math.random() * -H, 
-  vx: 2 + Math.random() * 4, // wind direction speed
+  vx: 2 + Math.random() * 4,
   speed: 15 + Math.random() * 15, 
   len: 12 + Math.random() * 18, 
   opacity: 0.15 + Math.random() * 0.35 
 });
-const mkFlake = (W: number, H: number): Flake => ({ x: Math.random()*W, y: Math.random()*-H, r: 1+Math.random()*2.5, speed: 0.8+Math.random()*1.5, sway: Math.random()*0.8, swayPhase: Math.random()*Math.PI*2 });
-const mkWisp  = (W: number, H: number): Wisp  => ({ x: Math.random()*W*1.4-W*0.2, y: H*0.4+Math.random()*H*0.5, w: 200+Math.random()*300, h: 40+Math.random()*60, speed: 0.2+Math.random()*0.3 });
+const mkFlake = (W: number, H: number): Flake => ({ 
+  x: Math.random()*W, 
+  y: Math.random()*-H, 
+  r: 1+Math.random()*2.5, 
+  speed: 0.8+Math.random()*1.5, 
+  sway: Math.random()*0.8, 
+  swayPhase: Math.random()*Math.PI*2 
+});
+const mkWisp  = (W: number, H: number): Wisp  => ({ 
+  x: Math.random()*W*1.4-W*0.2, 
+  y: H*0.4+Math.random()*H*0.5, 
+  w: 200+Math.random()*300, 
+  h: 40+Math.random()*60, 
+  speed: 0.2+Math.random()*0.3 
+});
 
 /* ── Draw helpers ── */
 function drawCloud(ctx: CanvasRenderingContext2D, c: Cloud, nightMode: boolean) {
@@ -120,7 +138,6 @@ function drawDrop(ctx: CanvasRenderingContext2D, d: Drop) {
   ctx.lineWidth = 1.2;
   ctx.beginPath();
   ctx.moveTo(d.x, d.y);
-  // the drop is slanted heavily based on its wind vx component relative to vertical speed
   ctx.lineTo(d.x - d.vx * 1.8, d.y + d.len);
   ctx.stroke();
   ctx.restore();
@@ -148,7 +165,7 @@ function drawWisp(ctx: CanvasRenderingContext2D, wp: Wisp) {
 
 /* ─────────────────────────────────────────────────── */
 
-export function WeatherBackground({ weatherCode = 0 }: WeatherBackgroundProps) {
+export function WeatherBackground({ weatherCode = 0, timezone }: WeatherBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -167,7 +184,8 @@ export function WeatherBackground({ weatherCode = 0 }: WeatherBackgroundProps) {
     };
     window.addEventListener("resize", onResize);
 
-    const period    = getTimePeriod();
+    // ✅ FIX: timezone দিয়ে সঠিক time period বের করো
+    const period    = getTimePeriod(timezone);
     const condition = codeToCondition(weatherCode);
     const [c1, c2, c3] = SKY_GRADIENTS[period];
     const isNight = period === "night";
@@ -201,10 +219,9 @@ export function WeatherBackground({ weatherCode = 0 }: WeatherBackgroundProps) {
 
       /* night: stars + moon */
       if (isNight) {
-        // Star Parallax & Twinkle
         stars.forEach((s) => {
           s.tw += s.twSpeed;
-          s.x -= s.dx; // parallax drift left
+          s.x -= s.dx;
           if (s.x < -10) s.x = W + 10;
           ctx.save();
           ctx.globalAlpha = (0.4 + Math.sin(s.tw) * 0.6) * 0.9;
@@ -213,7 +230,6 @@ export function WeatherBackground({ weatherCode = 0 }: WeatherBackgroundProps) {
           ctx.restore();
         });
 
-        // Moon Outer Glow
         const mg = ctx.createRadialGradient(moon.x, moon.y, 0, moon.x, moon.y, moon.r * 6);
         mg.addColorStop(0,   "rgba(255,255,210,0.35)");
         mg.addColorStop(0.4, "rgba(255,255,200,0.08)");
@@ -221,23 +237,19 @@ export function WeatherBackground({ weatherCode = 0 }: WeatherBackgroundProps) {
         ctx.fillStyle = mg;
         ctx.fillRect(0, 0, W, H);
 
-        // Moon Phase Render
         const phase = getMoonPhase();
         ctx.save();
         ctx.translate(moon.x, moon.y);
-        ctx.rotate(-Math.PI / 4); // tilt the moon slightly
+        ctx.rotate(-Math.PI / 4);
 
-        // Base moon disk
         ctx.fillStyle = "#fffde8";
         ctx.beginPath();
         ctx.arc(0, 0, moon.r, 0, Math.PI * 2);
         ctx.fill();
 
-        // Overlay shadow for phase
-        ctx.fillStyle = "#161a2b"; // Night sky match
+        ctx.fillStyle = "#161a2b";
         ctx.beginPath();
         ctx.arc(0, 0, moon.r, -Math.PI/2, Math.PI/2, phase < 0.5); 
-        // Use an ellipse to draw the curve of the terminator line
         const terminatorX = Math.cos(phase * Math.PI * 2) * moon.r;
         ctx.ellipse(0, 0, Math.abs(terminatorX), moon.r, 0, Math.PI/2, -Math.PI/2, phase < 0.5 === terminatorX > 0);
         ctx.fill();
@@ -274,7 +286,7 @@ export function WeatherBackground({ weatherCode = 0 }: WeatherBackgroundProps) {
         d.x -= d.vx;
         if (d.y > H || d.x < -100) { 
           d.y = Math.random() * -200 - 50; 
-          d.x = Math.random() * W * 1.5; // span wider to account for wind
+          d.x = Math.random() * W * 1.5;
         }
         drawDrop(ctx, d);
       });
@@ -295,24 +307,20 @@ export function WeatherBackground({ weatherCode = 0 }: WeatherBackgroundProps) {
       if (condition === "storm") {
         lightningTimer++;
         if (lightningTimer > 120 && Math.random() < 0.02) {
-          lightningOpacity = 0.8 + Math.random() * 0.5; // intense starting value
+          lightningOpacity = 0.8 + Math.random() * 0.5;
           lightningTimer = 0;
         }
         if (lightningOpacity > 0) {
           ctx.save();
           ctx.globalCompositeOperation = "screen";
           ctx.globalAlpha = Math.min(1, lightningOpacity);
-          
-          // create a massive semi-radial flash from top centre to bottom
           const flashGrad = ctx.createRadialGradient(W/2, 0, 0, W/2, 0, H);
           flashGrad.addColorStop(0, "rgba(255,255,255,1)");
           flashGrad.addColorStop(1, "rgba(220,230,255,0.3)");
-          
           ctx.fillStyle = flashGrad;
           ctx.fillRect(0, 0, W, H);
           ctx.restore();
-          
-          lightningOpacity -= 0.06; // fade relatively quickly but persist for a few frames
+          lightningOpacity -= 0.06;
         }
       }
 
@@ -329,7 +337,7 @@ export function WeatherBackground({ weatherCode = 0 }: WeatherBackgroundProps) {
     let isActive = true;
     const timer = setTimeout(() => {
       if (isActive) render();
-    }, 600); // Slightly more delay than SkyEngine
+    }, 600);
 
     return () => {
       isActive = false;
@@ -337,7 +345,7 @@ export function WeatherBackground({ weatherCode = 0 }: WeatherBackgroundProps) {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", onResize);
     };
-  }, [weatherCode]);
+  }, [weatherCode, timezone]); // ✅ timezone dependency যোগ করা হয়েছে
 
   return (
     <canvas

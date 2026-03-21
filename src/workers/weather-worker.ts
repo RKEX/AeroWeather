@@ -1,16 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// Weather Worker for heavy data processing
-
 self.onmessage = async (e: MessageEvent) => {
   const { weatherUrl, aqiUrl } = e.data;
 
   try {
-    // 1. Fetch Weather Data
     const weatherRes = await fetch(weatherUrl);
     if (!weatherRes.ok) throw new Error("Failed to fetch weather data");
     const weatherData = await weatherRes.json();
 
-    // 2. Fetch Air Quality Data
     let aqiData = null;
     try {
       const aqiRes = await fetch(aqiUrl);
@@ -22,9 +18,10 @@ self.onmessage = async (e: MessageEvent) => {
       console.warn("AQI fetch failed in worker", err);
     }
 
-    // 3. Process and Format Data
     const formattedData = {
+      timezone: weatherData.timezone, // ✅ TOP LEVEL এ
       current: {
+        // timezone নেই এখানে
         temperature2m: weatherData.current.temperature_2m,
         relativeHumidity2m: weatherData.current.relative_humidity_2m,
         apparentTemperature: weatherData.current.apparent_temperature,
@@ -72,7 +69,7 @@ self.onmessage = async (e: MessageEvent) => {
         nitrogenDioxide: aqiData.nitrogen_dioxide,
         sulphurDioxide: aqiData.sulphur_dioxide,
         ozone: aqiData.ozone,
-      } : undefined
+      } : undefined,
     };
 
     self.postMessage({ type: "SUCCESS", data: formattedData });

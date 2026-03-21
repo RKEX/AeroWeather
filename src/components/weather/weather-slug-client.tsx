@@ -6,8 +6,8 @@ import { WeatherSkeleton } from "@/components/weather/weather-skeleton";
 import { useWeather } from "@/hooks/useWeather";
 import { resolveDayIndex } from "@/lib/day-slug";
 import {
-    getThemeClasses,
-    getWeatherTheme,
+  getThemeClasses,
+  getWeatherTheme,
 } from "@/lib/weather-theme";
 import { WeatherData } from "@/types/weather";
 import { format } from "date-fns";
@@ -197,7 +197,7 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
             {showDeferredSections ?
               <>
                 <Suspense fallback={<div className="h-48 w-full rounded-3xl border border-white/10 bg-white/5" />}>
-                  <SunArc weather={displayWeather} dayIndex={actualDayIndex} />
+                  <SunArc weather={displayWeather} dayIndex={actualDayIndex} timezone={displayWeather.timezone} />
                 </Suspense>
                 <Suspense fallback={<DailyForecastSkeleton />}>
                   <DailyForecast weather={displayWeather} />

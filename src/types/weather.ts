@@ -4,11 +4,12 @@ export interface LocationResult {
   latitude: number;
   longitude: number;
   country: string;
-  admin1?: string; // State / Province
+  admin1?: string;
   timezone: string;
 }
 
 export interface WeatherData {
+  timezone: string; // ✅ TOP LEVEL এ, current এর বাইরে
   current: {
     temperature2m: number;
     relativeHumidity2m: number;
@@ -57,5 +58,5 @@ export interface WeatherData {
     nitrogenDioxide: number;
     sulphurDioxide: number;
     ozone: number;
-  }
+  };
 }

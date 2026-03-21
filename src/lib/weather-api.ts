@@ -47,6 +47,7 @@ export async function getWeatherData(lat: number, lon: number): Promise<WeatherD
 
     // Format response
     return {
+      timezone: weatherData.timezone,
       current: {
         temperature2m: weatherData.current.temperature_2m,
         relativeHumidity2m: weatherData.current.relative_humidity_2m,

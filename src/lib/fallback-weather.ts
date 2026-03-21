@@ -57,6 +57,7 @@ export function createFallbackWeatherData(): WeatherData {
   const dailyPrecipProbMax = Array.from({ length: totalDays }, (_, i) => (i % 4 === 0 ? 50 : 18));
 
   return {
+    timezone: "UTC",
     current: {
       temperature2m: hourlyTemperature[0] ?? 22,
       relativeHumidity2m: hourlyHumidity[0] ?? 65,
