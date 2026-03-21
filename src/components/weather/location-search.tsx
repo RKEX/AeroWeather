@@ -56,6 +56,19 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
     setResults([]);
     setOpen(false);
     onSelect(location);
+
+    // ✅ Selected location localStorage এ save করো
+    if (typeof window !== "undefined") {
+      localStorage.setItem(
+        "aeroweather_location",
+        JSON.stringify({
+          lat: location.latitude,
+          lon: location.longitude,
+          name: location.name,
+        })
+      );
+    }
+
     router.push(
       `/weather/${location.name.toLowerCase().replace(/\s+/g, "-")}`
     );
@@ -83,8 +96,7 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
             "Current Location";
 
           const country = data?.address?.country ?? "";
-          const timezone =
-            Intl.DateTimeFormat().resolvedOptions().timeZone;
+          const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
           const location: LocationResult = {
             id: 0,
@@ -94,6 +106,18 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
             country,
             timezone,
           };
+
+          // ✅ Current location localStorage এ save করো
+          if (typeof window !== "undefined") {
+            localStorage.setItem(
+              "aeroweather_location",
+              JSON.stringify({
+                lat: latitude,
+                lon: longitude,
+                name: city,
+              })
+            );
+          }
 
           setLocating(false);
           onSelect(location);
@@ -112,10 +136,10 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
       ref={containerRef}
     >
       <div className="flex w-full items-center gap-2">
-        
+
         {/* 🔥 FIXED INPUT */}
         <div className="relative flex-1">
-          
+
           {/* ICON PERFECT CENTER */}
           <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-white/70">
             {loading ? (

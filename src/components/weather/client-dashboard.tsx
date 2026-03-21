@@ -53,7 +53,29 @@ function scheduleIdleTask(callback: () => void, timeout = 200): () => void {
   return () => clearTimeout(timer);
 }
 
-// ✅ weatherCode থেকে WeatherKind বের করা
+// ✅ Default location: Kolkata
+const DEFAULT_LOCATION = { lat: 22.5726, lon: 88.3639, name: "Kolkata" };
+
+// ✅ localStorage থেকে initial location পড়ো — useState এর initializer এ
+function getInitialLocation(fallback: { lat: number; lon: number; name: string }) {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const saved = localStorage.getItem("aeroweather_location");
+    if (!saved) return fallback;
+    const parsed = JSON.parse(saved) as { lat?: number; lon?: number; name?: string };
+    if (
+      typeof parsed.lat === "number" &&
+      typeof parsed.lon === "number" &&
+      typeof parsed.name === "string"
+    ) {
+      return { lat: parsed.lat, lon: parsed.lon, name: parsed.name };
+    }
+  } catch {
+    // ignore
+  }
+  return fallback;
+}
+
 function codeToWeatherKind(code: number): "clear" | "cloudy" | "rain" | "snow" | "fog" | "storm" {
   if (code === 0) return "clear";
   if (code <= 3) return "cloudy";
@@ -72,7 +94,12 @@ function ClientDashboard({
   initialWeather: WeatherData;
   initialLocation: { lat: number; lon: number; name: string };
 }) {
-  const [activeLocation, setActiveLocation] = useState(initialLocation);
+  // ✅ useState এর initializer function দিয়ে সাথে সাথে localStorage পড়ো
+  // এতে New York একবারও render হবে না, সরাসরি saved/default location দিয়ে শুরু হবে
+  const [activeLocation, setActiveLocation] = useState(() =>
+    getInitialLocation(initialLocation)
+  );
+
   const [priority2Ready, setPriority2Ready] = useState(false);
   const [priority3Ready, setPriority3Ready] = useState(false);
   const { tier } = usePerformance();
@@ -90,20 +117,7 @@ function ClientDashboard({
     }
   }, [safeWeather.current.weatherCode, safeWeather.timezone]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const saved = localStorage.getItem("aeroweather_location");
-    if (!saved) return;
-    try {
-      const parsed = JSON.parse(saved) as { lat?: number; lon?: number; name?: string };
-      if (typeof parsed.lat === "number" && typeof parsed.lon === "number" && typeof parsed.name === "string") {
-        setActiveLocation({ lat: parsed.lat, lon: parsed.lon, name: parsed.name });
-      }
-    } catch {
-      // Keep server-provided location when cached data is malformed.
-    }
-  }, []);
-
+  // ✅ activeLocation বদলালে localStorage এ save করো
   useEffect(() => {
     if (typeof window === "undefined") return;
     localStorage.setItem("aeroweather_location", JSON.stringify(activeLocation));
@@ -195,7 +209,6 @@ function ClientDashboard({
                 </div>
                 <div>
                   <Suspense fallback={<div className="h-48 w-full rounded-3xl border border-white/10 bg-white/5" />}>
-                    {/* ✅ timezone prop যোগ করা হয়েছে */}
                     <SunArc weather={safeWeather} timezone={safeWeather.timezone} />
                   </Suspense>
                 </div>

@@ -3,7 +3,6 @@
 import { GlassCard } from "@/components/ui/glass-card";
 import { generateWeatherInsight } from "@/lib/ai-insight";
 import { WeatherData } from "@/types/weather";
-import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
 
 interface AiWeatherInsightProps {
@@ -11,9 +10,6 @@ interface AiWeatherInsightProps {
   dayIndex?: number;
 }
 
-/**
- * Determines a colour accent for the insight card based on the insight content.
- */
 function accentColors(insight: string): {
   border: string;
   glow: string;
@@ -55,7 +51,6 @@ function accentColors(insight: string): {
       badge: "bg-teal-400/20 text-teal-200 border-teal-400/30",
     };
   }
-  // Pleasant / generic
   return {
     border: "from-indigo-400/40 via-violet-400/20 to-transparent",
     glow: "shadow-indigo-400/20",
@@ -71,10 +66,8 @@ export function AiWeatherInsight({ weather, dayIndex = -1 }: AiWeatherInsightPro
   const colors = accentColors(insight);
 
   return (
-    <GlassCard
-      className="relative w-full overflow-hidden p-6"
-    >
-      {/* Animated gradient border accent (top edge) */}
+    <GlassCard className="relative w-full overflow-hidden p-6">
+      {/* Gradient border accent (top edge) */}
       <div
         className={`pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r ${colors.border}`}
       />
@@ -93,24 +86,33 @@ export function AiWeatherInsight({ weather, dayIndex = -1 }: AiWeatherInsightPro
             <span className={`text-xs font-semibold uppercase tracking-widest ${textTertiary}`}>
               AI Insight
             </span>
-            {/* Animated sky glow indicator */}
+            {/* Animated indicator */}
             <div className="relative flex items-center ml-2">
-              <span className="absolute inline-flex h-2.5 w-2.5 rounded-full bg-sky-400 opacity-70 animate-ping"></span>
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-sky-300 shadow-[0_0_6px_rgba(56,189,248,0.8)]"></span>
+              <span className="absolute inline-flex h-2.5 w-2.5 rounded-full bg-sky-400 opacity-70 animate-ping" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-sky-300 shadow-[0_0_6px_rgba(56,189,248,0.8)]" />
             </div>
           </div>
 
-          <motion.p
-            key={insight} // re-animate when insight changes
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.4 }}
+          {/* ✅ framer-motion সরানো হয়েছে — CSS animation-fill-mode দিয়ে fade-in */}
+          <p
+            key={insight}
             className={`text-base font-medium leading-relaxed ${textPrimary}`}
+            style={{
+              animation: "ai-fade-in 0.4s ease-out both",
+            }}
           >
             {insight}
-          </motion.p>
+          </p>
         </div>
       </div>
+
+      {/* ✅ Inline keyframe — zero JS, GPU composited opacity */}
+      <style>{`
+        @keyframes ai-fade-in {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+      `}</style>
     </GlassCard>
   );
 }

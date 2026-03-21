@@ -20,6 +20,13 @@ const HourlyForecast = dynamic(() => import("@/components/weather/hourly-forecas
 const DailyForecast = dynamic(() => import("@/components/weather/daily-forecast").then(mod => mod.DailyForecast), { ssr: false, loading: () => <DailyForecastSkeleton /> });
 const SunArc = dynamic(() => import("@/components/weather/sun-arc").then(mod => mod.SunArc), { ssr: false, loading: () => <div className="h-48 w-full rounded-3xl border border-white/10 bg-white/5" /> });
 
+// ✅ Default location: Kolkata
+const DEFAULT_LOCATION = {
+  lat: 22.5726,
+  lon: 88.3639,
+  name: "Kolkata",
+};
+
 interface WeatherSlugClientProps {
   initialWeather: WeatherData;
   locationName: string;
@@ -53,18 +60,33 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
   const { setWeather: setSkyWeather, setTimezone } = useSkyStore();
 
   useEffect(() => {
-    if (!isDaySlug || typeof window === "undefined") return;
+    if (typeof window === "undefined") return;
+
     const saved = localStorage.getItem("aeroweather_location");
-    if (!saved) return;
+
+    if (!saved) {
+      // ✅ localStorage এ কিছু নেই → Default Kolkata সেট করো
+      setSavedLocation(DEFAULT_LOCATION);
+      return;
+    }
+
     try {
       const parsed = JSON.parse(saved) as { lat?: number; lon?: number; name?: string };
-      if (typeof parsed.lat === "number" && typeof parsed.lon === "number" && typeof parsed.name === "string") {
+      if (
+        typeof parsed.lat === "number" &&
+        typeof parsed.lon === "number" &&
+        typeof parsed.name === "string"
+      ) {
         setSavedLocation({ lat: parsed.lat, lon: parsed.lon, name: parsed.name });
+      } else {
+        // ✅ Invalid data → Kolkata fallback
+        setSavedLocation(DEFAULT_LOCATION);
       }
     } catch {
-      // ignore
+      // ✅ Parse error → Kolkata fallback
+      setSavedLocation(DEFAULT_LOCATION);
     }
-  }, [isDaySlug]);
+  }, []);
 
   const fetchLat = isDaySlug && savedLocation ? savedLocation.lat : null;
   const fetchLon = isDaySlug && savedLocation ? savedLocation.lon : null;
@@ -134,7 +156,7 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 h-[50vw] w-[50vw] rounded-full bg-white/10 opacity-40" />
       </div>
-      
+
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 md:py-12">
         <div className="mb-6 flex items-center justify-between">
           <Link

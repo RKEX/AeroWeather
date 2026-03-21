@@ -9,14 +9,15 @@ export const metadata = constructMetadata({
 
 export const revalidate = 60;
 export default async function Home() {
-  const defaultLat = 40.7128;
-  const defaultLon = -74.006;
+  // ✅ Default location: Kolkata (New York এর বদলে)
+  const defaultLat = 22.5726;
+  const defaultLon = 88.3639;
   const initialWeather = createFallbackWeatherData();
 
   return (
     <ClientDashboard
       initialWeather={initialWeather}
-      initialLocation={{ lat: defaultLat, lon: defaultLon, name: "New York" }}
+      initialLocation={{ lat: defaultLat, lon: defaultLon, name: "Kolkata" }}
     />
   );
 }

@@ -51,31 +51,43 @@ const RadarMapComponent = ({ lat, lon, isNight = true }: { lat: number, lon: num
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
     const [isActive, setIsActive] = useState<boolean>(false);
     const containerRef = useRef<HTMLDivElement>(null);
-    const inactivityTimerRef = useRef<NodeJS.Timeout| null>(null);
+    const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Dynamic tile resolution based on quality
+    // ✅ LITE mode এ 256, নয়তো 512 — page load এ heavy না হওয়ার জন্য
     const tileSize = quality === "ULTRA" ? 512 : 256;
     const radarOpacity = quality === "LITE" ? (isActive ? 0.5 : 0.2) : (isActive ? 0.7 : 0.4);
 
-    // Fetch radar data
+    // ✅ Radar data fetch — শুধু শেষ 3টা frame নিয়ে কাজ করো (পুরো past নয়)
     useEffect(() => {
-        fetch("https://api.rainviewer.com/public/weather-maps.json")
+        const controller = new AbortController();
+
+        fetch("https://api.rainviewer.com/public/weather-maps.json", {
+            signal: controller.signal,
+        })
             .then(res => res.json())
             .then((data: RainViewerResponse) => {
-                if (data && data.radar && data.radar.past) {
-                    setTimestamps(data.radar.past.map((item) => item.time));
-                    setCurrentIndex(data.radar.past.length - 1);
+                if (data?.radar?.past) {
+                    // ✅ শুধু শেষ 6টা frame — কম memory, কম network
+                    const frames = data.radar.past.slice(-6);
+                    setTimestamps(frames.map((item) => item.time));
+                    setCurrentIndex(frames.length - 1);
                 }
             })
-            .catch(err => console.error("Failed to fetch radar data", err));
+            .catch(err => {
+                if (err.name !== "AbortError") {
+                    console.error("Failed to fetch radar data", err);
+                }
+            });
+
+        return () => controller.abort();
     }, []);
 
-    // Animation loop
+    // ✅ Animation loop — 1.2s interval (1s এ flicker বেশি হয়)
     useEffect(() => {
         if (!isPlaying || timestamps.length === 0) return;
         const interval = setInterval(() => {
             setCurrentIndex(prev => (prev + 1) % timestamps.length);
-        }, 1000);
+        }, 1200);
         return () => clearInterval(interval);
     }, [isPlaying, timestamps]);
 
@@ -122,24 +134,26 @@ const RadarMapComponent = ({ lat, lon, isNight = true }: { lat: number, lon: num
     if (timestamps.length === 0) return null;
 
     return (
-        <GlassCard 
+        <GlassCard
             ref={containerRef}
             onMouseLeave={() => isActive && handleDeactivate()}
             className={`relative w-full max-w-full h-105 overflow-hidden flex flex-col transition-all duration-500 ${
                 isActive ? 'ring-2 ring-blue-500/50 shadow-[0_0_30px_rgba(59,130,246,0.2)]' : ''
             }`}
-            style={{ 
+            style={{
                 transform: 'translateZ(0)',
-                willChange: 'transform'
+                willChange: 'transform',
+                // ✅ contain: strict — browser এর layout/paint scope সীমিত রাখো
+                contain: 'strict',
             }}
         >
-            <div className="absolute top-4 left-4 z-1000 pointer-events-none">
+            <div className="absolute top-4 left-4 z-[1000] pointer-events-none">
                 <h3 className="text-xl font-medium drop-shadow-md text-white flex items-center gap-2">
                     Live Radar
                     {isActive && (
                         <span className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-500/20 border border-blue-500/30 rounded-full text-[10px] uppercase tracking-wider animate-in fade-in zoom-in duration-300">
-                           <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-                           Active
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+                            Active
                         </span>
                     )}
                 </h3>
@@ -149,9 +163,9 @@ const RadarMapComponent = ({ lat, lon, isNight = true }: { lat: number, lon: num
             </div>
 
             {!isActive && (
-                <div 
+                <div
                     onClick={() => setIsActive(true)}
-                    className="absolute inset-0 z-1001 bg-black/5 hover:bg-black/10 cursor-pointer flex flex-col items-center justify-center group transition-all duration-300"
+                    className="absolute inset-0 z-[1001] bg-black/5 hover:bg-black/10 cursor-pointer flex flex-col items-center justify-center group transition-all duration-300"
                 >
                     <div className="bg-black/45 border border-white/10 p-4 rounded-3xl shadow-2xl flex flex-col items-center gap-3 transition-transform duration-300 group-hover:scale-110">
                         <MousePointer2 className="w-8 h-8 text-white animate-bounce" />
@@ -165,41 +179,43 @@ const RadarMapComponent = ({ lat, lon, isNight = true }: { lat: number, lon: num
                 zoom={6}
                 scrollWheelZoom={false}
                 zoomControl={false}
+                // ✅ preferCanvas: true — SVG এর বদলে Canvas ব্যবহার করো (অনেক দ্রুত)
                 preferCanvas={true}
                 className={`h-full w-full transition-opacity duration-500 ${!isActive ? 'opacity-80' : 'opacity-100'}`}
             >
                 <MapInteractionController isActive={isActive} />
-                
+
                 <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     className={isNight ? "map-tiles" : ""}
+                    // ✅ idle হলেই update — scroll করতে করতে re-render বন্ধ
                     updateWhenIdle={true}
+                    // ✅ buffer কমিয়ে দাও — কম tile load হবে
                     keepBuffer={1}
+                    // ✅ zoom animation বন্ধ — TBT কমবে
+                    updateWhenZooming={false}
                 />
-                
+
                 <TileLayer
                     url={`https://tilecache.rainviewer.com/v2/radar/${timestamps[currentIndex]}/${tileSize}/{z}/{x}/{y}/2/1_1.png`}
                     attribution='&copy; <a href="https://www.rainviewer.com/">RainViewer</a>'
                     opacity={radarOpacity}
                     updateWhenIdle={true}
                     keepBuffer={0}
+                    updateWhenZooming={false}
                 />
-
-                {isNight && (
-                    <div className="absolute inset-0 bg-black/20 pointer-events-none z-400" />
-                )}
             </MapContainer>
 
-            <div className={`absolute bottom-4 left-4 right-4 z-1000 flex items-center gap-4 bg-white/10 p-3 rounded-2xl border border-white/15 shadow-[0_10px_40px_rgba(0,0,0,0.35)] transition-all duration-500 ${!isActive ? 'translate-y-20 opacity-0' : 'translate-y-0 opacity-100'}`}>
-                <button 
+            <div className={`absolute bottom-4 left-4 right-4 z-[1000] flex items-center gap-4 bg-white/10 p-3 rounded-2xl border border-white/15 shadow-[0_10px_40px_rgba(0,0,0,0.35)] transition-all duration-500 ${!isActive ? 'translate-y-20 opacity-0' : 'translate-y-0 opacity-100'}`}>
+                <button
                     onClick={() => setIsPlaying(!isPlaying)}
                     className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all text-white border border-white/10"
                 >
                     {isPlaying ? <Pause className="w-5 h-5 fill-white" /> : <Play className="w-5 h-5 fill-white" />}
                 </button>
-                
-                <input 
+
+                <input
                     type="range"
                     min="0"
                     max={timestamps.length - 1}
@@ -211,7 +227,7 @@ const RadarMapComponent = ({ lat, lon, isNight = true }: { lat: number, lon: num
                     className="flex-1 accent-blue-500 bg-white/20 h-1.5 rounded-lg appearance-none cursor-pointer"
                 />
 
-                <button 
+                <button
                     onClick={handleDeactivate}
                     className="p-2 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-white/60 hover:text-white border border-white/5"
                     title="Unlock Map (ESC)"
