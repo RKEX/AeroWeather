@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 
-const SkyEngine = dynamic(() => import("../../../components/SkyEngine"), {
+const SkyEngine = dynamic(() => import("./SkyEngine"), {
   ssr: false,
 });
 

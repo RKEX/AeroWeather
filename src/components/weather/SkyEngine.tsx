@@ -103,7 +103,7 @@ export default function SkyEngine({ weather = "clear", className }: SkyEnginePro
     }
 
     if (!initializedRef.current) {
-      const worker = new Worker(new URL("../workers/sky.worker.ts", import.meta.url), {
+      const worker = new Worker(new URL("../../workers/sky.worker.ts", import.meta.url), {
         type: "module",
       });
       workerRef.current = worker;
