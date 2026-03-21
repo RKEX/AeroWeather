@@ -28,8 +28,8 @@ export default function SkyBackground() {
   }
 
   return (
-    <div className="fixed inset-0 -z-50">
-      <SkyEngine />
+    <div className="pointer-events-none fixed inset-0 -z-50 overflow-hidden">
+      <SkyEngine className="h-full w-full" />
     </div>
   );
 }

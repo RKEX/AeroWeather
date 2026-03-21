@@ -146,7 +146,7 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
 
   if (isDaySlug && loading && !weather) {
     return (
-      <main className="relative min-h-screen bg-slate-950 px-4 py-8 md:py-12">
+      <main className="relative min-h-screen max-w-full overflow-x-clip bg-slate-950 px-4 py-8 md:py-12">
         <div className="mx-auto max-w-7xl">
           <WeatherSkeleton />
         </div>
@@ -155,8 +155,10 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
   }
 
   return (
-    <main className={`relative min-h-screen overflow-x-hidden text-white transition-colors duration-1000 ${themeClasses}`}>
-      <div className="pointer-events-none fixed top-1/4 left-1/4 h-[50vw] w-[50vw] rounded-full bg-white/10 opacity-40" />
+    <main className={`relative min-h-screen max-w-full overflow-x-clip text-white transition-colors duration-1000 ${themeClasses}`}>
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 h-[50vw] w-[50vw] rounded-full bg-white/10 opacity-40" />
+      </div>
       
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 md:py-12">
         <div className="mb-6 flex items-center justify-between">

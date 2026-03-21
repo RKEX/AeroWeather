@@ -50,7 +50,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
           crossOrigin="anonymous"
         />
       </head>
-      <body className="overflow-x-hidden bg-transparent font-sans">
+      <body className="bg-transparent font-sans">
         <PerformanceProvider>
           <SettingsProvider>
             <Script
@@ -77,22 +77,28 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
             />
 
             <RootClientLayout>
-              <SkyBackground />
+              <div id="app-shell">
+                <SkyBackground />
 
-              {/* Dark overlay — all pages */}
-              <div className="fixed inset-0 -z-40 bg-black/35" />
+                {/* Dark overlay — all pages */}
+                <div className="pointer-events-none fixed inset-0 -z-40 overflow-hidden">
+                  <div className="h-full w-full bg-black/35" />
+                </div>
 
-              {/* Ambient glow blobs — all pages */}
-              <div className="pointer-events-none fixed top-1/4 left-1/4 -z-30 h-[50vw] w-[50vw] rounded-full bg-white/10 opacity-40" />
-              <div className="pointer-events-none fixed right-1/4 bottom-1/4 -z-30 h-[40vw] w-[40vw] rounded-full bg-white/5 opacity-30" />
+                {/* Ambient glow blobs — all pages */}
+                <div className="pointer-events-none fixed inset-0 -z-30 overflow-hidden">
+                  <div className="absolute top-1/4 left-1/4 h-[50vw] w-[50vw] rounded-full bg-white/10 opacity-40" />
+                  <div className="absolute right-1/4 bottom-1/4 h-[40vw] w-[40vw] rounded-full bg-white/5 opacity-30" />
+                </div>
 
-              <main className="relative z-10 min-h-screen">
-                {children}
-                {isProd && <Analytics />}
-                {isProd && <SpeedInsights />}
-              </main>
+                <main className="relative z-10 min-h-screen max-w-full">
+                  {children}
+                  {isProd && <Analytics />}
+                  {isProd && <SpeedInsights />}
+                </main>
 
-              <Footer />
+                <Footer />
+              </div>
             </RootClientLayout>
 
             <Script

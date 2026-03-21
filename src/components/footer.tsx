@@ -5,7 +5,7 @@ import Link from "next/link";
 export function Footer() {
   return (
     <footer className="animate-in fade-in slide-in-from-bottom-4 relative z-10 mt-20 w-full px-4 pb-12 duration-500">
-      <div className="mx-auto max-w-7xl rounded-[2.5rem] border border-white/10 bg-white/5 p-8 md:p-12 shadow-2xl overflow-hidden">
+      <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/5 p-8 shadow-2xl md:p-12">
         {/* Decorative background glow inside the footer card */}
         <div className="pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full bg-indigo-500/10 blur-[80px]" />
         <div className="pointer-events-none absolute -right-24 -bottom-24 h-64 w-64 rounded-full bg-blue-500/5 blur-[80px]" />

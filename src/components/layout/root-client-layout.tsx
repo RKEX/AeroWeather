@@ -47,5 +47,66 @@ export default function RootClientLayout({
     };
   }, []);
 
-  return <>{children}</>;
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has("debugOverflow")) {
+      return;
+    }
+
+    document.documentElement.classList.add("debug-overflow");
+
+    let rafId = 0;
+
+    const scanOverflow = () => {
+      document.querySelectorAll("[data-overflowing='true']").forEach((el) => {
+        el.removeAttribute("data-overflowing");
+      });
+
+      const viewportWidth = window.innerWidth;
+      const allElements = document.querySelectorAll<HTMLElement>("body *");
+      const offenders: string[] = [];
+
+      allElements.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        const overflowsLeft = rect.left < -1;
+        const overflowsRight = rect.right > viewportWidth + 1;
+
+        if (!overflowsLeft && !overflowsRight) {
+          return;
+        }
+
+        el.setAttribute("data-overflowing", "true");
+        offenders.push(
+          `${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ""}${el.className ? `.${el.className.toString().trim().replace(/\s+/g, ".")}` : ""}`,
+        );
+      });
+
+      if (offenders.length > 0) {
+        console.warn("[overflow-debug] Potential overflowing elements:", offenders);
+      }
+    };
+
+    const scheduleScan = () => {
+      window.cancelAnimationFrame(rafId);
+      rafId = window.requestAnimationFrame(scanOverflow);
+    };
+
+    scheduleScan();
+    window.addEventListener("resize", scheduleScan, { passive: true });
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", scheduleScan);
+      document.documentElement.classList.remove("debug-overflow");
+      document.querySelectorAll("[data-overflowing='true']").forEach((el) => {
+        el.removeAttribute("data-overflowing");
+      });
+    };
+  }, []);
+
+  return <div className="relative max-w-full overflow-x-clip">{children}</div>;
 }

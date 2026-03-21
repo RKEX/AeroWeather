@@ -135,7 +135,7 @@ function ClientDashboard({
 
   if (isLighthouseAudit && displayWeather) {
     return (
-      <div className="relative min-h-screen overflow-x-hidden">
+      <div className="relative min-h-screen max-w-full overflow-x-clip">
         <main className="relative z-10 container mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 md:py-12">
           <header className="relative z-50 flex w-full flex-col items-center justify-between gap-6 md:flex-row">
             <div className="flex items-center gap-3">
@@ -174,7 +174,7 @@ function ClientDashboard({
   }
 
   return (
-    <div className={`relative min-h-screen overflow-x-hidden transition-colors duration-1000 ${isLowEnd ? 'performance-low' : ''}`}>
+    <div className={`relative min-h-screen max-w-full overflow-x-clip transition-colors duration-1000 ${isLowEnd ? 'performance-low' : ''}`}>
       <main className="relative z-10 container mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 md:py-12 gpu-accel">
         <header className="relative z-50 flex w-full flex-col items-center justify-between gap-6 md:flex-row">
           <div className="flex items-center gap-3">
