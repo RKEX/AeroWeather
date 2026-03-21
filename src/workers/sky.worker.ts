@@ -347,19 +347,75 @@ function drawStars(nowTs: number) {
 
 function drawSunAndMoon() {
   if (!ctx || !sprites) return;
+
+  // 🌞 SUN
   if (currentHour >= 5.5 && currentHour <= 19) {
-    const sz = cssWidth*0.18; ctx.globalAlpha = 0.98;
-    ctx.drawImage(sprites.sun, sunX-sz*0.5, sunY-sz*0.5, sz, sz);
+    const sz = cssWidth * 0.18;
+
+    ctx.save();
+
+    // ✅ make it perfectly rounded (no square edges)
+    ctx.beginPath();
+    ctx.arc(sunX, sunY, sz * 0.5, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.clip();
+
+    // draw original sprite (unchanged gradient/color)
+    ctx.globalAlpha = 0.98;
+    ctx.drawImage(
+      sprites.sun,
+      sunX - sz * 0.5,
+      sunY - sz * 0.5,
+      sz,
+      sz
+    );
+
+    ctx.restore();
+
+    // ✨ optional glow (makes it look premium)
+    const glow = ctx.createRadialGradient(
+      sunX,
+      sunY,
+      sz * 0.2,
+      sunX,
+      sunY,
+      sz * 0.7
+    );
+
+    glow.addColorStop(0, "rgba(255,200,120,0.35)");
+    glow.addColorStop(1, "rgba(255,200,120,0)");
+
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(sunX, sunY, sz * 0.7, 0, Math.PI * 2);
+    ctx.fill();
   }
+
+  // 🌙 MOON (unchanged)
   if ((currentHour >= 18 || currentHour <= 6.5) && moonPhaseSprite) {
-    const sz = cssWidth*0.14; ctx.globalAlpha = 0.9;
-    ctx.drawImage(sprites.moon, moonX-sz*0.62, moonY-sz*0.62, sz*1.24, sz*1.24);
+    const sz = cssWidth * 0.14;
+
+    ctx.globalAlpha = 0.9;
+    ctx.drawImage(
+      sprites.moon,
+      moonX - sz * 0.62,
+      moonY - sz * 0.62,
+      sz * 1.24,
+      sz * 1.24
+    );
+
     ctx.globalAlpha = 0.95;
-    ctx.drawImage(moonPhaseSprite, moonX-sz*0.5, moonY-sz*0.5, sz, sz);
+    ctx.drawImage(
+      moonPhaseSprite,
+      moonX - sz * 0.5,
+      moonY - sz * 0.5,
+      sz,
+      sz
+    );
   }
+
   ctx.globalAlpha = 1;
 }
-
 function drawRain() {
   if (!ctx||!sprites) return;
   const sp=sprites.rain, sw=sp.width, sh=sp.height;
