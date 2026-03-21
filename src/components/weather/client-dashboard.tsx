@@ -10,7 +10,7 @@ import { useWeather } from "@/hooks/useWeather";
 import { LocationResult, WeatherData } from "@/types/weather";
 import { Navigation } from "lucide-react";
 import dynamic from "next/dynamic";
-import { memo, Suspense, useEffect, useRef, useState } from "react";
+import { memo, Suspense, useEffect, useMemo, useRef, useState } from "react";
 
 const HourlyForecast = dynamic(() => import("@/components/weather/hourly-forecast").then(mod => mod.HourlyForecast), { 
   ssr: false,
@@ -33,23 +33,41 @@ const SunArc = dynamic(() => import("@/components/weather/sun-arc").then(mod => 
   loading: () => <div className="h-48 w-full rounded-3xl border border-white/10 bg-white/5" />,
 });
 
+type IdleHandle = number;
+
+function scheduleIdleTask(callback: () => void, timeout = 200): () => void {
+  if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+    const id = (window as Window & {
+      requestIdleCallback: (cb: () => void, options?: { timeout: number }) => IdleHandle;
+      cancelIdleCallback: (cb: IdleHandle) => void;
+    }).requestIdleCallback(callback, { timeout });
+
+    return () => {
+      (window as Window & { cancelIdleCallback: (cb: IdleHandle) => void }).cancelIdleCallback(id);
+    };
+  }
+
+  const timer = window.setTimeout(callback, Math.min(timeout, 120));
+  return () => window.clearTimeout(timer);
+}
+
 function ClientDashboard({
   initialWeather,
   initialLocation,
 }: {
-  initialWeather: WeatherData | null;
+  initialWeather: WeatherData;
   initialLocation: { lat: number; lon: number; name: string };
 }) {
   const [activeLocation, setActiveLocation] = useState(initialLocation);
-  const [showDeferredSections, setShowDeferredSections] = useState(false);
+  const [priority2Ready, setPriority2Ready] = useState(false);
+  const [priority3Ready, setPriority3Ready] = useState(false);
+  const [deferredInView, setDeferredInView] = useState(false);
   const deferredTriggerRef = useRef<HTMLDivElement | null>(null);
   const { tier } = usePerformance();
   const isLowEnd = tier === "LOW";
-  const [isLighthouseAudit, setIsLighthouseAudit] = useState(false);
 
   const { weather, error } = useWeather(activeLocation.lat, activeLocation.lon);
-
-  const displayWeather = weather ?? initialWeather;
+  const safeWeather = weather ?? initialWeather;
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -90,16 +108,23 @@ function ClientDashboard({
   }, [activeLocation]);
 
   useEffect(() => {
-    if (typeof navigator === "undefined") {
-      return;
-    }
+    const cancelP2 = scheduleIdleTask(() => {
+      setPriority2Ready(true);
+    }, 160);
 
-    setIsLighthouseAudit(/Lighthouse|Chrome-Lighthouse/i.test(navigator.userAgent));
+    const cancelP3 = scheduleIdleTask(() => {
+      setPriority3Ready(true);
+    }, 360);
+
+    return () => {
+      cancelP2();
+      cancelP3();
+    };
   }, []);
 
   useEffect(() => {
     if (typeof IntersectionObserver === "undefined") {
-      setShowDeferredSections(true);
+      setDeferredInView(true);
       return;
     }
 
@@ -109,7 +134,7 @@ function ClientDashboard({
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) {
-          setShowDeferredSections(true);
+          setDeferredInView(true);
           observer.disconnect();
         }
       },
@@ -128,50 +153,12 @@ function ClientDashboard({
     });
   };
 
-  const isNight = displayWeather ? displayWeather.current.isDay === 0 : true;
+  const isNight = useMemo(() => safeWeather.current.isDay === 0, [safeWeather.current.isDay]);
   const textPrimary = "text-white";
   const textTertiary = "text-white/60";
   const currentCity = activeLocation.name;
 
-  if (isLighthouseAudit && displayWeather) {
-    return (
-      <div className="relative min-h-screen max-w-full overflow-x-clip">
-        <main className="relative z-10 container mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 md:py-12">
-          <header className="relative z-50 flex w-full flex-col items-center justify-between gap-6 md:flex-row">
-            <div className="flex items-center gap-3">
-              <div className="rounded-2xl border border-white/15 bg-white/10 p-3 shadow-xl">
-                <Navigation className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className={`text-2xl font-bold tracking-tight drop-shadow-sm ${textPrimary}`}>
-                  AeroWeather
-                </h1>
-                <p className={`text-sm font-medium ${textTertiary}`}>
-                  Ultra-Premium Forecast
-                </p>
-              </div>
-            </div>
-            <div className="w-full max-w-xl flex-1 md:w-auto">
-              <LocationSearch onSelect={handleLocationSelect} />
-            </div>
-          </header>
-
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-            <div className="flex flex-col gap-6 lg:col-span-8">
-              <WeatherHero weather={displayWeather} locationName={currentCity} />
-              <div className="h-32 w-full rounded-3xl border border-white/10 bg-white/10" />
-              <div className="h-48 w-full rounded-3xl border border-white/10 bg-white/10" />
-            </div>
-            <div className="flex flex-col gap-6 lg:col-span-4">
-              <div className="h-125 w-full rounded-3xl border border-white/10 bg-white/10" />
-              <div className="h-48 w-full rounded-3xl border border-white/10 bg-white/10" />
-              <div className="h-64 w-full rounded-3xl border border-white/10 bg-white/10" />
-            </div>
-          </div>
-        </main>
-      </div>
-    );
-  }
+  const shouldRenderPriority3 = priority3Ready && deferredInView;
 
   return (
     <div className={`relative min-h-screen max-w-full overflow-x-clip transition-colors duration-1000 ${isLowEnd ? 'performance-low' : ''}`}>
@@ -196,74 +183,87 @@ function ClientDashboard({
           </div>
         </header>
 
-        {error && !displayWeather && (
+        {error && (
           <div className="rounded-xl border border-red-500/50 bg-red-500/20 p-4 text-center text-white">
             {error}
           </div>
         )}
 
-        {displayWeather && (
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-              <div className="flex flex-col gap-6 lg:col-span-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          <div className="flex flex-col gap-6 lg:col-span-8">
+            <div>
+              <WeatherHero
+                weather={safeWeather}
+                locationName={currentCity}
+                showDetails={priority2Ready}
+              />
+            </div>
+
+            <div>
+              {priority2Ready ? (
+                <Suspense fallback={<div className="h-32 w-full rounded-3xl border border-white/10 bg-white/5" />}>
+                  <AiWeatherInsight weather={safeWeather} />
+                </Suspense>
+              ) : (
+                <div className="h-32 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
+              )}
+            </div>
+
+            <div>
+              {priority2Ready ? (
+                <Suspense fallback={<HourlyForecastSkeleton />}>
+                  <HourlyForecast weather={safeWeather} />
+                </Suspense>
+              ) : (
+                <HourlyForecastSkeleton />
+              )}
+            </div>
+
+            <div ref={deferredTriggerRef} className="h-1 w-full" />
+            {shouldRenderPriority3 ? (
+              <div>
+                <LazyRadarMap
+                  lat={activeLocation.lat}
+                  lon={activeLocation.lon}
+                  isNight={isNight}
+                />
+              </div>
+            ) : (
+              <MapSkeleton />
+            )}
+          </div>
+
+          <div className="flex flex-col gap-6 lg:col-span-4">
+            {shouldRenderPriority3 ? (
+              <>
                 <div>
-                  <WeatherHero
-                    weather={displayWeather}
-                    locationName={currentCity}
-                  />
-                </div>
-                <div>
-                  <Suspense fallback={<div className="h-32 w-full rounded-3xl border border-white/10 bg-white/5" />}>
-                    <AiWeatherInsight weather={displayWeather} />
+                  <Suspense fallback={<DailyForecastSkeleton />}>
+                    <DailyForecast weather={safeWeather} />
                   </Suspense>
                 </div>
                 <div>
-                  <Suspense fallback={<HourlyForecastSkeleton />}>
-                    <HourlyForecast weather={displayWeather} />
+                  <Suspense fallback={<div className="h-48 w-full rounded-3xl border border-white/10 bg-white/5" />}>
+                    <SunArc weather={safeWeather} />
                   </Suspense>
                 </div>
-                <div ref={deferredTriggerRef} className="h-1 w-full" />
-                {showDeferredSections ?
-                  <div>
-                    <LazyRadarMap
-                      lat={activeLocation.lat}
-                      lon={activeLocation.lon}
+                <div>
+                  <Suspense fallback={<div className="h-64 w-full rounded-3xl border border-white/10 bg-white/5" />}>
+                    <AqiCard
+                      aqiData={safeWeather.airQuality}
                       isNight={isNight}
                     />
-                  </div>
-                : <MapSkeleton />
-                }
-              </div>
-              <div className="flex flex-col gap-6 lg:col-span-4">
-                {showDeferredSections ?
-                  <>
-                    <div>
-                      <Suspense fallback={<DailyForecastSkeleton />}>
-                        <DailyForecast weather={displayWeather} />
-                      </Suspense>
-                    </div>
-                    <div>
-                      <Suspense fallback={<div className="h-48 w-full rounded-3xl border border-white/10 bg-white/5" />}>
-                        <SunArc weather={displayWeather} />
-                      </Suspense>
-                    </div>
-                    <div>
-                      <Suspense fallback={<div className="h-64 w-full rounded-3xl border border-white/10 bg-white/5" />}>
-                        <AqiCard
-                          aqiData={displayWeather.airQuality}
-                          isNight={isNight}
-                        />
-                      </Suspense>
-                    </div>
-                  </>
-                : <>
-                    <div className="h-125 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
-                    <div className="h-48 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
-                    <div className="h-64 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
-                  </>
-                }
-              </div>
-            </div>
-          )}
+                  </Suspense>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="h-125 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
+                <div className="h-48 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
+                <div className="h-64 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
+              </>
+            )}
+          </div>
+        </div>
       </main>
     </div>
   );

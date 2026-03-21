@@ -100,14 +100,14 @@ const SunArcComponent = ({ weather, dayIndex = -1 }: { weather: WeatherData, day
                 {progress > 0 && progress < 1 && (
                      <LazyMotion features={domAnimation}>
                      <m.div
-                        className="absolute w-6 h-6 -ml-3 -mt-3 bg-yellow-400 rounded-full"
+                        className="absolute top-0 left-0 h-6 w-6 rounded-full bg-yellow-400 will-change-transform"
                         style={{
                             boxShadow: "0 0 12px rgba(250, 204, 21, 0.6), 0 0 30px rgba(250, 204, 21, 0.35)",
                         }}
-                        initial={{ left: "50%", top: "110px", opacity: 0 }}
+                        initial={{ x: cx - 12, y: cy - 12, opacity: 0 }}
                         animate={{ 
-                            left: `${(sunX / 300) * 100}%`, 
-                            top: `${sunY}px`,
+                            x: sunX - 12,
+                            y: sunY - 12,
                             opacity: 1 
                         }}
                                 transition={{ duration: 1, ease: "easeOut" }}
