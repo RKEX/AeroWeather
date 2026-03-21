@@ -5,18 +5,15 @@ import { WeatherHero } from "@/components/weather/weather-hero";
 import { WeatherSkeleton } from "@/components/weather/weather-skeleton";
 import { useWeather } from "@/hooks/useWeather";
 import { resolveDayIndex } from "@/lib/day-slug";
-import {
-  getThemeClasses,
-  getWeatherTheme,
-} from "@/lib/weather-theme";
+import { getThemeClasses, getWeatherTheme } from "@/lib/weather-theme";
+import { useSkyStore } from "@/store/useSkyStore";
 import { WeatherData } from "@/types/weather";
 import { format } from "date-fns";
 import { ArrowLeft } from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type TouchEvent, Suspense, useEffect, useRef, useState } from "react";
-
-import dynamic from "next/dynamic";
 
 const AiWeatherInsight = dynamic(() => import("@/components/weather/ai-weather-insight").then(mod => mod.AiWeatherInsight), { ssr: false, loading: () => <div className="h-32 w-full rounded-3xl border border-white/10 bg-white/5" /> });
 const HourlyForecast = dynamic(() => import("@/components/weather/hourly-forecast").then(mod => mod.HourlyForecast), { ssr: false, loading: () => <HourlyForecastSkeleton /> });
@@ -29,6 +26,17 @@ interface WeatherSlugClientProps {
   slug: string;
 }
 
+function codeToWeatherKind(code: number): "clear" | "cloudy" | "rain" | "snow" | "fog" | "storm" {
+  if (code === 0) return "clear";
+  if (code <= 3) return "cloudy";
+  if (code >= 45 && code <= 48) return "fog";
+  if (code >= 51 && code <= 67) return "rain";
+  if (code >= 71 && code <= 77) return "snow";
+  if (code >= 80 && code <= 82) return "rain";
+  if (code >= 95) return "storm";
+  return "clear";
+}
+
 export function WeatherSlugClient({ initialWeather, locationName, slug }: WeatherSlugClientProps) {
   const router = useRouter();
   const dummyDates = Array.from({ length: 7 }, (_, i) => {
@@ -39,66 +47,27 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
   const isDaySlug = resolveDayIndex(slug.toLowerCase(), dummyDates) >= 0;
 
   const [savedLocation, setSavedLocation] = useState<{ lat: number; lon: number; name: string } | null>(null);
-  const [showDeferredSections, setShowDeferredSections] = useState(false);
-  const deferredTriggerRef = useRef<HTMLDivElement | null>(null);
   const touchStartXRef = useRef<number | null>(null);
 
+  // ✅ zustand sky store
+  const { setWeather: setSkyWeather, setTimezone } = useSkyStore();
+
   useEffect(() => {
-    if (!isDaySlug || typeof window === "undefined") {
-      return;
-    }
-
+    if (!isDaySlug || typeof window === "undefined") return;
     const saved = localStorage.getItem("aeroweather_location");
-    if (!saved) {
-      return;
-    }
-
+    if (!saved) return;
     try {
-      const parsed = JSON.parse(saved) as {
-        lat?: number;
-        lon?: number;
-        name?: string;
-      };
-
-      if (
-        typeof parsed.lat === "number" &&
-        typeof parsed.lon === "number" &&
-        typeof parsed.name === "string"
-      ) {
+      const parsed = JSON.parse(saved) as { lat?: number; lon?: number; name?: string };
+      if (typeof parsed.lat === "number" && typeof parsed.lon === "number" && typeof parsed.name === "string") {
         setSavedLocation({ lat: parsed.lat, lon: parsed.lon, name: parsed.name });
       }
     } catch {
-      // Ignore malformed cached location and keep route-provided location.
+      // ignore
     }
   }, [isDaySlug]);
 
-  useEffect(() => {
-    if (typeof IntersectionObserver === "undefined") {
-      setShowDeferredSections(true);
-      return;
-    }
-
-    const el = deferredTriggerRef.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setShowDeferredSections(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: "120px 0px", threshold: 0.1 },
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  // Only fetch live data for day slugs when we have a valid saved location
   const fetchLat = isDaySlug && savedLocation ? savedLocation.lat : null;
   const fetchLon = isDaySlug && savedLocation ? savedLocation.lon : null;
-
   const { weather, loading } = useWeather(fetchLat, fetchLon);
 
   const displayWeather = (isDaySlug && weather) ? weather : initialWeather;
@@ -106,6 +75,15 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
 
   const dayIndex = resolveDayIndex(slug, displayWeather.daily.time);
   const actualDayIndex = dayIndex >= 0 ? dayIndex : 0;
+
+  // ✅ forecast day এর weatherCode + timezone দিয়ে SkyEngine sync
+  useEffect(() => {
+    const code = displayWeather.daily.weatherCode[actualDayIndex] ?? 0;
+    setSkyWeather(codeToWeatherKind(code));
+    if (displayWeather.timezone) {
+      setTimezone(displayWeather.timezone);
+    }
+  }, [actualDayIndex, displayWeather.daily.weatherCode, displayWeather.timezone]);
 
   const allSlugs = displayWeather.daily.time.map((t) => {
     const d = new Date(t + "T00:00:00");
@@ -132,10 +110,7 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
 
   const handleTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
     const start = touchStartXRef.current;
-    if (start === null) {
-      return;
-    }
-
+    if (start === null) return;
     const end = event.changedTouches[0]?.clientX ?? start;
     handleSwipe(end - start);
     touchStartXRef.current = null;
@@ -162,16 +137,16 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
       
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 md:py-12">
         <div className="mb-6 flex items-center justify-between">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/15">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Home
-            </Link>
-            <div className="text-right">
-               <h2 className="text-2xl font-bold">{format(new Date(displayWeather.daily.time[actualDayIndex] + "T00:00:00"), "EEEE, MMM do")}</h2>
-               <p className="text-white/60">Weather in {displayName}</p>
-            </div>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/15">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Home
+          </Link>
+          <div className="text-right">
+            <h2 className="text-2xl font-bold">{format(new Date(displayWeather.daily.time[actualDayIndex] + "T00:00:00"), "EEEE, MMM do")}</h2>
+            <p className="text-white/60">Weather in {displayName}</p>
+          </div>
         </div>
 
         <div
@@ -184,30 +159,18 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
             <Suspense fallback={<HourlyForecastSkeleton />}>
               <HourlyForecast weather={displayWeather} dayIndex={actualDayIndex} />
             </Suspense>
-            <div ref={deferredTriggerRef} className="h-1 w-full" />
-            {showDeferredSections ?
-              <Suspense fallback={<div className="h-32 w-full rounded-3xl border border-white/10 bg-white/5" />}>
-                <AiWeatherInsight weather={displayWeather} dayIndex={actualDayIndex} />
-              </Suspense>
-            : <div className="h-32 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
-            }
+            <Suspense fallback={<div className="h-32 w-full rounded-3xl border border-white/10 bg-white/5" />}>
+              <AiWeatherInsight weather={displayWeather} dayIndex={actualDayIndex} />
+            </Suspense>
           </div>
 
           <div className="lg:col-span-4 flex flex-col gap-6">
-            {showDeferredSections ?
-              <>
-                <Suspense fallback={<div className="h-48 w-full rounded-3xl border border-white/10 bg-white/5" />}>
-                  <SunArc weather={displayWeather} dayIndex={actualDayIndex} timezone={displayWeather.timezone} />
-                </Suspense>
-                <Suspense fallback={<DailyForecastSkeleton />}>
-                  <DailyForecast weather={displayWeather} />
-                </Suspense>
-              </>
-            : <>
-                <div className="h-48 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
-                <div className="h-125 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
-              </>
-            }
+            <Suspense fallback={<div className="h-48 w-full rounded-3xl border border-white/10 bg-white/5" />}>
+              <SunArc weather={displayWeather} dayIndex={actualDayIndex} timezone={displayWeather.timezone} />
+            </Suspense>
+            <Suspense fallback={<DailyForecastSkeleton />}>
+              <DailyForecast weather={displayWeather} />
+            </Suspense>
           </div>
         </div>
       </div>

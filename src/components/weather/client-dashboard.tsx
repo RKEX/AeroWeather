@@ -11,7 +11,7 @@ import { useSkyStore } from "@/store/useSkyStore";
 import { LocationResult, WeatherData } from "@/types/weather";
 import { Navigation } from "lucide-react";
 import dynamic from "next/dynamic";
-import { memo, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { memo, Suspense, useEffect, useMemo, useState } from "react";
 
 const HourlyForecast = dynamic(() => import("@/components/weather/hourly-forecast").then(mod => mod.HourlyForecast), { 
   ssr: false,
@@ -75,8 +75,6 @@ function ClientDashboard({
   const [activeLocation, setActiveLocation] = useState(initialLocation);
   const [priority2Ready, setPriority2Ready] = useState(false);
   const [priority3Ready, setPriority3Ready] = useState(false);
-  const [deferredInView, setDeferredInView] = useState(false);
-  const deferredTriggerRef = useRef<HTMLDivElement | null>(null);
   const { tier } = usePerformance();
   const isLowEnd = tier === "LOW";
 
@@ -117,26 +115,6 @@ function ClientDashboard({
     return () => { cancelP2(); cancelP3(); };
   }, []);
 
-  useEffect(() => {
-    if (typeof IntersectionObserver === "undefined") {
-      setDeferredInView(true);
-      return;
-    }
-    const el = deferredTriggerRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setDeferredInView(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: "120px 0px", threshold: 0.1 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
   const handleLocationSelect = (loc: LocationResult) => {
     setActiveLocation({ lat: loc.latitude, lon: loc.longitude, name: loc.name });
   };
@@ -145,7 +123,7 @@ function ClientDashboard({
   const textPrimary = "text-white";
   const textTertiary = "text-white/60";
   const currentCity = activeLocation.name;
-  const shouldRenderPriority3 = priority3Ready && deferredInView;
+  const shouldRenderPriority3 = priority3Ready;
 
   return (
     <div className={`relative min-h-screen max-w-full overflow-x-clip transition-colors duration-1000 ${isLowEnd ? 'performance-low' : ''}`}>
@@ -198,8 +176,6 @@ function ClientDashboard({
                 <HourlyForecastSkeleton />
               )}
             </div>
-
-            <div ref={deferredTriggerRef} className="h-1 w-full" />
             {shouldRenderPriority3 ? (
               <div>
                 <LazyRadarMap lat={activeLocation.lat} lon={activeLocation.lon} isNight={isNight} />
