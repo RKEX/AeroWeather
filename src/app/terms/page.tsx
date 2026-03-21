@@ -1,7 +1,7 @@
 import { GlassCard } from "@/components/ui/glass-card";
-import Link from "next/link";
-import { Scale, ShieldCheck, AlertTriangle, FileText, Mail, LucideIcon } from "lucide-react";
 import { constructMetadata, metadataConfig } from "@/config/metadata";
+import { AlertTriangle, FileText, LucideIcon, Mail, Scale, ShieldCheck } from "lucide-react";
+import Link from "next/link";
 
 export const metadata = constructMetadata({
   title: metadataConfig.terms.title,
@@ -16,7 +16,7 @@ export default function TermsPage() {
       <div className="mb-8">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur-md transition-colors hover:bg-white/15"
+          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/15"
         >
           ← Back to Home
         </Link>

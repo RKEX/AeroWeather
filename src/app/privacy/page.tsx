@@ -1,7 +1,7 @@
 import { GlassCard } from "@/components/ui/glass-card";
-import Link from "next/link";
-import { Shield, MapPin, Database, Share2, Mail, LucideIcon } from "lucide-react";
 import { constructMetadata, metadataConfig } from "@/config/metadata";
+import { Database, LucideIcon, Mail, MapPin, Share2, Shield } from "lucide-react";
+import Link from "next/link";
 
 export const metadata = constructMetadata({
   title: metadataConfig.privacy.title,
@@ -16,7 +16,7 @@ export default function PrivacyPage() {
       <div className="mb-8">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur-md transition-colors hover:bg-white/15"
+          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/15"
         >
           ← Back to Home
         </Link>

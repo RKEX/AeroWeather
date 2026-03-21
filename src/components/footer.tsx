@@ -1,17 +1,11 @@
-"use client";
-
 import { Navigation } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
-import { motion } from "framer-motion";
 
 export function Footer() {
   return (
-    <motion.footer
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" as any }}
-      className="relative z-10 w-full px-4 pb-12 mt-20">
-      <div className="mx-auto max-w-7xl rounded-[2.5rem] border border-white/10 bg-white/5 p-8 md:p-12 backdrop-blur-xl shadow-2xl overflow-hidden">
+    <footer className="animate-in fade-in slide-in-from-bottom-4 relative z-10 mt-20 w-full px-4 pb-12 duration-500">
+      <div className="mx-auto max-w-7xl rounded-[2.5rem] border border-white/10 bg-white/5 p-8 md:p-12 shadow-2xl overflow-hidden">
         {/* Decorative background glow inside the footer card */}
         <div className="pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full bg-indigo-500/10 blur-[80px]" />
         <div className="pointer-events-none absolute -right-24 -bottom-24 h-64 w-64 rounded-full bg-blue-500/5 blur-[80px]" />
@@ -20,7 +14,7 @@ export function Footer() {
           {/* Brand Section */}
           <div className="flex flex-col gap-6">
             <div className="flex items-center gap-2">
-              <div className="rounded-xl border border-white/15 bg-white/10 p-2 shadow-lg backdrop-blur-md">
+              <div className="rounded-xl border border-white/15 bg-white/10 p-2 shadow-lg">
                 <Navigation className="h-5 w-5 text-white" />
               </div>
               <span className="text-xl font-bold tracking-tight text-white">
@@ -103,7 +97,7 @@ export function Footer() {
           </div>
         </div>
       </div>
-    </motion.footer>
+    </footer>
   );
 }
 
@@ -128,7 +122,7 @@ function FooterLink({
 
   return (
     <Link
-      href={href as any}
+      href={href as Route}
       className="group">
       {content}
     </Link>

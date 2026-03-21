@@ -1,5 +1,6 @@
 "use client";
 
+import { subscribeSharedRaf } from "@/lib/shared-raf";
 import Lenis from "lenis";
 import { ReactNode, useEffect } from "react";
 
@@ -10,29 +11,39 @@ export default function RootClientLayout({
 }) {
   useEffect(() => {
     let lenis: Lenis | null = null;
-    let rafId: number | null = null;
+    let unsubscribeRaf: (() => void) | null = null;
 
-    const timer = setTimeout(() => {
+    const timer = window.setTimeout(() => {
+      const reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      const lowEndDevice =
+        (navigator.hardwareConcurrency || 4) <= 4 ||
+        window.devicePixelRatio > 2 ||
+        window.innerWidth < 768;
+
+      // Skip smooth-scroll on constrained devices to preserve animation budget.
+      if (reducedMotion || lowEndDevice) {
+        return;
+      }
+
       lenis = new Lenis({
-        duration: 1.2,
-        lerp: 0.1,
+        duration: 1.1,
+        lerp: 0.12,
         wheelMultiplier: 1,
-        touchMultiplier: 1.5,
+        touchMultiplier: 1.2,
         smoothWheel: true,
       });
 
-      function raf(time: number) {
+      unsubscribeRaf = subscribeSharedRaf((time) => {
         lenis?.raf(time);
-        rafId = requestAnimationFrame(raf);
-      }
-
-      rafId = requestAnimationFrame(raf);
+      });
     }, 100);
 
     return () => {
-      clearTimeout(timer);
-      if (lenis) lenis.destroy();
-      if (rafId) cancelAnimationFrame(rafId);
+      window.clearTimeout(timer);
+      unsubscribeRaf?.();
+      lenis?.destroy();
     };
   }, []);
 

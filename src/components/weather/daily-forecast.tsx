@@ -1,14 +1,13 @@
 "use client";
 
+import { GlassCard } from "@/components/ui/glass-card";
+import { getDaySlug } from "@/lib/day-slug";
+import { getWeatherIcon } from "@/lib/weather-theme";
 import { WeatherData } from "@/types/weather";
 import { format } from "date-fns";
-import { getWeatherIcon } from "@/lib/weather-theme";
-import { getDaySlug } from "@/lib/day-slug";
 import { Droplets } from "lucide-react";
-import { motion } from "framer-motion";
-import { ElementType, memo, useMemo } from "react";
 import Link from "next/link";
-import { GlassCard } from "@/components/ui/glass-card";
+import { ElementType, memo, useMemo } from "react";
 
 /* ─────────── Types ─────────── */
 
@@ -34,7 +33,7 @@ export const DetailMetric = memo(({
   value: string | number;
 }) => {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 transition-all hover:bg-white/20 shadow-lg backdrop-blur-2xl">
+    <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 transition-all hover:bg-white/20 shadow-lg">
       {Icon && <Icon className="h-5 w-5 shrink-0 text-white/60" />}
       <div className="min-w-0">
         <p className="mb-0.5 truncate text-[10px] uppercase tracking-widest text-white/50">
@@ -106,11 +105,8 @@ const DailyForecastComponent = ({ weather }: DailyForecastProps) => {
 
           return (
             <Link key={i} href={`/weather/${day.slug}`} className="outline-none">
-              <motion.div
-                whileHover={{ scale: 1.02, x: 4 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 400, damping: 28 }}
-                className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 transition-colors hover:border-indigo-400/40 hover:shadow-md hover:shadow-indigo-500/10 ${itemBg}`}
+              <div
+                className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 transition-all duration-150 hover:border-indigo-400/40 hover:translate-x-0.5 hover:scale-[1.01] hover:shadow-md hover:shadow-indigo-500/10 active:scale-[0.99] ${itemBg}`}
               >
                 {/* Day label */}
                 <span className={`w-28 shrink-0 text-sm font-medium ${textSecondary}`}>{label}</span>
@@ -136,7 +132,7 @@ const DailyForecastComponent = ({ weather }: DailyForecastProps) => {
                 <svg className="h-4 w-4 shrink-0 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
-              </motion.div>
+              </div>
             </Link>
           );
         })}
@@ -149,5 +145,5 @@ export const DailyForecast = memo(DailyForecastComponent);
 DailyForecast.displayName = "DailyForecast";
 
 // Re-export helpers so the day detail page can reuse them
-export { tempColor };
-export { DetailMetric as _DetailMetric };
+export { DetailMetric as _DetailMetric, tempColor };
+

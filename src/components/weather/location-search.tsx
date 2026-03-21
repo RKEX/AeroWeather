@@ -2,11 +2,11 @@
 
 import { useDebounce } from "@/hooks/useDebounce";
 import { searchLocations } from "@/lib/geocode";
+import { prefetchWeather } from "@/lib/prefetch";
 import { LocationResult } from "@/types/weather";
 import { Loader2, MapPin, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { prefetchWeather } from "@/lib/prefetch";
 
 interface LocationSearchProps {
   onSelect: (location: LocationResult) => void;
@@ -80,7 +80,7 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
             if (results.length > 0) setOpen(true);
           }}
           placeholder="Search for a city..."
-          className="w-full rounded-2xl border border-white/25 bg-white/15 py-3 pr-4 pl-10 text-white shadow-[0_10px_40px_rgba(0,0,0,0.45)] backdrop-blur-2xl placeholder:text-white/60 focus:ring-2 focus:ring-white/30 focus:outline-none"
+          className="w-full rounded-2xl border border-white/25 bg-white/15 py-3 pr-4 pl-10 text-white shadow-[0_10px_40px_rgba(0,0,0,0.45)] placeholder:text-white/60 focus:ring-2 focus:ring-white/30 focus:outline-none"
         />
       </div>
 

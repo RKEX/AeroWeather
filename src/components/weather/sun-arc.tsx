@@ -1,11 +1,11 @@
 "use client";
 
-import { WeatherData } from "@/types/weather";
-import { Sunrise, Sunset } from "lucide-react";
-import { format } from "date-fns";
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { GlassCard } from "@/components/ui/glass-card";
+import { WeatherData } from "@/types/weather";
+import { format } from "date-fns";
+import { LazyMotion, domAnimation, m } from "framer-motion";
+import { Sunrise, Sunset } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { memo } from "react";
 
@@ -62,7 +62,7 @@ const SunArcComponent = ({ weather, dayIndex = -1 }: { weather: WeatherData, day
         <GlassCard className="p-6 w-full overflow-hidden relative transition-all">
             <h3 className={`text-xl font-medium mb-4 drop-shadow-sm ${textPrimary}`}>Sunrise & Sunset</h3>
             
-            <div className="relative w-full max-w-[340px] h-36 mx-auto mt-6 px-5">
+            <div className="relative mx-auto mt-6 h-36 w-full max-w-85 px-5">
                 {/* SVG Container for the Arc */}
                 <svg width="100%" height="120" viewBox="0 0 300 120" className="overflow-visible">
                     <defs>
@@ -82,21 +82,24 @@ const SunArcComponent = ({ weather, dayIndex = -1 }: { weather: WeatherData, day
                     />
 
                     {/* Progress Arc - Elegant & Gradient */}
-                    <motion.path
-                        d={`M ${cx - r},${cy} A ${r},${r} 0 0,1 ${cx + r},${cy}`}
-                        fill="none"
-                        stroke="url(#sunGradient)"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        initial={{ pathLength: 0 }}
-                        animate={{ pathLength: progress }}
-                        transition={{ duration: 1.5, ease: "easeOut" }}
-                    />
+                    <LazyMotion features={domAnimation}>
+                      <m.path
+                          d={`M ${cx - r},${cy} A ${r},${r} 0 0,1 ${cx + r},${cy}`}
+                          fill="none"
+                          stroke="url(#sunGradient)"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          initial={{ pathLength: 0 }}
+                          animate={{ pathLength: progress }}
+                          transition={{ duration: 1, ease: "easeOut" }}
+                      />
+                    </LazyMotion>
                 </svg>
 
                 {/* Glowing Sun Position */}
                 {progress > 0 && progress < 1 && (
-                     <motion.div
+                     <LazyMotion features={domAnimation}>
+                     <m.div
                         className="absolute w-6 h-6 -ml-3 -mt-3 bg-yellow-400 rounded-full"
                         style={{
                             boxShadow: "0 0 12px rgba(250, 204, 21, 0.6), 0 0 30px rgba(250, 204, 21, 0.35)",
@@ -107,19 +110,20 @@ const SunArcComponent = ({ weather, dayIndex = -1 }: { weather: WeatherData, day
                             top: `${sunY}px`,
                             opacity: 1 
                         }}
-                        transition={{ duration: 1.5, ease: "easeOut" }}
+                                transition={{ duration: 1, ease: "easeOut" }}
                      />
+                            </LazyMotion>
                 )}
 
                 {/* Markers & Baseline */}
-                <div className="absolute top-[110px] left-0 right-0 flex justify-between items-end px-2">
+                <div className="absolute top-27.5 right-0 left-0 flex items-end justify-between px-2">
                     <div className="flex flex-col items-center gap-1.5 translate-y-1">
                         <Sunrise className="w-4 h-4 text-yellow-500/80" />
                         <span className={`text-[11px] font-semibold tracking-wide ${textPrimary}`}>{format(sunrise, 'h:mm a')}</span>
                     </div>
                     
                     {/* Minimal Baseline */}
-                    <div className="flex-1 h-px bg-white/5 mx-4 translate-y-[-6px]"></div>
+                    <div className="mx-4 h-px flex-1 -translate-y-1.5 bg-white/5"></div>
 
                     <div className="flex flex-col items-center gap-1.5 translate-y-1">
                         <Sunset className="w-4 h-4 text-orange-500/80" />

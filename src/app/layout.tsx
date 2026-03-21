@@ -5,13 +5,14 @@ import { SettingsProvider } from "@/components/Providers/settings-provider";
 import SkyBackground from "@/components/weather/sky-background";
 import { geistMono, geistSans } from "@/lib/fonts";
 import {
-  organizationSchema,
-  personSchema,
-  websiteSchema,
+    organizationSchema,
+    personSchema,
+    websiteSchema,
 } from "@/lib/schema/person";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Metadata } from "next";
+import Script from "next/script";
 import { ReactNode } from "react";
 
 import { constructMetadata } from "@/config/metadata";
@@ -24,26 +25,52 @@ type RootLayoutProps = {
 };
 
 export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
+  const isProd = process.env.NODE_ENV === "production";
+
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       suppressHydrationWarning>
+      <head>
+        {/* Preconnect external APIs used by weather and radar calls to reduce fetch setup latency. */}
+        <link
+          rel="preconnect"
+          href="https://api.open-meteo.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preconnect"
+          href="https://air-quality-api.open-meteo.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preconnect"
+          href="https://api.rainviewer.com"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className="overflow-x-hidden bg-transparent font-sans">
         <PerformanceProvider>
           <SettingsProvider>
-            <script
+            <Script
+              id="person-schema"
               type="application/ld+json"
+              strategy="afterInteractive"
               dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
             />
-            <script
+            <Script
+              id="organization-schema"
               type="application/ld+json"
+              strategy="afterInteractive"
               dangerouslySetInnerHTML={{
                 __html: JSON.stringify(organizationSchema),
               }}
             />
-            <script
+            <Script
+              id="website-schema"
               type="application/ld+json"
+              strategy="afterInteractive"
               dangerouslySetInnerHTML={{
                 __html: JSON.stringify(websiteSchema),
               }}
@@ -53,30 +80,27 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
               <SkyBackground />
 
               {/* Dark overlay — all pages */}
-              <div className="fixed inset-0 -z-40 bg-black/35 backdrop-blur-[2px]" />
+              <div className="fixed inset-0 -z-40 bg-black/35" />
 
               {/* Ambient glow blobs — all pages */}
-              <div className="pointer-events-none fixed top-1/4 left-1/4 -z-30 h-[50vw] w-[50vw] rounded-full bg-white/10 opacity-40 mix-blend-overlay blur-[150px]" />
-              <div className="pointer-events-none fixed right-1/4 bottom-1/4 -z-30 h-[40vw] w-[40vw] rounded-full bg-white/5 opacity-30 mix-blend-overlay blur-[120px]" />
+              <div className="pointer-events-none fixed top-1/4 left-1/4 -z-30 h-[50vw] w-[50vw] rounded-full bg-white/10 opacity-40" />
+              <div className="pointer-events-none fixed right-1/4 bottom-1/4 -z-30 h-[40vw] w-[40vw] rounded-full bg-white/5 opacity-30" />
 
               <main className="relative z-10 min-h-screen">
                 {children}
-                <Analytics />
-                <SpeedInsights />
+                {isProd && <Analytics />}
+                {isProd && <SpeedInsights />}
               </main>
 
               <Footer />
             </RootClientLayout>
 
-            <script
+            <Script
+              id="service-worker-register"
+              strategy="lazyOnload"
               dangerouslySetInnerHTML={{
-                __html: `
-                  if ("serviceWorker" in navigator) {
-                    window.addEventListener("load", function() {
-                      navigator.serviceWorker.register("/sw.js");
-                    });
-                  }
-                `,
+                __html:
+                  'if ("serviceWorker" in navigator) { window.addEventListener("load", function () { navigator.serviceWorker.register("/sw.js"); }); }',
               }}
             />
           </SettingsProvider>

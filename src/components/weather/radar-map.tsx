@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState, useRef, memo, useCallback } from 'react';
-import { MapContainer, TileLayer, useMap } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import { Play, Pause, Lock, MousePointer2 } from 'lucide-react';
-import { format } from "date-fns";
-import { GlassCard } from "@/components/ui/glass-card";
 import { usePerformance } from "@/components/Providers/performance-provider";
+import { GlassCard } from "@/components/ui/glass-card";
+import { format } from "date-fns";
+import 'leaflet/dist/leaflet.css';
+import { Lock, MousePointer2, Pause, Play } from 'lucide-react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 
 interface RainViewerRadarItem {
     time: number;
@@ -137,7 +137,7 @@ const RadarMapComponent = ({ lat, lon, isNight = true }: { lat: number, lon: num
                 <h3 className="text-xl font-medium drop-shadow-md text-white flex items-center gap-2">
                     Live Radar
                     {isActive && (
-                        <span className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-500/20 backdrop-blur-md border border-blue-500/30 rounded-full text-[10px] uppercase tracking-wider animate-in fade-in zoom-in duration-300">
+                        <span className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-500/20 border border-blue-500/30 rounded-full text-[10px] uppercase tracking-wider animate-in fade-in zoom-in duration-300">
                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
                            Active
                         </span>
@@ -153,7 +153,7 @@ const RadarMapComponent = ({ lat, lon, isNight = true }: { lat: number, lon: num
                     onClick={() => setIsActive(true)}
                     className="absolute inset-0 z-1001 bg-black/5 hover:bg-black/10 cursor-pointer flex flex-col items-center justify-center group transition-all duration-300"
                 >
-                    <div className="bg-black/40 backdrop-blur-xl border border-white/10 p-4 rounded-3xl shadow-2xl flex flex-col items-center gap-3 transition-transform duration-300 group-hover:scale-110">
+                    <div className="bg-black/45 border border-white/10 p-4 rounded-3xl shadow-2xl flex flex-col items-center gap-3 transition-transform duration-300 group-hover:scale-110">
                         <MousePointer2 className="w-8 h-8 text-white animate-bounce" />
                         <span className="text-white font-medium text-sm px-2">Click to Interact with Map</span>
                     </div>
@@ -191,7 +191,7 @@ const RadarMapComponent = ({ lat, lon, isNight = true }: { lat: number, lon: num
                 )}
             </MapContainer>
 
-            <div className={`absolute bottom-4 left-4 right-4 z-1000 flex items-center gap-4 bg-white/10 backdrop-blur-2xl p-3 rounded-2xl border border-white/15 shadow-[0_10px_40px_rgba(0,0,0,0.35)] transition-all duration-500 ${!isActive ? 'translate-y-20 opacity-0' : 'translate-y-0 opacity-100'}`}>
+            <div className={`absolute bottom-4 left-4 right-4 z-1000 flex items-center gap-4 bg-white/10 p-3 rounded-2xl border border-white/15 shadow-[0_10px_40px_rgba(0,0,0,0.35)] transition-all duration-500 ${!isActive ? 'translate-y-20 opacity-0' : 'translate-y-0 opacity-100'}`}>
                 <button 
                     onClick={() => setIsPlaying(!isPlaying)}
                     className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all text-white border border-white/10"
@@ -222,7 +222,7 @@ const RadarMapComponent = ({ lat, lon, isNight = true }: { lat: number, lon: num
 
             <style jsx global>{`
                 .map-tiles {
-                    filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+                    opacity: 1;
                 }
                 .leaflet-container {
                     background: transparent !important;

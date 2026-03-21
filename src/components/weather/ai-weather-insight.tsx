@@ -1,10 +1,10 @@
 "use client";
 
-import { WeatherData } from "@/types/weather";
-import { generateWeatherInsight } from "@/lib/ai-insight";
-import { motion } from "framer-motion";
-import { Sparkles } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
+import { generateWeatherInsight } from "@/lib/ai-insight";
+import { WeatherData } from "@/types/weather";
+import { LazyMotion, domAnimation, m } from "framer-motion";
+import { Sparkles } from "lucide-react";
 
 interface AiWeatherInsightProps {
   weather: WeatherData;
@@ -80,7 +80,7 @@ export function AiWeatherInsight({ weather, dayIndex = -1 }: AiWeatherInsightPro
       />
 
       {/* Subtle inner glow blob */}
-      <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full blur-2xl bg-white/5" />
+      <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-linear-to-br from-white/10 to-transparent opacity-40" />
 
       <div className="relative flex items-start gap-4">
         {/* AI Icon Badge */}
@@ -100,15 +100,17 @@ export function AiWeatherInsight({ weather, dayIndex = -1 }: AiWeatherInsightPro
             </div>
           </div>
 
-          <motion.p
-            key={insight} // re-animate when insight changes
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.4 }}
-            className={`text-base font-medium leading-relaxed ${textPrimary}`}
-          >
-            {insight}
-          </motion.p>
+          <LazyMotion features={domAnimation}>
+            <m.p
+              key={insight}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+              className={`text-base font-medium leading-relaxed ${textPrimary}`}
+            >
+              {insight}
+            </m.p>
+          </LazyMotion>
         </div>
       </div>
     </GlassCard>

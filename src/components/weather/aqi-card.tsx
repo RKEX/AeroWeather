@@ -1,8 +1,8 @@
 "use client";
 
+import { GlassCard } from "@/components/ui/glass-card";
 import { WeatherData } from "@/types/weather";
 import { Wind } from "lucide-react";
-import { GlassCard } from "@/components/ui/glass-card";
 
 import { memo } from "react";
 
@@ -12,7 +12,7 @@ interface AqiCardProps {
 }
 
 const Pollutant = memo(({ label, value, unit }: { label: string, value: number, unit: string }) => {
-    const itemBg = "bg-white/10 border-white/15 shadow-lg backdrop-blur-2xl";
+    const itemBg = "bg-white/10 border-white/15 shadow-lg";
     const textMain = "text-white";
     const textSub = "text-white/80";
     const textUnit = "text-white/60";

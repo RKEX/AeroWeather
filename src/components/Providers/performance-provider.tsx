@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 export type PerformanceTier = "LOW" | "MID" | "HIGH";
 export type QualityMode = "LITE" | "BALANCED" | "ULTRA";
@@ -28,55 +28,15 @@ export const usePerformance = () => {
 export function PerformanceProvider({ children }: { children: React.ReactNode }) {
   const [tier, setTier] = useState<PerformanceTier>("MID");
   const [quality, setQualityState] = useState<QualityMode>("BALANCED");
-  const [fps, setFps] = useState(60);
+  const [fps] = useState(60);
   const [targetFps, setTargetFps] = useState(60);
-  
-  const callbacksRef = useRef<Map<string, (timestamp: number) => void>>(new Map());
-  const rafIdRef = useRef<number | null>(null);
-  const frameTimesRef = useRef<number[]>([]);
-  const lastTimeRef = useRef<number>(0);
 
-  const setQuality = useCallback((mode: QualityMode) => {
+  const setQuality = (mode: QualityMode) => {
     setQualityState(mode);
     if (typeof window !== "undefined") {
       localStorage.setItem("aeroweather_quality_mode", mode);
     }
-  }, []);
-
-  // Register/Unregister for the central loop
-  const registerCallback = useCallback((id: string, callback: (timestamp: number) => void) => {
-    callbacksRef.current.set(id, callback);
-  }, []);
-
-  const unregisterCallback = useCallback((id: string) => {
-    callbacksRef.current.delete(id);
-  }, []);
-
-  // Use a named function for the loop to avoid hoisting/circular reference issues in useCallback
-  const startLoop = useCallback(() => {
-    const loop = (timestamp: number) => {
-      if (lastTimeRef.current !== 0) {
-        const delta = timestamp - lastTimeRef.current;
-        const currentFps = 1000 / delta;
-        
-        frameTimesRef.current.push(currentFps);
-        if (frameTimesRef.current.length > 60) {
-          frameTimesRef.current.shift();
-        }
-        
-        if (timestamp % 500 < 20) {
-          const avgFps = frameTimesRef.current.reduce((a, b) => a + b, 0) / frameTimesRef.current.length;
-          setFps(Math.round(avgFps));
-        }
-      }
-      lastTimeRef.current = timestamp;
-
-      callbacksRef.current.forEach((cb) => cb(timestamp));
-      rafIdRef.current = requestAnimationFrame(loop);
-    };
-    
-    rafIdRef.current = requestAnimationFrame(loop);
-  }, []);
+  };
 
   useEffect(() => {
     const detectCapability = () => {
@@ -115,24 +75,20 @@ export function PerformanceProvider({ children }: { children: React.ReactNode })
     };
 
     detectCapability();
-    startLoop();
+  }, []);
 
-    return () => {
-      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
-    };
-  }, [startLoop]);
-
-  const value = {
+  const value = useMemo(() => ({
     tier,
     quality,
     fps,
     targetFps,
     isLowEnd: quality === "LITE" || tier === "LOW",
     isHighEnd: quality === "ULTRA" && tier === "HIGH",
-    registerCallback,
-    unregisterCallback,
+    // Kept for API compatibility; no global RAF subscriptions for lower TBT.
+    registerCallback: () => {},
+    unregisterCallback: () => {},
     setQuality,
-  };
+  }), [tier, quality, fps, targetFps]);
 
   return (
     <PerformanceContext.Provider value={value}>

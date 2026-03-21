@@ -2,10 +2,10 @@
 
 import React from "react";
 
-import { WeatherData } from "@/types/weather";
-import { getWeatherIcon, getWeatherConditionText } from "@/lib/weather-theme";
-import { Wind, Droplets, Eye, Thermometer } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
+import { getWeatherConditionText, getWeatherIcon } from "@/lib/weather-theme";
+import { WeatherData } from "@/types/weather";
+import { Droplets, Eye, Thermometer, Wind } from "lucide-react";
 
 interface WeatherHeroProps {
   weather: WeatherData;
@@ -79,7 +79,7 @@ function WeatherMetric({ icon: Icon, label, value }: { icon: React.ElementType, 
     const textSub = "text-white/60";
 
     return (
-        <div className="flex min-w-17.5 flex-col items-center justify-center rounded-2xl border border-white/15 bg-white/10 p-3 transition-all hover:bg-white/20 shadow-lg backdrop-blur-2xl">
+      <div className="flex min-w-17.5 flex-col items-center justify-center rounded-2xl border border-white/15 bg-white/10 p-3 transition-all hover:bg-white/20 shadow-lg">
             <Icon className={`w-6 h-6 drop-shadow-md ${textMain}`} />
             <div className="text-center mt-2">
                 <p className={`text-xs mb-0.5 font-medium uppercase tracking-wider ${textSub}`}>{label}</p>

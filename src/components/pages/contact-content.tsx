@@ -2,13 +2,13 @@
 
 import { GlassCard } from "@/components/ui/glass-card";
 import {
-  CheckCircle,
-  Github,
-  Instagram,
-  Loader2,
-  LucideIcon,
-  Mail,
-  Send,
+    CheckCircle,
+    Github,
+    Instagram,
+    Loader2,
+    LucideIcon,
+    Mail,
+    Send,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -56,7 +56,7 @@ export default function ContactContent() {
       <div className="mb-8">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur-md transition-colors hover:bg-white/15">
+          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/15">
           ← Back to Home
         </Link>
       </div>

@@ -1,27 +1,27 @@
 "use client";
 
+import { DailyForecastSkeleton, HourlyForecastSkeleton } from "@/components/weather/ForecastSkeleton";
+import { WeatherHero } from "@/components/weather/weather-hero";
+import { WeatherSkeleton } from "@/components/weather/weather-skeleton";
+import { useWeather } from "@/hooks/useWeather";
+import { resolveDayIndex } from "@/lib/day-slug";
+import {
+    getThemeClasses,
+    getWeatherTheme,
+} from "@/lib/weather-theme";
+import { WeatherData } from "@/types/weather";
 import { format } from "date-fns";
-import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { resolveDayIndex } from "@/lib/day-slug";
-import {
-  getThemeClasses,
-  getWeatherTheme,
-} from "@/lib/weather-theme";
-import { WeatherData } from "@/types/weather";
-import { useWeather } from "@/hooks/useWeather";
-import { WeatherSkeleton } from "@/components/weather/weather-skeleton";
+import { type TouchEvent, Suspense, useEffect, useRef, useState } from "react";
 
 import dynamic from "next/dynamic";
 
-const WeatherHero = dynamic(() => import("@/components/weather/weather-hero").then(mod => mod.WeatherHero));
-const AiWeatherInsight = dynamic(() => import("@/components/weather/ai-weather-insight").then(mod => mod.AiWeatherInsight), { ssr: false });
-const HourlyForecast = dynamic(() => import("@/components/weather/hourly-forecast").then(mod => mod.HourlyForecast), { ssr: false });
-const DailyForecast = dynamic(() => import("@/components/weather/daily-forecast").then(mod => mod.DailyForecast), { ssr: false });
-const SunArc = dynamic(() => import("@/components/weather/sun-arc").then(mod => mod.SunArc), { ssr: false });
+const AiWeatherInsight = dynamic(() => import("@/components/weather/ai-weather-insight").then(mod => mod.AiWeatherInsight), { ssr: false, loading: () => <div className="h-32 w-full rounded-3xl border border-white/10 bg-white/5" /> });
+const HourlyForecast = dynamic(() => import("@/components/weather/hourly-forecast").then(mod => mod.HourlyForecast), { ssr: false, loading: () => <HourlyForecastSkeleton /> });
+const DailyForecast = dynamic(() => import("@/components/weather/daily-forecast").then(mod => mod.DailyForecast), { ssr: false, loading: () => <DailyForecastSkeleton /> });
+const SunArc = dynamic(() => import("@/components/weather/sun-arc").then(mod => mod.SunArc), { ssr: false, loading: () => <div className="h-48 w-full rounded-3xl border border-white/10 bg-white/5" /> });
 
 interface WeatherSlugClientProps {
   initialWeather: WeatherData;
@@ -31,9 +31,6 @@ interface WeatherSlugClientProps {
 
 export function WeatherSlugClient({ initialWeather, locationName, slug }: WeatherSlugClientProps) {
   const router = useRouter();
-  const [hasMounted, setHasMounted] = useState(false);
-  const [savedLocation, setSavedLocation] = useState<{ lat: number; lon: number; name: string } | null>(null);
-
   const dummyDates = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
@@ -41,29 +38,71 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
   });
   const isDaySlug = resolveDayIndex(slug.toLowerCase(), dummyDates) >= 0;
 
+  const [savedLocation, setSavedLocation] = useState<{ lat: number; lon: number; name: string } | null>(null);
+  const [showDeferredSections, setShowDeferredSections] = useState(false);
+  const deferredTriggerRef = useRef<HTMLDivElement | null>(null);
+  const touchStartXRef = useRef<number | null>(null);
+
   useEffect(() => {
-    setHasMounted(true);
-    if (isDaySlug) {
-      const saved = localStorage.getItem("aeroweather_location");
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          setSavedLocation(parsed);
-        } catch (e) {
-          console.error("Failed to parse saved location", e);
-        }
+    if (!isDaySlug || typeof window === "undefined") {
+      return;
+    }
+
+    const saved = localStorage.getItem("aeroweather_location");
+    if (!saved) {
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(saved) as {
+        lat?: number;
+        lon?: number;
+        name?: string;
+      };
+
+      if (
+        typeof parsed.lat === "number" &&
+        typeof parsed.lon === "number" &&
+        typeof parsed.name === "string"
+      ) {
+        setSavedLocation({ lat: parsed.lat, lon: parsed.lon, name: parsed.name });
       }
+    } catch {
+      // Ignore malformed cached location and keep route-provided location.
     }
   }, [isDaySlug]);
 
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") {
+      setShowDeferredSections(true);
+      return;
+    }
+
+    const el = deferredTriggerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setShowDeferredSections(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "120px 0px", threshold: 0.1 },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   // Only fetch live data for day slugs when we have a valid saved location
-  const fetchLat = hasMounted && isDaySlug && savedLocation ? savedLocation.lat : null;
-  const fetchLon = hasMounted && isDaySlug && savedLocation ? savedLocation.lon : null;
+  const fetchLat = isDaySlug && savedLocation ? savedLocation.lat : null;
+  const fetchLon = isDaySlug && savedLocation ? savedLocation.lon : null;
 
   const { weather, loading } = useWeather(fetchLat, fetchLon);
 
-  const displayWeather = (hasMounted && isDaySlug && weather) ? weather : initialWeather;
-  const displayName = (hasMounted && isDaySlug && savedLocation) ? savedLocation.name : locationName;
+  const displayWeather = (isDaySlug && weather) ? weather : initialWeather;
+  const displayName = (isDaySlug && savedLocation) ? savedLocation.name : locationName;
 
   const dayIndex = resolveDayIndex(slug, displayWeather.daily.time);
   const actualDayIndex = dayIndex >= 0 ? dayIndex : 0;
@@ -87,10 +126,25 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
     if (offsetX > 60 && prevSlug) router.push(`/weather/${prevSlug}`);
   };
 
+  const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+    touchStartXRef.current = event.touches[0]?.clientX ?? null;
+  };
+
+  const handleTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
+    const start = touchStartXRef.current;
+    if (start === null) {
+      return;
+    }
+
+    const end = event.changedTouches[0]?.clientX ?? start;
+    handleSwipe(end - start);
+    touchStartXRef.current = null;
+  };
+
   const themeCode = getWeatherTheme(displayWeather.daily.weatherCode[actualDayIndex], 1);
   const themeClasses = getThemeClasses(themeCode);
 
-  if (hasMounted && isDaySlug && loading && !weather) {
+  if (isDaySlug && loading && !weather) {
     return (
       <main className="relative min-h-screen bg-slate-950 px-4 py-8 md:py-12">
         <div className="mx-auto max-w-7xl">
@@ -102,13 +156,13 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
 
   return (
     <main className={`relative min-h-screen overflow-x-hidden text-white transition-colors duration-1000 ${themeClasses}`}>
-      <div className="pointer-events-none fixed top-1/4 left-1/4 h-[50vw] w-[50vw] rounded-full bg-white/10 mix-blend-overlay blur-[150px]" />
+      <div className="pointer-events-none fixed top-1/4 left-1/4 h-[50vw] w-[50vw] rounded-full bg-white/10 opacity-40" />
       
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 md:py-12">
         <div className="mb-6 flex items-center justify-between">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur-md transition-colors hover:bg-white/15">
+              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/15">
               <ArrowLeft className="h-4 w-4" />
               Back to Home
             </Link>
@@ -118,24 +172,42 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
             </div>
         </div>
 
-        <motion.div
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.1}
-          onDragEnd={(_, info) => handleSwipe(info.offset.x)}
-          className="grid grid-cols-1 lg:grid-cols-12 gap-6 cursor-grab active:cursor-grabbing select-none"
+        <div
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          className="grid grid-cols-1 gap-6 select-none lg:grid-cols-12"
         >
           <div className="lg:col-span-8 flex flex-col gap-6">
             <WeatherHero weather={displayWeather} locationName={displayName} dayIndex={actualDayIndex} />
-            <AiWeatherInsight weather={displayWeather} dayIndex={actualDayIndex} />
-            <HourlyForecast weather={displayWeather} dayIndex={actualDayIndex} />
+            <Suspense fallback={<HourlyForecastSkeleton />}>
+              <HourlyForecast weather={displayWeather} dayIndex={actualDayIndex} />
+            </Suspense>
+            <div ref={deferredTriggerRef} className="h-1 w-full" />
+            {showDeferredSections ?
+              <Suspense fallback={<div className="h-32 w-full rounded-3xl border border-white/10 bg-white/5" />}>
+                <AiWeatherInsight weather={displayWeather} dayIndex={actualDayIndex} />
+              </Suspense>
+            : <div className="h-32 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
+            }
           </div>
 
           <div className="lg:col-span-4 flex flex-col gap-6">
-            <SunArc weather={displayWeather} dayIndex={actualDayIndex} />
-            <DailyForecast weather={displayWeather} />
+            {showDeferredSections ?
+              <>
+                <Suspense fallback={<div className="h-48 w-full rounded-3xl border border-white/10 bg-white/5" />}>
+                  <SunArc weather={displayWeather} dayIndex={actualDayIndex} />
+                </Suspense>
+                <Suspense fallback={<DailyForecastSkeleton />}>
+                  <DailyForecast weather={displayWeather} />
+                </Suspense>
+              </>
+            : <>
+                <div className="h-48 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
+                <div className="h-125 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
+              </>
+            }
           </div>
-        </motion.div>
+        </div>
       </div>
     </main>
   );

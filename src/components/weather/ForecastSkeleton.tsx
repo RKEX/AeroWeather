@@ -1,0 +1,52 @@
+"use client";
+
+import { Skeleton } from "@/components/ui/skeleton";
+import { memo } from "react";
+
+export const HourlyForecastSkeleton = memo(function HourlyForecastSkeleton() {
+  return (
+    <div className="w-full rounded-3xl border border-white/10 bg-white/5 p-6">
+      <Skeleton className="mb-6 h-7 w-44 bg-white/10" />
+
+      <div className="mb-6 flex gap-4 overflow-hidden pb-4">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex min-w-17.5 flex-col items-center justify-center rounded-2xl border border-white/15 bg-white/10 p-3"
+          >
+            <Skeleton className="mb-2 h-4 w-10 bg-white/15" />
+            <Skeleton className="mb-2 h-6 w-6 rounded-full bg-white/15" />
+            <Skeleton className="h-5 w-8 bg-white/15" />
+            <Skeleton className="mt-2 h-3 w-7 bg-white/15" />
+          </div>
+        ))}
+      </div>
+
+      <div className="h-62.5 w-full rounded-2xl border border-white/10 bg-white/5 p-4">
+        <Skeleton className="h-full w-full bg-white/10" />
+      </div>
+    </div>
+  );
+});
+
+export const DailyForecastSkeleton = memo(function DailyForecastSkeleton() {
+  return (
+    <div className="flex w-full flex-col gap-3 rounded-3xl border border-white/10 bg-white/5 p-6">
+      <Skeleton className="mb-2 h-7 w-40 bg-white/10" />
+
+      <div className="flex flex-col gap-2">
+        {Array.from({ length: 7 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex items-center justify-between gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-3"
+          >
+            <Skeleton className="h-4 w-28 bg-white/15" />
+            <Skeleton className="h-5 w-5 rounded-full bg-white/15" />
+            <Skeleton className="h-4 w-16 bg-white/15" />
+            <Skeleton className="h-4 w-4 bg-white/15" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+});
