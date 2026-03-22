@@ -2,10 +2,8 @@
 
 import { GlassCard } from "@/components/ui/glass-card";
 import { WeatherData } from "@/types/weather";
-import { Sunrise, Sunset } from "lucide-react";
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useId, useState } from "react";
 
-// ✅ open-meteo "2026-03-22T05:38" → UTC timestamp
 function localStrToUTC(str: string, timezone: string): Date {
   const [datePart, timePart] = str.split("T");
   if (!datePart || !timePart) return new Date(str);
@@ -39,8 +37,10 @@ const SunArcComponent = ({
   dayIndex?: number;
   timezone?: string;
 }) => {
-  const textPrimary = "text-white";
-  const textTertiary = "text-white/60";
+  // ✅ React useId — SSR-safe, always unique per instance
+  const uid = useId().replace(/:/g, "");
+  const gradId = `sunGrad-${uid}`;
+  const glowId = `sunGlow-${uid}`;
 
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -55,8 +55,6 @@ const SunArcComponent = ({
   if (!sunriseStr || !sunsetStr) return null;
 
   const tz = timezone || "UTC";
-
-  // ✅ timezone-aware parsing
   const sunriseUTC = localStrToUTC(sunriseStr, tz);
   const sunsetUTC = localStrToUTC(sunsetStr, tz);
 
@@ -76,7 +74,6 @@ const SunArcComponent = ({
     statusText = "Sun has set";
   }
 
-  // ✅ local time display directly from string (most accurate)
   const formatRawTime = (str: string): string => {
     const parts = str.split("T");
     if (!parts[1]) return str;
@@ -97,97 +94,169 @@ const SunArcComponent = ({
     });
   };
 
-  // ✅ Same as original — strokeDashoffset approach (always on the arc)
-  const r = 100;
+  // ── SVG geometry ──────────────────────────────────────────────
+  const VW = 300;
+  const VH = 160;   // enough room for arc (top ~20px) + labels (~40px below baseline)
   const cx = 150;
-  const cy = 110;
+  const cy = 115;   // baseline — arc sits above, labels below
+  const r  = 95;    // slightly smaller so left/right edges have padding
+
   const arcLength = Math.PI * r;
 
-  // Sun dot position
+  // Sun position: angle goes π→0 as progress 0→1 (left to right)
   const angle = Math.PI - progress * Math.PI;
   const sunX = cx + r * Math.cos(angle);
   const sunY = cy - r * Math.sin(angle);
 
   const sunriseIST = toIST(sunriseUTC);
-  const sunsetIST = toIST(sunsetUTC);
+  const sunsetIST  = toIST(sunsetUTC);
 
   return (
-    <GlassCard className="p-6 w-full overflow-hidden relative transition-all">
-      <h3 className={`text-xl font-medium mb-4 drop-shadow-sm ${textPrimary}`}>
-        Sunrise & Sunset
+    <GlassCard className="p-6 w-full relative transition-all">
+      <h3 className="text-xl font-medium mb-2 drop-shadow-sm text-white">
+        Sunrise &amp; Sunset
       </h3>
 
-      <div className="relative mx-auto mt-6 h-36 w-full max-w-85 px-5">
-        <svg
-          width="100%"
-          height="120"
-          viewBox="0 0 300 120"
-          className="overflow-visible"
-        >
-          <defs>
-            <linearGradient id="sunGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#facc15" />
-              <stop offset="100%" stopColor="#f59e0b" />
-            </linearGradient>
-          </defs>
+      <svg
+        width="100%"
+        viewBox={`0 0 ${VW} ${VH}`}
+        overflow="visible"
+        aria-hidden="true"
+        className="mt-2"
+      >
+        <defs>
+          {/* ✅ Unique gradient id — no conflict when multiple SunArc on page */}
+          <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stopColor="#facc15" />
+            <stop offset="100%" stopColor="#f59e0b" />
+          </linearGradient>
 
-          {/* ✅ Background dashed arc */}
-          <path
-            d={`M ${cx - r},${cy} A ${r},${r} 0 0,1 ${cx + r},${cy}`}
-            fill="none"
-            stroke="rgba(255,255,255,0.08)"
-            strokeWidth="1.5"
-            strokeDasharray="4 4"
-          />
+          {/* ✅ Unique glow filter id */}
+          <filter id={glowId} x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
 
-          {/* ✅ Progress arc — strokeDashoffset trick (always follows the arc perfectly) */}
-          <path
-            d={`M ${cx - r},${cy} A ${r},${r} 0 0,1 ${cx + r},${cy}`}
-            fill="none"
-            stroke="url(#sunGradient)"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeDasharray={arcLength}
-            strokeDashoffset={(1 - progress) * arcLength}
-          />
-        </svg>
+        {/* ── Dashed background arc ── */}
+        <path
+          d={`M ${cx - r},${cy} A ${r},${r} 0 0,1 ${cx + r},${cy}`}
+          fill="none"
+          stroke="rgba(255,255,255,0.10)"
+          strokeWidth="1.5"
+          strokeDasharray="4 4"
+        />
 
-        {/* ✅ Sun dot — div positioned by sunX/sunY (same as original) */}
+        {/* ── Progress arc (yellow) ── */}
+        <path
+          d={`M ${cx - r},${cy} A ${r},${r} 0 0,1 ${cx + r},${cy}`}
+          fill="none"
+          stroke={`url(#${gradId})`}
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeDasharray={arcLength}
+          strokeDashoffset={arcLength - progress * arcLength}
+        />
+
+        {/* ── Sun dot ── */}
         {progress > 0 && progress < 1 && (
-          <div
-            className="absolute -ml-2.5 -mt-2.5 h-5 w-5 rounded-full bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.7)]"
-            style={{
-              left: `${(sunX / 300) * 100}%`,
-              top: `${sunY}px`,
-            }}
+          <circle
+            cx={sunX}
+            cy={sunY}
+            r="7"
+            fill="#facc15"
+            filter={`url(#${glowId})`}
           />
         )}
 
-        {/* Labels */}
-        <div className="absolute top-27.5 right-0 left-0 flex items-end justify-between px-2">
-          <div className="flex flex-col items-center gap-1 translate-y-1">
-            <Sunrise className="w-4 h-4 text-yellow-500/80" />
-            <span className={`text-[11px] font-semibold tracking-wide ${textPrimary}`}>
-              {formatRawTime(sunriseStr)}
-            </span>
-            {sunriseIST && (
-              <span className={`text-[9px] ${textTertiary}`}>{sunriseIST} IST</span>
-            )}
-          </div>
-          <div className="mx-4 h-px flex-1 -translate-y-1.5 bg-white/5" />
-          <div className="flex flex-col items-center gap-1 translate-y-1">
-            <Sunset className="w-4 h-4 text-orange-500/80" />
-            <span className={`text-[11px] font-semibold tracking-wide ${textPrimary}`}>
-              {formatRawTime(sunsetStr)}
-            </span>
-            {sunsetIST && (
-              <span className={`text-[9px] ${textTertiary}`}>{sunsetIST} IST</span>
-            )}
-          </div>
-        </div>
-      </div>
+        {/* ── Baseline ── */}
+        <line
+          x1={cx - r - 2} y1={cy}
+          x2={cx + r + 2} y2={cy}
+          stroke="rgba(255,255,255,0.08)"
+          strokeWidth="1"
+        />
 
-      <p className={`text-center text-sm mt-8 font-medium tracking-wide ${textTertiary}`}>
+        {/* ── Sunrise (left) ── */}
+        <g>
+          {/* icon: horizon line */}
+          <line
+            x1={cx - r - 8} y1={cy + 16}
+            x2={cx - r + 8} y2={cy + 16}
+            stroke="#f59e0b" strokeWidth="1.2" strokeLinecap="round" opacity="0.7"
+          />
+          {/* icon: sun rising arc */}
+          <path
+            d={`M ${cx - r - 7},${cy + 14} Q ${cx - r},${cy + 6} ${cx - r + 7},${cy + 14}`}
+            fill="none" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round"
+          />
+          {/* icon: rays */}
+          <line x1={cx - r}     y1={cy + 4}  x2={cx - r}     y2={cy + 2}  stroke="#f59e0b" strokeWidth="1.2" strokeLinecap="round" opacity="0.6"/>
+          <line x1={cx - r - 7} y1={cy + 8}  x2={cx - r - 9} y2={cy + 6}  stroke="#f59e0b" strokeWidth="1.2" strokeLinecap="round" opacity="0.6"/>
+          <line x1={cx - r + 7} y1={cy + 8}  x2={cx - r + 9} y2={cy + 6}  stroke="#f59e0b" strokeWidth="1.2" strokeLinecap="round" opacity="0.6"/>
+
+          <text
+            x={cx - r} y={cy + 30}
+            textAnchor="middle"
+            fontSize="11" fontWeight="600"
+            fill="white" letterSpacing="0.4"
+          >
+            {formatRawTime(sunriseStr)}
+          </text>
+          {sunriseIST && (
+            <text x={cx - r} y={cy + 42} textAnchor="middle" fontSize="9" fill="rgba(255,255,255,0.45)">
+              {sunriseIST} IST
+            </text>
+          )}
+        </g>
+
+        {/* ── Sunset (right) ── */}
+        <g>
+          {/* icon: horizon line */}
+          <line
+            x1={cx + r - 8} y1={cy + 16}
+            x2={cx + r + 8} y2={cy + 16}
+            stroke="#f97316" strokeWidth="1.2" strokeLinecap="round" opacity="0.7"
+          />
+          {/* icon: sun setting arc */}
+          <path
+            d={`M ${cx + r - 7},${cy + 14} Q ${cx + r},${cy + 6} ${cx + r + 7},${cy + 14}`}
+            fill="none" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round"
+          />
+          {/* icon: rays */}
+          <line x1={cx + r}     y1={cy + 4}  x2={cx + r}     y2={cy + 2}  stroke="#f97316" strokeWidth="1.2" strokeLinecap="round" opacity="0.6"/>
+          <line x1={cx + r - 7} y1={cy + 8}  x2={cx + r - 9} y2={cy + 6}  stroke="#f97316" strokeWidth="1.2" strokeLinecap="round" opacity="0.6"/>
+          <line x1={cx + r + 7} y1={cy + 8}  x2={cx + r + 9} y2={cy + 6}  stroke="#f97316" strokeWidth="1.2" strokeLinecap="round" opacity="0.6"/>
+
+          <text
+            x={cx + r} y={cy + 30}
+            textAnchor="middle"
+            fontSize="11" fontWeight="600"
+            fill="white" letterSpacing="0.4"
+          >
+            {formatRawTime(sunsetStr)}
+          </text>
+          {sunsetIST && (
+            <text x={cx + r} y={cy + 42} textAnchor="middle" fontSize="9" fill="rgba(255,255,255,0.45)">
+              {sunsetIST} IST
+            </text>
+          )}
+        </g>
+
+        {/* ── Divider between labels ── */}
+        <line
+          x1={cx - r + 36} y1={cy + 16}
+          x2={cx + r - 36} y2={cy + 16}
+          stroke="rgba(255,255,255,0.06)"
+          strokeWidth="1"
+        />
+      </svg>
+
+      {/* ── Status text ── */}
+      <p className="text-center text-sm mt-1 font-medium tracking-wide text-white/60">
         {statusText}
       </p>
     </GlassCard>

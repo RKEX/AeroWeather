@@ -6,6 +6,7 @@ import { LazyRadarMap } from "@/components/weather/lazy-radar-map";
 import { LocationSearch } from "@/components/weather/location-search";
 import { MapSkeleton } from "@/components/weather/MapSkeleton";
 import { WeatherHero } from "@/components/weather/weather-hero";
+import { WindPressureCard } from "@/components/weather/wind-pressure-card";
 import { useWeather } from "@/hooks/useWeather";
 import { useSkyStore } from "@/store/useSkyStore";
 import { LocationResult, WeatherData } from "@/types/weather";
@@ -13,50 +14,48 @@ import { Navigation } from "lucide-react";
 import dynamic from "next/dynamic";
 import { memo, Suspense, useEffect, useMemo, useState } from "react";
 
-const HourlyForecast = dynamic(() => import("@/components/weather/hourly-forecast").then(mod => mod.HourlyForecast), { 
-  ssr: false,
-  loading: () => <HourlyForecastSkeleton />,
-});
-const AiWeatherInsight = dynamic(() => import("@/components/weather/ai-weather-insight").then(mod => mod.AiWeatherInsight), { 
-  ssr: false,
-  loading: () => <div className="h-32 w-full rounded-3xl border border-white/10 bg-white/5" />,
-});
-const DailyForecast = dynamic(() => import("@/components/weather/daily-forecast").then(mod => mod.DailyForecast), { 
-  ssr: false,
-  loading: () => <DailyForecastSkeleton />,
-});
-const AqiCard = dynamic(() => import("@/components/weather/aqi-card").then(mod => mod.AqiCard), { 
-  ssr: false,
-  loading: () => <div className="h-64 w-full rounded-3xl border border-white/10 bg-white/5" />,
-});
-const SunArc = dynamic(() => import("@/components/weather/sun-arc").then(mod => mod.SunArc), { 
-  ssr: false,
-  loading: () => <div className="h-48 w-full rounded-3xl border border-white/10 bg-white/5" />,
-});
+const HourlyForecast = dynamic(
+  () => import("@/components/weather/hourly-forecast").then((mod) => mod.HourlyForecast),
+  { ssr: false, loading: () => <HourlyForecastSkeleton /> }
+);
+const AiWeatherInsight = dynamic(
+  () => import("@/components/weather/ai-weather-insight").then((mod) => mod.AiWeatherInsight),
+  { ssr: false, loading: () => <div className="h-32 w-full rounded-3xl border border-white/10 bg-white/5" /> }
+);
+const DailyForecast = dynamic(
+  () => import("@/components/weather/daily-forecast").then((mod) => mod.DailyForecast),
+  { ssr: false, loading: () => <DailyForecastSkeleton /> }
+);
+const AqiCard = dynamic(
+  () => import("@/components/weather/aqi-card").then((mod) => mod.AqiCard),
+  { ssr: false, loading: () => <div className="h-64 w-full rounded-3xl border border-white/10 bg-white/5" /> }
+);
+const SunArc = dynamic(
+  () => import("@/components/weather/sun-arc").then((mod) => mod.SunArc),
+  { ssr: false, loading: () => <div className="h-48 w-full rounded-3xl border border-white/10 bg-white/5" /> }
+);
 
 type IdleHandle = number;
 type Timer = ReturnType<typeof setTimeout>;
 
 function scheduleIdleTask(callback: () => void, timeout = 200): () => void {
   if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-    const id = (window as Window & {
-      requestIdleCallback: (cb: () => void, options?: { timeout: number }) => IdleHandle;
-      cancelIdleCallback: (cb: IdleHandle) => void;
-    }).requestIdleCallback(callback, { timeout });
-
+    const id = (
+      window as Window & {
+        requestIdleCallback: (cb: () => void, options?: { timeout: number }) => IdleHandle;
+        cancelIdleCallback: (cb: IdleHandle) => void;
+      }
+    ).requestIdleCallback(callback, { timeout });
     return () => {
       (window as Window & { cancelIdleCallback: (cb: IdleHandle) => void }).cancelIdleCallback(id);
     };
   }
-
   const timer: Timer = setTimeout(callback, Math.min(timeout, 120));
   return () => clearTimeout(timer);
 }
 
-// ✅ Default location: Kolkata
 const DEFAULT_LOCATION = { lat: 22.5726, lon: 88.3639, name: "Kolkata" };
 
-// ✅ localStorage থেকে initial location পড়ো — useState এর initializer এ
 function getInitialLocation(fallback: { lat: number; lon: number; name: string }) {
   if (typeof window === "undefined") return fallback;
   try {
@@ -70,13 +69,13 @@ function getInitialLocation(fallback: { lat: number; lon: number; name: string }
     ) {
       return { lat: parsed.lat, lon: parsed.lon, name: parsed.name };
     }
-  } catch {
-    // ignore
-  }
+  } catch {}
   return fallback;
 }
 
-function codeToWeatherKind(code: number): "clear" | "cloudy" | "rain" | "snow" | "fog" | "storm" {
+function codeToWeatherKind(
+  code: number
+): "clear" | "cloudy" | "rain" | "snow" | "fog" | "storm" {
   if (code === 0) return "clear";
   if (code <= 3) return "cloudy";
   if (code >= 45 && code <= 48) return "fog";
@@ -94,12 +93,9 @@ function ClientDashboard({
   initialWeather: WeatherData;
   initialLocation: { lat: number; lon: number; name: string };
 }) {
-  // ✅ useState এর initializer function দিয়ে সাথে সাথে localStorage পড়ো
-  // এতে New York একবারও render হবে না, সরাসরি saved/default location দিয়ে শুরু হবে
   const [activeLocation, setActiveLocation] = useState(() =>
     getInitialLocation(initialLocation)
   );
-
   const [priority2Ready, setPriority2Ready] = useState(false);
   const [priority3Ready, setPriority3Ready] = useState(false);
   const { tier } = usePerformance();
@@ -108,16 +104,12 @@ function ClientDashboard({
   const { weather, error } = useWeather(activeLocation.lat, activeLocation.lon);
   const safeWeather = weather ?? initialWeather;
 
-  // ✅ zustand store update — SkyBackground sync হবে
   const { setWeather: setSkyWeather, setTimezone } = useSkyStore();
   useEffect(() => {
     setSkyWeather(codeToWeatherKind(safeWeather.current.weatherCode));
-    if (safeWeather.timezone) {
-      setTimezone(safeWeather.timezone);
-    }
+    if (safeWeather.timezone) setTimezone(safeWeather.timezone);
   }, [safeWeather.current.weatherCode, safeWeather.timezone]);
 
-  // ✅ activeLocation বদলালে localStorage এ save করো
   useEffect(() => {
     if (typeof window === "undefined") return;
     localStorage.setItem("aeroweather_location", JSON.stringify(activeLocation));
@@ -126,7 +118,10 @@ function ClientDashboard({
   useEffect(() => {
     const cancelP2 = scheduleIdleTask(() => setPriority2Ready(true), 160);
     const cancelP3 = scheduleIdleTask(() => setPriority3Ready(true), 360);
-    return () => { cancelP2(); cancelP3(); };
+    return () => {
+      cancelP2();
+      cancelP3();
+    };
   }, []);
 
   const handleLocationSelect = (loc: LocationResult) => {
@@ -134,98 +129,187 @@ function ClientDashboard({
   };
 
   const isNight = useMemo(() => safeWeather.current.isDay === 0, [safeWeather.current.isDay]);
-  const textPrimary = "text-white";
-  const textTertiary = "text-white/60";
   const currentCity = activeLocation.name;
   const shouldRenderPriority3 = priority3Ready;
 
   return (
-    <div className={`relative min-h-screen max-w-full overflow-x-clip transition-colors duration-1000 ${isLowEnd ? 'performance-low' : ''}`}>
-      <main className="relative z-10 container mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 md:py-12 gpu-accel">
-        <header className="relative z-50 flex w-full flex-col items-center justify-between gap-6 md:flex-row">
+    <div
+      className={`relative min-h-screen w-full overflow-x-clip transition-colors duration-1000 ${
+        isLowEnd ? "performance-low" : ""
+      }`}
+    >
+      <main className="relative z-10 mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 md:py-10 gpu-accel">
+
+        {/* ── Header ── */}
+        <header className="relative z-50 flex w-full flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="flex items-center gap-3">
             <div className="rounded-2xl border border-white/15 bg-white/10 p-3 shadow-xl">
               <Navigation className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className={`text-2xl font-bold tracking-tight drop-shadow-sm ${textPrimary}`}>
+              <h1 className="text-2xl font-bold tracking-tight text-white drop-shadow-sm">
                 AeroWeather
               </h1>
-              <p className={`text-sm font-medium ${textTertiary}`}>Ultra-Premium Forecast</p>
+              <p className="text-sm font-medium text-white/60">Ultra-Premium Forecast</p>
             </div>
           </div>
-          <div className="w-full max-w-xl flex-1 md:w-auto">
+          <div className="w-full sm:max-w-md lg:max-w-xl">
             <LocationSearch onSelect={handleLocationSelect} />
           </div>
         </header>
 
+        {/* ── Error banner ── */}
         {error && (
           <div className="rounded-xl border border-red-500/50 bg-red-500/20 p-4 text-center text-white">
             {error}
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-          <div className="flex flex-col gap-6 lg:col-span-8">
-            <div>
-              <WeatherHero weather={safeWeather} locationName={currentCity} showDetails={priority2Ready} />
-            </div>
+        {/* ── Main grid ── */}
+        {/*
+          Mobile  : single column, components stack in reading order
+          Desktop : left col (flex-1) + right sidebar (fixed 340px)
+          Right sidebar is sticky so it stays visible while scrolling left col
+        */}
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-6">
 
-            <div>
-              {priority2Ready ? (
-                <Suspense fallback={<div className="h-32 w-full rounded-3xl border border-white/10 bg-white/5" />}>
-                  <AiWeatherInsight weather={safeWeather} />
-                </Suspense>
-              ) : (
-                <div className="h-32 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
-              )}
-            </div>
+          {/* ════ LEFT / MAIN COLUMN ════ */}
+          <div className="flex min-w-0 flex-1 flex-col gap-6">
 
-            <div>
-              {priority2Ready ? (
-                <Suspense fallback={<HourlyForecastSkeleton />}>
-                  <HourlyForecast weather={safeWeather} />
-                </Suspense>
-              ) : (
-                <HourlyForecastSkeleton />
-              )}
-            </div>
-            {shouldRenderPriority3 ? (
-              <div>
-                <LazyRadarMap lat={activeLocation.lat} lon={activeLocation.lon} isNight={isNight} />
-              </div>
+            {/* 1. Hero */}
+            <WeatherHero
+              weather={safeWeather}
+              locationName={currentCity}
+              showDetails={priority2Ready}
+            />
+
+            {/* 2. AI Insight */}
+            {priority2Ready ? (
+              <Suspense
+                fallback={
+                  <div className="h-32 w-full rounded-3xl border border-white/10 bg-white/5" />
+                }
+              >
+                <AiWeatherInsight weather={safeWeather} />
+              </Suspense>
             ) : (
-              <MapSkeleton />
+              <div className="h-32 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
             )}
-          </div>
 
-          <div className="flex flex-col gap-6 lg:col-span-4">
-            {shouldRenderPriority3 ? (
-              <>
-                <div>
+            {/* 3. Hourly Forecast */}
+            {priority2Ready ? (
+              <Suspense fallback={<HourlyForecastSkeleton />}>
+                <HourlyForecast weather={safeWeather} />
+              </Suspense>
+            ) : (
+              <HourlyForecastSkeleton />
+            )}
+
+            {/*
+              4. Mobile only — 7-Day + SunArc appear here so users don't
+                 have to scroll past the radar map to see the forecast.
+                 On lg+ these are hidden here and shown in the sidebar instead.
+            */}
+            <div className="flex flex-col gap-6 lg:hidden">
+              {shouldRenderPriority3 ? (
+                <>
                   <Suspense fallback={<DailyForecastSkeleton />}>
                     <DailyForecast weather={safeWeather} />
                   </Suspense>
-                </div>
-                <div>
-                  <Suspense fallback={<div className="h-48 w-full rounded-3xl border border-white/10 bg-white/5" />}>
+                  <Suspense
+                    fallback={
+                      <div className="h-48 w-full rounded-3xl border border-white/10 bg-white/5" />
+                    }
+                  >
                     <SunArc weather={safeWeather} timezone={safeWeather.timezone} />
                   </Suspense>
-                </div>
-                <div>
-                  <Suspense fallback={<div className="h-64 w-full rounded-3xl border border-white/10 bg-white/5" />}>
+                </>
+              ) : (
+                <>
+                  <div className="h-[420px] w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
+                  <div className="h-48 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
+                </>
+              )}
+            </div>
+
+            {/* 5. Live Radar */}
+            {shouldRenderPriority3 ? (
+              <LazyRadarMap
+                lat={activeLocation.lat}
+                lon={activeLocation.lon}
+                isNight={isNight}
+              />
+            ) : (
+              <MapSkeleton />
+            )}
+
+            {/* 6. Mobile only — AQI + Wind after radar */}
+            <div className="flex flex-col gap-6 lg:hidden">
+              {shouldRenderPriority3 ? (
+                <>
+                  <Suspense
+                    fallback={
+                      <div className="h-64 w-full rounded-3xl border border-white/10 bg-white/5" />
+                    }
+                  >
                     <AqiCard aqiData={safeWeather.airQuality} isNight={isNight} />
                   </Suspense>
-                </div>
+                  <WindPressureCard weather={safeWeather} />
+                </>
+              ) : (
+                <>
+                  <div className="h-64 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
+                  <div className="h-64 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* ════ RIGHT / SIDEBAR — desktop only ════ */}
+          {/*
+            w-[340px] fixed width keeps sidebar from squishing.
+            sticky top-6 means it stays visible as you scroll.
+            hidden on mobile — content is reordered in LEFT column above.
+          */}
+          <aside className="hidden w-[340px] shrink-0 flex-col gap-6 lg:sticky lg:top-6 lg:flex">
+            {shouldRenderPriority3 ? (
+              <>
+                {/* 7-Day Forecast */}
+                <Suspense fallback={<DailyForecastSkeleton />}>
+                  <DailyForecast weather={safeWeather} />
+                </Suspense>
+
+                {/* Sun Arc */}
+                <Suspense
+                  fallback={
+                    <div className="h-48 w-full rounded-3xl border border-white/10 bg-white/5" />
+                  }
+                >
+                  <SunArc weather={safeWeather} timezone={safeWeather.timezone} />
+                </Suspense>
+
+                {/* AQI */}
+                <Suspense
+                  fallback={
+                    <div className="h-64 w-full rounded-3xl border border-white/10 bg-white/5" />
+                  }
+                >
+                  <AqiCard aqiData={safeWeather.airQuality} isNight={isNight} />
+                </Suspense>
+
+                {/* Wind & Pressure */}
+                <WindPressureCard weather={safeWeather} />
               </>
             ) : (
               <>
-                <div className="h-125 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
+                <div className="h-[420px] w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
                 <div className="h-48 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
+                <div className="h-64 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
                 <div className="h-64 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
               </>
             )}
-          </div>
+          </aside>
+
         </div>
       </main>
     </div>
