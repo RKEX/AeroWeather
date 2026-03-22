@@ -2,7 +2,7 @@
 
 Modern **AI-enhanced weather dashboard** built with **Next.js 16**, **Bun package manager**, and deployed on **Vercel**.
 
-🔗 **Live Demo:**
+🔗 **Live at:**
 https://aeroweather-mauve.vercel.app/
 
 ---
