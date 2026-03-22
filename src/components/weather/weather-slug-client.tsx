@@ -20,12 +20,8 @@ const HourlyForecast = dynamic(() => import("@/components/weather/hourly-forecas
 const DailyForecast = dynamic(() => import("@/components/weather/daily-forecast").then(mod => mod.DailyForecast), { ssr: false, loading: () => <DailyForecastSkeleton /> });
 const SunArc = dynamic(() => import("@/components/weather/sun-arc").then(mod => mod.SunArc), { ssr: false, loading: () => <div className="h-48 w-full rounded-3xl border border-white/10 bg-white/5" /> });
 
-// ✅ Default location: Kolkata
-const DEFAULT_LOCATION = {
-  lat: 22.5726,
-  lon: 88.3639,
-  name: "Kolkata",
-};
+// ✅ Default: Kolkata
+const DEFAULT_LOCATION = { lat: 22.5726, lon: 88.3639, name: "Kolkata" };
 
 interface WeatherSlugClientProps {
   initialWeather: WeatherData;
@@ -44,61 +40,71 @@ function codeToWeatherKind(code: number): "clear" | "cloudy" | "rain" | "snow" |
   return "clear";
 }
 
-export function WeatherSlugClient({ initialWeather, locationName, slug }: WeatherSlugClientProps) {
-  const router = useRouter();
-  const dummyDates = Array.from({ length: 7 }, (_, i) => {
+// ✅ slug টা day slug কিনা check করো
+function checkIsDaySlug(slug: string): boolean {
+  const dummyDates = Array.from({ length: 10 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
-    return d.toISOString().split("T")[0];
+    return d.toISOString().split("T")[0]!;
   });
-  const isDaySlug = resolveDayIndex(slug.toLowerCase(), dummyDates) >= 0;
+  return resolveDayIndex(slug.toLowerCase(), dummyDates) >= 0;
+}
 
-  const [savedLocation, setSavedLocation] = useState<{ lat: number; lon: number; name: string } | null>(null);
+export function WeatherSlugClient({ initialWeather, locationName, slug }: WeatherSlugClientProps) {
+  const router = useRouter();
   const touchStartXRef = useRef<number | null>(null);
-
-  // ✅ zustand sky store
   const { setWeather: setSkyWeather, setTimezone } = useSkyStore();
 
+  const isDaySlug = checkIsDaySlug(slug);
+
+  // ✅ Day slug হলে localStorage থেকে user এর saved location পড়ো
+  // City slug হলে null — server data ব্যবহার হবে
+  const [clientLocation, setClientLocation] = useState<{
+    lat: number;
+    lon: number;
+    name: string;
+  } | null>(null);
+
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!isDaySlug) return;
 
-    const saved = localStorage.getItem("aeroweather_location");
-
-    if (!saved) {
-      // ✅ localStorage এ কিছু নেই → Default Kolkata সেট করো
-      setSavedLocation(DEFAULT_LOCATION);
-      return;
-    }
-
+    // localStorage থেকে saved location পড়ো
     try {
-      const parsed = JSON.parse(saved) as { lat?: number; lon?: number; name?: string };
-      if (
-        typeof parsed.lat === "number" &&
-        typeof parsed.lon === "number" &&
-        typeof parsed.name === "string"
-      ) {
-        setSavedLocation({ lat: parsed.lat, lon: parsed.lon, name: parsed.name });
-      } else {
-        // ✅ Invalid data → Kolkata fallback
-        setSavedLocation(DEFAULT_LOCATION);
+      const saved = localStorage.getItem("aeroweather_location");
+      if (saved) {
+        const parsed = JSON.parse(saved) as { lat?: number; lon?: number; name?: string };
+        if (
+          typeof parsed.lat === "number" &&
+          typeof parsed.lon === "number" &&
+          typeof parsed.name === "string"
+        ) {
+          setClientLocation({ lat: parsed.lat, lon: parsed.lon, name: parsed.name });
+          return;
+        }
       }
     } catch {
-      // ✅ Parse error → Kolkata fallback
-      setSavedLocation(DEFAULT_LOCATION);
+      // ignore
     }
-  }, []);
+    // localStorage এ কিছু না থাকলে Kolkata default
+    setClientLocation(DEFAULT_LOCATION);
+  }, [isDaySlug]);
 
-  const fetchLat = isDaySlug && savedLocation ? savedLocation.lat : null;
-  const fetchLon = isDaySlug && savedLocation ? savedLocation.lon : null;
-  const { weather, loading } = useWeather(fetchLat, fetchLon);
+  // ✅ Day slug হলে client location দিয়ে weather fetch করো
+  // City slug হলে fetch করার দরকার নেই — server data আছে
+  const fetchLat = isDaySlug && clientLocation ? clientLocation.lat : null;
+  const fetchLon = isDaySlug && clientLocation ? clientLocation.lon : null;
+  const { weather: clientWeather, loading } = useWeather(fetchLat, fetchLon);
 
-  const displayWeather = (isDaySlug && weather) ? weather : initialWeather;
-  const displayName = (isDaySlug && savedLocation) ? savedLocation.name : locationName;
+  // ✅ কোন data দেখাবে:
+  // Day slug + client weather ready → client weather (correct user location)
+  // Day slug + loading → skeleton
+  // City slug → server initialWeather (correct city from URL)
+  const displayWeather = isDaySlug ? (clientWeather ?? initialWeather) : initialWeather;
+  const displayName = isDaySlug ? (clientLocation?.name ?? locationName) : locationName;
 
   const dayIndex = resolveDayIndex(slug, displayWeather.daily.time);
   const actualDayIndex = dayIndex >= 0 ? dayIndex : 0;
 
-  // ✅ forecast day এর weatherCode + timezone দিয়ে SkyEngine sync
   useEffect(() => {
     const code = displayWeather.daily.weatherCode[actualDayIndex] ?? 0;
     setSkyWeather(codeToWeatherKind(code));
@@ -107,6 +113,7 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
     }
   }, [actualDayIndex, displayWeather.daily.weatherCode, displayWeather.timezone]);
 
+  // Swipe navigation
   const allSlugs = displayWeather.daily.time.map((t) => {
     const d = new Date(t + "T00:00:00");
     const today = new Date();
@@ -141,7 +148,8 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
   const themeCode = getWeatherTheme(displayWeather.daily.weatherCode[actualDayIndex], 1);
   const themeClasses = getThemeClasses(themeCode);
 
-  if (isDaySlug && loading && !weather) {
+  // ✅ Day slug এ client location পেয়েছি কিন্তু weather এখনো আসেনি → skeleton
+  if (isDaySlug && clientLocation && loading && !clientWeather) {
     return (
       <main className="relative min-h-screen max-w-full overflow-x-clip bg-slate-950 px-4 py-8 md:py-12">
         <div className="mx-auto max-w-7xl">
@@ -166,7 +174,9 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
             Back to Home
           </Link>
           <div className="text-right">
-            <h2 className="text-2xl font-bold">{format(new Date(displayWeather.daily.time[actualDayIndex] + "T00:00:00"), "EEEE, MMM do")}</h2>
+            <h2 className="text-2xl font-bold">
+              {format(new Date(displayWeather.daily.time[actualDayIndex] + "T00:00:00"), "EEEE, MMM do")}
+            </h2>
             <p className="text-white/60">Weather in {displayName}</p>
           </div>
         </div>

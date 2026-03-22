@@ -9,13 +9,9 @@ import { Droplets } from "lucide-react";
 import Link from "next/link";
 import { ElementType, memo, useMemo } from "react";
 
-/* ─────────── Types ─────────── */
-
 interface DailyForecastProps {
   weather: WeatherData;
 }
-
-/* ─────────── Helpers ─────────── */
 
 function tempColor(temp: number): string {
   if (temp < 15) return "text-blue-400";
@@ -46,8 +42,6 @@ export const DetailMetric = memo(({
 });
 DetailMetric.displayName = "DetailMetric";
 
-/* ─────────── Main Component ─────────── */
-
 const DailyForecastComponent = ({ weather }: DailyForecastProps) => {
   const textPrimary = "text-white";
   const textSecondary = "text-white/80";
@@ -55,9 +49,7 @@ const DailyForecastComponent = ({ weather }: DailyForecastProps) => {
   const daily = weather.daily;
   const hourly = weather.hourly;
 
-  /* build 7-day array starting tomorrow (index 1) */
   const forecastDays = useMemo(() => {
-    /* aggregate hourly data per day */
     const getAggregates = (dayIdx: number) => {
       const start = dayIdx * 24;
       const humSlice = hourly.relativeHumidity2m.slice(start, start + 24);
@@ -71,19 +63,21 @@ const DailyForecastComponent = ({ weather }: DailyForecastProps) => {
       return { avgHumidity, maxWind };
     };
 
+    // ✅ সব dates বানাও duplicate detection এর জন্য
+    const allDates = daily.time.slice(1, 8).map((t) => new Date(t + "T00:00:00"));
+
     return daily.time.slice(1, 8).map((time, i) => {
       const globalIdx = i + 1;
       const aggs = getAggregates(globalIdx);
       const date = new Date(time + "T00:00:00");
       return {
         date,
-        slug: getDaySlug(date),
-        maxTemp: Math.round(daily.temperature2mMax[globalIdx]),
-        minTemp: Math.round(daily.temperature2mMin[globalIdx]),
-        code: daily.weatherCode[globalIdx],
+        // ✅ allDates pass করো যাতে duplicate weekday detect হয়
+        slug: getDaySlug(date, allDates),
+        maxTemp: Math.round(daily.temperature2mMax[globalIdx] ?? 0),
+        minTemp: Math.round(daily.temperature2mMin[globalIdx] ?? 0),
+        code: daily.weatherCode[globalIdx] ?? 0,
         precipProb: daily.precipitationProbabilityMax[globalIdx] ?? 0,
-        sunrise: daily.sunrise?.[globalIdx],
-        sunset: daily.sunset?.[globalIdx],
         uvIndexMax: daily.uvIndexMax?.[globalIdx]
           ? Math.round(daily.uvIndexMax[globalIdx])
           : 0,
@@ -95,7 +89,9 @@ const DailyForecastComponent = ({ weather }: DailyForecastProps) => {
 
   return (
     <GlassCard className="flex w-full flex-col gap-3 p-6">
-      <h3 className={`mb-2 text-xl font-semibold tracking-tight drop-shadow-sm ${textPrimary}`}>7-Day Forecast</h3>
+      <h3 className={`mb-2 text-xl font-semibold tracking-tight drop-shadow-sm ${textPrimary}`}>
+        7-Day Forecast
+      </h3>
 
       <div className="flex flex-col gap-2">
         {forecastDays.map((day, i) => {
@@ -108,10 +104,10 @@ const DailyForecastComponent = ({ weather }: DailyForecastProps) => {
               <div
                 className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 transition-all duration-150 hover:border-indigo-400/40 hover:translate-x-0.5 hover:scale-[1.01] hover:shadow-md hover:shadow-indigo-500/10 active:scale-[0.99] ${itemBg}`}
               >
-                {/* Day label */}
-                <span className={`w-28 shrink-0 text-sm font-medium ${textSecondary}`}>{label}</span>
+                <span className={`w-28 shrink-0 text-sm font-medium ${textSecondary}`}>
+                  {label}
+                </span>
 
-                {/* Icon + precip */}
                 <div className="flex flex-1 items-center justify-center gap-1.5">
                   <Icon className={`h-5 w-5 ${textPrimary}`} />
                   {day.precipProb > 5 && (
@@ -122,13 +118,11 @@ const DailyForecastComponent = ({ weather }: DailyForecastProps) => {
                   )}
                 </div>
 
-                {/* High / Low */}
                 <div className="flex gap-2 font-semibold">
                   <span className={tempColor(day.maxTemp)}>{day.maxTemp}°</span>
                   <span className="text-slate-400">{day.minTemp}°</span>
                 </div>
 
-                {/* Chevron hint */}
                 <svg className="h-4 w-4 shrink-0 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -144,6 +138,4 @@ const DailyForecastComponent = ({ weather }: DailyForecastProps) => {
 export const DailyForecast = memo(DailyForecastComponent);
 DailyForecast.displayName = "DailyForecast";
 
-// Re-export helpers so the day detail page can reuse them
 export { DetailMetric as _DetailMetric, tempColor };
-
