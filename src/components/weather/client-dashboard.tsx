@@ -42,6 +42,7 @@ const RadarMap = dynamic(
 
 type IdleHandle = number;
 type Timer = ReturnType<typeof setTimeout>;
+const HOME_SKY_STATE_KEY = "aeroweather_home_sky_state";
 
 function scheduleIdleTask(callback: () => void, timeout = 200): () => void {
   if (typeof window !== "undefined" && "requestIdleCallback" in window) {
@@ -117,7 +118,21 @@ function ClientDashboard({
 
     setSkyWeather(codeToWeatherKind(weather.current.weatherCode));
     if (weather.timezone) setTimezone(weather.timezone);
-    setTimeData(extractSkyTimeData(weather));
+
+    const skyTimeData = extractSkyTimeData(weather);
+    setTimeData(skyTimeData);
+
+    if (typeof window !== "undefined" && skyTimeData) {
+      localStorage.setItem(
+        HOME_SKY_STATE_KEY,
+        JSON.stringify({
+          weatherCode: weather.current.weatherCode,
+          timezone: weather.timezone,
+          timeData: skyTimeData,
+          savedAt: Date.now(),
+        })
+      );
+    }
   }, [weather, setSkyWeather, setTimezone, setTimeData]);
 
   useEffect(() => {
