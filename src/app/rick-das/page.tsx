@@ -762,6 +762,7 @@ const allBadges = [
 ];
 
 const allCommunity = [
+  { name: "Next '26 Attendee", date: "16 Apr 2026" },
   { name: "Gemini Enterprise Agent Ready", date: "19 Mar 2026" },
   { name: "Google I/O 2026 — Registered", date: "14 Mar 2026" },
   { name: "GDG on Campus Sister Nivedita University — Kolkata, India (Member)", date: "10 Feb 2026" },
