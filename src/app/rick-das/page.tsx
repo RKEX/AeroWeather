@@ -1,39 +1,46 @@
+import { constructMetadata, metadataConfig } from "@/config/metadata";
 import { Metadata } from "next";
 import Link from "next/link";
 
 /* ─────────── METADATA (SSR) ─────────── */
-export const metadata: Metadata = {
-  title: "Rick Das - Founder of AeroWeather",
-  description:
-    "Rick Das is the founder and developer of AeroWeather, a real-time weather intelligence platform based in West Bengal, India. Explore his background, skills, research, and projects.",
-  keywords: [
-    "who is Rick Das",
-    "Rick Das developer",
-    "Rick Das founder",
-    "Rick Das AeroWeather",
-    "Rick Das biography",
+const founderDescription = `${metadataConfig.founder.description} Explore his background, skills, research, and projects.`;
+const founderKeywords = Array.from(
+  new Set([
+    ...metadataConfig.founder.keywords,
     "Rick Das NASA ISRO",
+    "Who is Rick Das",
+    "Who is Rick Das from barasat",
+    "Rick Das",
     "Rick Das quantum computing",
     "Rick Das Google Cloud",
     "Rick Das Kolkata",
     "Rick Das full stack developer",
-    "AeroWeather founder",
-  ],
+  ])
+);
+
+const founderBaseMetadata = constructMetadata({
+  title: metadataConfig.founder.title,
+  description: founderDescription,
+  keywords: founderKeywords,
+});
+
+export const metadata: Metadata = {
+  ...founderBaseMetadata,
   alternates: {
     canonical: "https://www.aeroweather.app/rick-das",
   },
   openGraph: {
-    title: "Rick Das - Founder of AeroWeather",
+    ...(founderBaseMetadata.openGraph ?? {}),
+    title: metadataConfig.founder.title,
     description:
       "Rick Das is the founder and developer of AeroWeather, based in West Bengal, India.",
     url: "https://www.aeroweather.app/rick-das",
-    siteName: "AeroWeather",
     type: "profile",
-    locale: "en_US",
   },
   twitter: {
+    ...(founderBaseMetadata.twitter ?? {}),
     card: "summary_large_image",
-    title: "Rick Das - Founder of AeroWeather",
+    title: metadataConfig.founder.title,
     description:
       "Rick Das - Founder of AeroWeather, full-stack developer, and researcher based in West Bengal, India.",
   },

@@ -1,5 +1,5 @@
-import { Metadata } from "next";
 import { defaultSEO } from "@/lib/seo-config";
+import { Metadata } from "next";
 
 export const SITE_CONFIG = {
   name: "AeroWeather",
@@ -13,6 +13,21 @@ export const SITE_CONFIG = {
   author: defaultSEO.author,
   twitterHandle: defaultSEO.twitterHandle,
 };
+
+const founderSeoKeywords = Array.from(
+  new Set([
+    ...defaultSEO.keywords.filter((keyword) =>
+      /rick\s*das|rkex|mr_rkex|aeroweather\s+founder|who\s+is\s+rick\s+das/i.test(
+        keyword
+      )
+    ),
+    "Rick Das founder",
+    "Rick Das AeroWeather",
+    "AeroWeather founder",
+    "Rick Das biography",
+    "Rick Das developer",
+  ])
+);
 
 export const metadataConfig = {
   home: {
@@ -40,6 +55,12 @@ export const metadataConfig = {
   terms: {
     title: "Terms of Service - AeroWeather",
     description: "The terms and conditions for using the AeroWeather platform.",
+  },
+  founder: {
+    title: "Rick Das - Founder of AeroWeather",
+    description:
+      "Rick Das is the founder and developer of AeroWeather, a real-time weather intelligence platform based in West Bengal, India.",
+    keywords: founderSeoKeywords,
   },
 };
 
