@@ -3,13 +3,13 @@
 import React from "react";
 
 import { GlassCard } from "@/components/ui/glass-card";
-import {
-  formatWindKmh,
-  getCurrentWindKmh,
-  getForecastPeakWindKmh,
-  roundWindKmh,
-} from "@/lib/wind";
 import { getWeatherConditionText, getWeatherIcon } from "@/lib/weather-theme";
+import {
+    formatWindKmh,
+    getCurrentWindKmh,
+    getForecastPeakWindKmh,
+    roundWindKmh,
+} from "@/lib/wind";
 import { WeatherData } from "@/types/weather";
 import { Droplets, Eye, Thermometer, Wind } from "lucide-react";
 import { memo, useEffect, useMemo } from "react";

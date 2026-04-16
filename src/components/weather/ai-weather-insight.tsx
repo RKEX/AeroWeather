@@ -2,22 +2,22 @@
 
 import { GlassCard } from "@/components/ui/glass-card";
 import {
-  generateWeatherInsight,
-  type InsightCategory,
+    generateWeatherInsight,
+    type InsightCategory,
 } from "@/lib/ai-insight";
 import { WeatherData } from "@/types/weather";
 import {
-  CloudLightning,
-  CloudRain,
-  CloudSnow,
-  Droplets,
-  Flame,
-  MoonStar,
-  Snowflake,
-  Sparkles,
-  Sun,
-  Wind,
-  type LucideIcon,
+    CloudLightning,
+    CloudRain,
+    CloudSnow,
+    Droplets,
+    Flame,
+    MoonStar,
+    Snowflake,
+    Sparkles,
+    Sun,
+    Wind,
+    type LucideIcon,
 } from "lucide-react";
 
 interface AiWeatherInsightProps {

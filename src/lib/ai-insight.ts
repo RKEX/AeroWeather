@@ -1,6 +1,6 @@
 import { WeatherData } from "@/types/weather";
-import { getForecastPeakWindKmh, roundWindKmh } from "./wind";
 import { getWeatherConditionText } from "./weather-theme";
+import { getForecastPeakWindKmh, roundWindKmh } from "./wind";
 
 export type InsightCategory =
   | "storm"
