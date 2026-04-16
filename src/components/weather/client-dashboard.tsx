@@ -2,17 +2,18 @@
 
 import { usePerformance } from "@/components/Providers/performance-provider";
 import { DailyForecastSkeleton, HourlyForecastSkeleton } from "@/components/weather/ForecastSkeleton";
-import { LazyRadarMap } from "@/components/weather/lazy-radar-map";
 import { LocationSearch } from "@/components/weather/location-search";
 import { MapSkeleton } from "@/components/weather/MapSkeleton";
 import { WeatherHero } from "@/components/weather/weather-hero";
 import { WindPressureCard } from "@/components/weather/wind-pressure-card";
 import { useWeather } from "@/hooks/useWeather";
+import { extractSkyTimeData } from "@/lib/sky-time";
+import { getCurrentWindKmh } from "@/lib/wind";
 import { useSkyStore } from "@/store/useSkyStore";
 import { LocationResult, WeatherData } from "@/types/weather";
 import { Navigation } from "lucide-react";
 import dynamic from "next/dynamic";
-import { memo, Suspense, useEffect, useMemo, useState } from "react";
+import { memo, Suspense, useEffect, useState } from "react";
 
 const HourlyForecast = dynamic(
   () => import("@/components/weather/hourly-forecast").then((mod) => mod.HourlyForecast),
@@ -34,6 +35,10 @@ const SunArc = dynamic(
   () => import("@/components/weather/sun-arc").then((mod) => mod.SunArc),
   { ssr: false, loading: () => <div className="h-48 w-full rounded-3xl border border-white/10 bg-white/5" /> }
 );
+const RadarMap = dynamic(
+  () => import("@/components/weather/radar-map").then((mod) => mod.RadarMap),
+  { ssr: false, loading: () => <MapSkeleton /> }
+);
 
 type IdleHandle = number;
 type Timer = ReturnType<typeof setTimeout>;
@@ -53,8 +58,6 @@ function scheduleIdleTask(callback: () => void, timeout = 200): () => void {
   const timer: Timer = setTimeout(callback, Math.min(timeout, 120));
   return () => clearTimeout(timer);
 }
-
-const DEFAULT_LOCATION = { lat: 22.5726, lon: 88.3639, name: "Kolkata" };
 
 function getInitialLocation(fallback: { lat: number; lon: number; name: string }) {
   if (typeof window === "undefined") return fallback;
@@ -104,11 +107,18 @@ function ClientDashboard({
   const { weather, error } = useWeather(activeLocation.lat, activeLocation.lon);
   const safeWeather = weather ?? initialWeather;
 
-  const { setWeather: setSkyWeather, setTimezone } = useSkyStore();
+  const { setWeather: setSkyWeather, setTimezone, setTimeData } = useSkyStore();
   useEffect(() => {
-    setSkyWeather(codeToWeatherKind(safeWeather.current.weatherCode));
-    if (safeWeather.timezone) setTimezone(safeWeather.timezone);
-  }, [safeWeather.current.weatherCode, safeWeather.timezone]);
+    // Only sync sky state from real fetched weather to avoid dummy/fallback flashes.
+    if (!weather) {
+      setTimeData(null);
+      return;
+    }
+
+    setSkyWeather(codeToWeatherKind(weather.current.weatherCode));
+    if (weather.timezone) setTimezone(weather.timezone);
+    setTimeData(extractSkyTimeData(weather));
+  }, [weather, setSkyWeather, setTimezone, setTimeData]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -128,7 +138,8 @@ function ClientDashboard({
     setActiveLocation({ lat: loc.latitude, lon: loc.longitude, name: loc.name });
   };
 
-  const isNight = useMemo(() => safeWeather.current.isDay === 0, [safeWeather.current.isDay]);
+  const isNight = safeWeather.current.isDay === 0;
+  const windSourceKmh = getCurrentWindKmh(safeWeather);
   const currentCity = activeLocation.name;
   const shouldRenderPriority3 = priority3Ready;
 
@@ -181,6 +192,7 @@ function ClientDashboard({
               weather={safeWeather}
               locationName={currentCity}
               showDetails={priority2Ready}
+              windSourceKmh={windSourceKmh}
             />
 
             {/* 2. AI Insight */}
@@ -226,22 +238,18 @@ function ClientDashboard({
                 </>
               ) : (
                 <>
-                  <div className="h-[420px] w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
+                  <div className="h-105 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
                   <div className="h-48 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
                 </>
               )}
             </div>
 
             {/* 5. Live Radar */}
-            {shouldRenderPriority3 ? (
-              <LazyRadarMap
-                lat={activeLocation.lat}
-                lon={activeLocation.lon}
-                isNight={isNight}
-              />
-            ) : (
-              <MapSkeleton />
-            )}
+            <RadarMap
+              lat={activeLocation.lat}
+              lon={activeLocation.lon}
+              isNight={isNight}
+            />
 
             {/* 6. Mobile only — AQI + Wind after radar */}
             <div className="flex flex-col gap-6 lg:hidden">
@@ -254,7 +262,7 @@ function ClientDashboard({
                   >
                     <AqiCard aqiData={safeWeather.airQuality} isNight={isNight} />
                   </Suspense>
-                  <WindPressureCard weather={safeWeather} />
+                  <WindPressureCard weather={safeWeather} windSourceKmh={windSourceKmh} />
                 </>
               ) : (
                 <>
@@ -271,7 +279,7 @@ function ClientDashboard({
             sticky top-6 means it stays visible as you scroll.
             hidden on mobile — content is reordered in LEFT column above.
           */}
-          <aside className="hidden w-[340px] shrink-0 flex-col gap-6 lg:sticky lg:top-6 lg:flex">
+          <aside className="hidden w-85 shrink-0 flex-col gap-6 lg:sticky lg:top-6 lg:flex">
             {shouldRenderPriority3 ? (
               <>
                 {/* 7-Day Forecast */}
@@ -298,11 +306,11 @@ function ClientDashboard({
                 </Suspense>
 
                 {/* Wind & Pressure */}
-                <WindPressureCard weather={safeWeather} />
+                <WindPressureCard weather={safeWeather} windSourceKmh={windSourceKmh} />
               </>
             ) : (
               <>
-                <div className="h-[420px] w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
+                <div className="h-105 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
                 <div className="h-48 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
                 <div className="h-64 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
                 <div className="h-64 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />

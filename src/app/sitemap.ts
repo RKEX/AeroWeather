@@ -38,7 +38,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
 
     {
-      url: `${baseUrl}/who-is-rick-das`,
+      url: `${baseUrl}/rick-das`,
       lastModified: new Date(),
       changeFrequency: "monthly" as const,
       priority: 0.7,

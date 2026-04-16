@@ -78,6 +78,7 @@ export function Footer() {
               <FooterLink href="/terms">Terms of Service</FooterLink>
               <FooterLink href="/contact">Contact us</FooterLink>
               <FooterLink href="/about">About AeroWeather</FooterLink>
+              <FooterLink href="/rick-das">Rick Das (Founder)</FooterLink>
             </nav>
           </div>
         </div>
@@ -93,7 +94,9 @@ export function Footer() {
             <div className="h-px w-8 bg-white/10" />
             <p className="text-[10px] font-black tracking-[0.3em] text-white/30 uppercase">
               Built and maintained by{" "}
-              <span className="text-indigo-400/50">Rick Das</span>
+              <Link href="/rick-das" className="text-indigo-400/70 hover:text-indigo-300">
+                Rick Das
+              </Link>
             </p>
             <div className="h-px w-8 bg-white/10" />
           </div>

@@ -5,9 +5,9 @@ import { SettingsProvider } from "@/components/Providers/settings-provider";
 import SkyBackground from "@/components/weather/sky-background";
 import { geistMono, geistSans } from "@/lib/fonts";
 import {
-  organizationSchema,
-  personSchema,
-  websiteSchema,
+    organizationSchema,
+    personSchema,
+    websiteSchema,
 } from "@/lib/schema/person";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -50,6 +50,10 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
           crossOrigin="anonymous"
         />
         <link rel="dns-prefetch" href="https://nominatim.openstreetmap.org" />
+
+        <link rel="preload" as="image" href="/sky-texture.png" />
+        <link rel="preload" as="image" href="/sky-texture.svg" />
+        <link rel="preload" as="script" href="/sky-engine.js" />
       </head>
       <body className="bg-transparent font-sans">
         <PerformanceProvider>
@@ -78,20 +82,20 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
             />
 
             <RootClientLayout>
+              <SkyBackground />
+
+              {/* Dark overlay — fixed to viewport */}
+              <div className="pointer-events-none fixed inset-0 -z-40 overflow-hidden">
+                <div className="h-full w-full bg-black/35" />
+              </div>
+
+              {/* Ambient glow blobs — fixed to viewport */}
+              <div className="pointer-events-none fixed inset-0 -z-30 overflow-hidden">
+                <div className="absolute top-1/4 left-1/4 h-[50vw] w-[50vw] rounded-full bg-white/10 opacity-40" />
+                <div className="absolute right-1/4 bottom-1/4 h-[40vw] w-[40vw] rounded-full bg-white/5 opacity-30" />
+              </div>
+
               <div id="app-shell">
-                <SkyBackground />
-
-                {/* Dark overlay — all pages */}
-                <div className="pointer-events-none fixed inset-0 -z-40 overflow-hidden">
-                  <div className="h-full w-full bg-black/35" />
-                </div>
-
-                {/* Ambient glow blobs — all pages */}
-                <div className="pointer-events-none fixed inset-0 -z-30 overflow-hidden">
-                  <div className="absolute top-1/4 left-1/4 h-[50vw] w-[50vw] rounded-full bg-white/10 opacity-40" />
-                  <div className="absolute right-1/4 bottom-1/4 h-[40vw] w-[40vw] rounded-full bg-white/5 opacity-30" />
-                </div>
-
                 <main className="relative z-10 min-h-screen max-w-full">
                   {children}
                   {isProd && <Analytics />}

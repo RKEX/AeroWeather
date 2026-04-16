@@ -10,6 +10,8 @@ export interface LocationResult {
 
 export interface WeatherData {
   timezone: string; // ✅ TOP LEVEL এ, current এর বাইরে
+  currentTime?: string;
+  utcOffsetSeconds?: number;
   current: {
     temperature2m: number;
     relativeHumidity2m: number;

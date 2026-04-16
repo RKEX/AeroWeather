@@ -3,6 +3,15 @@
 import { createSpriteAtlas, type SkySprites } from "../lib/sprite";
 
 type WeatherKind = "clear" | "cloudy" | "rain" | "snow" | "fog" | "storm";
+type SkyPhase = "night" | "sunrise" | "day" | "sunset";
+
+type TimeDataPayload = {
+  currentTime: string;
+  sunrise: string;
+  sunset: string;
+  timezone?: string;
+  utcOffsetSeconds?: number;
+};
 
 type InitMessage = {
   type: "init";
@@ -15,16 +24,18 @@ type InitMessage = {
   lowEnd: boolean;
   renderScale: number;
   timezone?: string;
+  timeData?: TimeDataPayload | null;
 };
 
 type ResizeMessage   = { type: "resize"; width: number; height: number; dpr: number; renderScale: number };
 type WeatherMessage  = { type: "weather"; weather: WeatherKind };
+type TimeDataMessage = { type: "timeData"; timeData: TimeDataPayload };
 type TimezoneMessage = { type: "timezone"; timezone: string }; // ✅ নতুন
 type PauseMessage    = { type: "pause" };
 type ResumeMessage   = { type: "resume" };
 type VisibilityMessage = { type: "visibility"; visible: boolean };
 
-type WorkerMessage = InitMessage | ResizeMessage | WeatherMessage | TimezoneMessage | PauseMessage | ResumeMessage | VisibilityMessage;
+type WorkerMessage = InitMessage | ResizeMessage | WeatherMessage | TimeDataMessage | TimezoneMessage | PauseMessage | ResumeMessage | VisibilityMessage;
 
 type SkyKey = "morning" | "day" | "sunset" | "night";
 type F32 = Float32Array<ArrayBufferLike>;
@@ -38,6 +49,9 @@ const SKY_COLORS: Record<SkyKey, [string, string, string]> = {
 
 const LUNAR_MONTH = 29.530588853;
 const KNOWN_NEW_MOON_UTC = Date.UTC(2000, 0, 6, 18, 14, 0);
+const MINUTE_MS = 60_000;
+const HOUR_MS = 60 * MINUTE_MS;
+const DAY_MS = 24 * HOUR_MS;
 
 let canvas: OffscreenCanvas | null = null;
 let ctx: OffscreenCanvasRenderingContext2D | null = null;
@@ -52,9 +66,22 @@ let paused = true, visible = true;
 let targetFps = 60, frameIntervalMs = 1000 / 60;
 let rafId = 0, lastFrameTs = 0, avgFrameMs = 16;
 let quality = 1, minQuality = 0.45, maxQuality = 1, qualityEvalAt = 0;
+let readyPosted = false;
 
 let currentHour = 12, moonPhase = 0, lastClockUpdate = -1;
 let skyAIndex = 1, skyBIndex = 2, skyMix = 0;
+let skyPhase: SkyPhase = "day";
+let nightVisibility = 0;
+let currentLocalMs = Date.now();
+let sunriseLocalMs = 0;
+let sunsetLocalMs = 0;
+let hasSunTimes = false;
+let apiCurrentLocalMs = 0;
+let apiSyncUtcMs = 0;
+let hasApiCurrentTime = false;
+let utcOffsetSeconds = 0;
+let hasUtcOffset = false;
+let lastDebugLogMinute = -1;
 let skyTextures: OffscreenCanvas[] = [];
 let moonPhaseSprite: OffscreenCanvas | null = null, moonPhaseBucket = -1;
 let sunX = 0, sunY = 0, moonX = 0, moonY = 0;
@@ -147,42 +174,317 @@ function rebuildMoonPhaseSprite(phase: number) {
   moonPhaseSprite = moon;
 }
 
-// ✅ KEY FIX: location timezone অনুযায়ী hour বের করো
-function getLocationHour(): number {
-  if (locationTimezone) {
-    try {
-      const locStr = new Date().toLocaleString("en-US", { timeZone: locationTimezone });
-      const d = new Date(locStr);
-      return d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600;
-    } catch { /* fallback */ }
+function parseLocalIsoToPseudoMs(value: string): number | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/.exec(value);
+  if (!match) return null;
+
+  const [, year, month, day, hour, minute, second = "0"] = match;
+  return Date.UTC(
+    Number(year),
+    Number(month) - 1,
+    Number(day),
+    Number(hour),
+    Number(minute),
+    Number(second)
+  );
+}
+
+function formatPseudoLocalIso(ms: number): string {
+  const d = new Date(ms);
+  const pad = (v: number) => String(v).padStart(2, "0");
+  return [
+    d.getUTCFullYear(),
+    "-",
+    pad(d.getUTCMonth() + 1),
+    "-",
+    pad(d.getUTCDate()),
+    "T",
+    pad(d.getUTCHours()),
+    ":",
+    pad(d.getUTCMinutes()),
+    ":",
+    pad(d.getUTCSeconds()),
+  ].join("");
+}
+
+function getPseudoLocalMsFromOffset(nowUtcMs: number, offsetSeconds: number): number {
+  const shifted = new Date(nowUtcMs + offsetSeconds * 1000);
+  return Date.UTC(
+    shifted.getUTCFullYear(),
+    shifted.getUTCMonth(),
+    shifted.getUTCDate(),
+    shifted.getUTCHours(),
+    shifted.getUTCMinutes(),
+    shifted.getUTCSeconds(),
+    shifted.getUTCMilliseconds()
+  );
+}
+
+function getPseudoLocalMsFromTimezone(nowUtcMs: number, timezone: string): number | null {
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(new Date(nowUtcMs));
+
+    const read = (type: Intl.DateTimeFormatPartTypes) => {
+      const part = parts.find((entry) => entry.type === type);
+      return part ? Number(part.value) : NaN;
+    };
+
+    const year = read("year");
+    const month = read("month");
+    const day = read("day");
+    const hour = read("hour");
+    const minute = read("minute");
+    const second = read("second");
+
+    if ([year, month, day, hour, minute, second].some((value) => Number.isNaN(value))) {
+      return null;
+    }
+
+    return Date.UTC(year, month - 1, day, hour, minute, second);
+  } catch {
+    return null;
   }
-  const now = new Date();
-  return now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
+}
+
+function getCurrentLocalPseudoMs(nowUtcMs: number): number {
+  if (hasApiCurrentTime) {
+    return apiCurrentLocalMs + (nowUtcMs - apiSyncUtcMs);
+  }
+
+  if (hasUtcOffset) {
+    return getPseudoLocalMsFromOffset(nowUtcMs, utcOffsetSeconds);
+  }
+
+  if (locationTimezone) {
+    const fromTimezone = getPseudoLocalMsFromTimezone(nowUtcMs, locationTimezone);
+    if (fromTimezone !== null) return fromTimezone;
+  }
+
+  // Last resort: browser local clock.
+  const local = new Date(nowUtcMs);
+  return Date.UTC(
+    local.getFullYear(),
+    local.getMonth(),
+    local.getDate(),
+    local.getHours(),
+    local.getMinutes(),
+    local.getSeconds(),
+    local.getMilliseconds()
+  );
+}
+
+function normalizeSunWindow(currentMs: number, sunriseMs: number, sunsetMs: number) {
+  let sunrise = sunriseMs;
+  let sunset = sunsetMs;
+
+  if (sunset <= sunrise) {
+    sunset = sunrise + 12 * HOUR_MS;
+  }
+
+  while (currentMs < sunrise - 6 * HOUR_MS) {
+    sunrise -= DAY_MS;
+    sunset -= DAY_MS;
+  }
+
+  while (currentMs > sunset + 18 * HOUR_MS) {
+    sunrise += DAY_MS;
+    sunset += DAY_MS;
+  }
+
+  return { sunrise, sunset };
+}
+
+function applyTimeData(timeData?: TimeDataPayload | null) {
+  if (!timeData) {
+    hasSunTimes = false;
+    hasApiCurrentTime = false;
+    lastClockUpdate = -1;
+    return;
+  }
+
+  if (timeData.timezone) {
+    locationTimezone = timeData.timezone;
+  }
+
+  if (
+    typeof timeData.utcOffsetSeconds === "number" &&
+    Number.isFinite(timeData.utcOffsetSeconds)
+  ) {
+    utcOffsetSeconds = timeData.utcOffsetSeconds;
+    hasUtcOffset = true;
+  } else {
+    hasUtcOffset = false;
+  }
+
+  const parsedCurrent = parseLocalIsoToPseudoMs(timeData.currentTime);
+  if (parsedCurrent !== null) {
+    apiCurrentLocalMs = parsedCurrent;
+    apiSyncUtcMs = Date.now();
+    hasApiCurrentTime = true;
+  } else {
+    hasApiCurrentTime = false;
+  }
+
+  const parsedSunrise = parseLocalIsoToPseudoMs(timeData.sunrise);
+  const parsedSunset = parseLocalIsoToPseudoMs(timeData.sunset);
+  if (parsedSunrise !== null && parsedSunset !== null) {
+    sunriseLocalMs = parsedSunrise;
+    sunsetLocalMs = parsedSunset;
+    hasSunTimes = true;
+  } else {
+    hasSunTimes = false;
+  }
+
+  lastClockUpdate = -1;
+  lastDebugLogMinute = -1;
 }
 
 function updateClock(nowMs: number) {
   if (lastClockUpdate > 0 && nowMs - lastClockUpdate < 1000) return;
 
-  // ✅ location time use করো
-  currentHour = getLocationHour();
-  moonPhase = moonPhaseAt(Date.now());
+  const nowUtcMs = Date.now();
+  currentLocalMs = getCurrentLocalPseudoMs(nowUtcMs);
+  currentHour = (((currentLocalMs % DAY_MS) + DAY_MS) % DAY_MS) / HOUR_MS;
+  moonPhase = moonPhaseAt(nowUtcMs);
 
   const phaseBucket = Math.floor(moonPhase * 48);
-  if (phaseBucket !== moonPhaseBucket) { moonPhaseBucket = phaseBucket; rebuildMoonPhaseSprite(moonPhase); }
+  if (phaseBucket !== moonPhaseBucket) {
+    moonPhaseBucket = phaseBucket;
+    rebuildMoonPhaseSprite(moonPhase);
+  }
 
-  if (currentHour < 9)       { skyAIndex = 0; skyBIndex = 1; skyMix = clamp((currentHour - 5) / 4, 0, 1); }
-  else if (currentHour < 17) { skyAIndex = 1; skyBIndex = 2; skyMix = clamp((currentHour - 9) / 8, 0, 1); }
-  else if (currentHour < 20) { skyAIndex = 2; skyBIndex = 3; skyMix = clamp((currentHour - 17) / 3, 0, 1); }
-  else                       { skyAIndex = 3; skyBIndex = 0; const h = currentHour >= 20 ? currentHour - 20 : currentHour + 4; skyMix = clamp(h / 9, 0, 1); }
+  let effectiveSunrise = sunriseLocalMs;
+  let effectiveSunset = sunsetLocalMs;
 
-  const tSun = clamp((currentHour - 6) / 12, 0, 1);
-  sunX = cssWidth * 0.1 + cssWidth * 0.8 * tSun;
-  sunY = cssHeight * 0.9 - Math.sin(tSun * Math.PI) * cssHeight * 0.75;
+  if (hasSunTimes) {
+    const aligned = normalizeSunWindow(currentLocalMs, sunriseLocalMs, sunsetLocalMs);
+    effectiveSunrise = aligned.sunrise;
+    effectiveSunset = aligned.sunset;
 
-  const tMoon = currentHour >= 18 ? (currentHour - 18) / 12 : (currentHour + 6) / 12;
-  const tMoonC = clamp(tMoon, 0, 1);
-  moonX = cssWidth * 0.1 + cssWidth * 0.8 * tMoonC;
-  moonY = cssHeight * 0.9 - Math.sin(tMoonC * Math.PI) * cssHeight * 0.68;
+    const sunriseEnd = effectiveSunrise + HOUR_MS;
+    const sunsetStart = effectiveSunset - HOUR_MS;
+    const forceNightAfter = effectiveSunset + 10 * MINUTE_MS;
+
+    if (currentLocalMs > forceNightAfter) {
+      // Hard override to prevent any sunset-state sticking after dusk.
+      skyPhase = "night";
+    } else if (currentLocalMs < effectiveSunrise) {
+      skyPhase = "night";
+    } else if (currentLocalMs < sunriseEnd) {
+      skyPhase = "sunrise";
+    } else if (currentLocalMs < sunsetStart) {
+      skyPhase = "day";
+    } else if (currentLocalMs < effectiveSunset) {
+      skyPhase = "sunset";
+    } else {
+      skyPhase = "night";
+    }
+
+    if (skyPhase === "sunrise") {
+      skyAIndex = 0;
+      skyBIndex = 1;
+      skyMix = clamp((currentLocalMs - effectiveSunrise) / HOUR_MS, 0, 1);
+    } else if (skyPhase === "day") {
+      skyAIndex = 1;
+      skyBIndex = 1;
+      skyMix = 0;
+    } else if (skyPhase === "sunset") {
+      skyAIndex = 1;
+      skyBIndex = 2;
+      skyMix = clamp((currentLocalMs - sunsetStart) / HOUR_MS, 0, 1);
+    } else {
+      skyAIndex = 3;
+      skyBIndex = 3;
+      skyMix = 0;
+    }
+
+    if (skyPhase === "night") {
+      nightVisibility = 1;
+    } else if (skyPhase === "sunset") {
+      nightVisibility = clamp((currentLocalMs - sunsetStart) / HOUR_MS, 0, 1);
+    } else if (skyPhase === "sunrise") {
+      nightVisibility = clamp(1 - (currentLocalMs - effectiveSunrise) / HOUR_MS, 0, 1);
+    } else {
+      nightVisibility = 0;
+    }
+
+    const daylightSpan = Math.max(30 * MINUTE_MS, effectiveSunset - effectiveSunrise);
+    const tSun = clamp((currentLocalMs - effectiveSunrise) / daylightSpan, 0, 1);
+    sunX = cssWidth * 0.1 + cssWidth * 0.8 * tSun;
+    sunY = cssHeight * 0.9 - Math.sin(tSun * Math.PI) * cssHeight * 0.75;
+
+    const nextSunrise = effectiveSunrise + DAY_MS;
+    const nightSpan = Math.max(30 * MINUTE_MS, nextSunrise - effectiveSunset);
+    const moonProgress =
+      currentLocalMs >= effectiveSunset
+        ? (currentLocalMs - effectiveSunset) / nightSpan
+        : (currentLocalMs + DAY_MS - effectiveSunset) / nightSpan;
+    const tMoon = clamp(moonProgress, 0, 1);
+    moonX = cssWidth * 0.1 + cssWidth * 0.8 * tMoon;
+    moonY = cssHeight * 0.9 - Math.sin(tMoon * Math.PI) * cssHeight * 0.68;
+  } else {
+    if (currentHour < 9) {
+      skyAIndex = 0;
+      skyBIndex = 1;
+      skyMix = clamp((currentHour - 5) / 4, 0, 1);
+      skyPhase = "sunrise";
+    } else if (currentHour < 17) {
+      skyAIndex = 1;
+      skyBIndex = 2;
+      skyMix = clamp((currentHour - 9) / 8, 0, 1);
+      skyPhase = "day";
+    } else if (currentHour < 20) {
+      skyAIndex = 2;
+      skyBIndex = 3;
+      skyMix = clamp((currentHour - 17) / 3, 0, 1);
+      skyPhase = "sunset";
+    } else {
+      skyAIndex = 3;
+      skyBIndex = 0;
+      const h = currentHour >= 20 ? currentHour - 20 : currentHour + 4;
+      skyMix = clamp(h / 9, 0, 1);
+      skyPhase = "night";
+    }
+
+    if (currentHour >= 20 || currentHour < 5) {
+      nightVisibility = 1;
+    } else if (currentHour < 7) {
+      nightVisibility = clamp((7 - currentHour) / 2, 0, 1);
+    } else if (currentHour >= 17) {
+      nightVisibility = clamp((currentHour - 17) / 3, 0, 1);
+    } else {
+      nightVisibility = 0;
+    }
+
+    const tSun = clamp((currentHour - 6) / 12, 0, 1);
+    sunX = cssWidth * 0.1 + cssWidth * 0.8 * tSun;
+    sunY = cssHeight * 0.9 - Math.sin(tSun * Math.PI) * cssHeight * 0.75;
+
+    const tMoon = currentHour >= 18 ? (currentHour - 18) / 12 : (currentHour + 6) / 12;
+    const tMoonC = clamp(tMoon, 0, 1);
+    moonX = cssWidth * 0.1 + cssWidth * 0.8 * tMoonC;
+    moonY = cssHeight * 0.9 - Math.sin(tMoonC * Math.PI) * cssHeight * 0.68;
+  }
+
+  const debugMinute = Math.floor(currentLocalMs / MINUTE_MS);
+  if (debugMinute !== lastDebugLogMinute) {
+    lastDebugLogMinute = debugMinute;
+    console.log("[SkyTime]", {
+      currentTime: formatPseudoLocalIso(currentLocalMs),
+      sunrise: hasSunTimes ? formatPseudoLocalIso(effectiveSunrise) : null,
+      sunset: hasSunTimes ? formatPseudoLocalIso(effectiveSunset) : null,
+      state: skyPhase,
+    });
+  }
 
   lastClockUpdate = nowMs;
 }
@@ -331,8 +633,7 @@ function drawCloudLayer(sprite: OffscreenCanvas, count: number, x: F32, y: F32, 
 
 function drawStars(nowTs: number) {
   if (!ctx || !sprites) return;
-  const hw = currentHour >= 24 ? currentHour - 24 : currentHour;
-  const nf = hw >= 19 || hw <= 5 ? 1 : hw < 7 ? clamp((7-hw)/2,0,1) : clamp((hw-17)/2,0,1);
+  const nf = nightVisibility;
   if (nf <= 0.01) return;
   const tt = nowTs*0.001;
   const sprite = sprites.star;
@@ -349,7 +650,7 @@ function drawSunAndMoon() {
   if (!ctx || !sprites) return;
 
   // 🌞 SUN
-  if (currentHour >= 5.5 && currentHour <= 19) {
+  if (skyPhase !== "night") {
     const sz = cssWidth * 0.18;
 
     ctx.save();
@@ -391,11 +692,11 @@ function drawSunAndMoon() {
     ctx.fill();
   }
 
-  // 🌙 MOON (unchanged)
-  if ((currentHour >= 18 || currentHour <= 6.5) && moonPhaseSprite) {
+  // 🌙 MOON
+  if (nightVisibility > 0.08 && moonPhaseSprite) {
     const sz = cssWidth * 0.14;
 
-    ctx.globalAlpha = 0.9;
+    ctx.globalAlpha = clamp(0.35 + nightVisibility * 0.55, 0, 0.95);
     ctx.drawImage(
       sprites.moon,
       moonX - sz * 0.62,
@@ -404,7 +705,7 @@ function drawSunAndMoon() {
       sz * 1.24
     );
 
-    ctx.globalAlpha = 0.95;
+    ctx.globalAlpha = clamp(0.45 + nightVisibility * 0.5, 0, 0.95);
     ctx.drawImage(
       moonPhaseSprite,
       moonX - sz * 0.5,
@@ -464,6 +765,11 @@ function render(nowTs: number) {
   if (weather==="storm"&&lightningAlpha>0) {
     ctx.globalAlpha=lightningAlpha; ctx.fillStyle="rgba(230,240,255,1)"; ctx.fillRect(0,0,cssWidth,cssHeight); ctx.globalAlpha=1;
   }
+
+  if (!readyPosted) {
+    readyPosted = true;
+    self.postMessage({ type: "ready" });
+  }
 }
 
 function rafLoop(ts: number) {
@@ -486,6 +792,12 @@ function startLoop() {
 function handleInit(msg: InitMessage) {
   canvas=msg.canvas; weather=msg.weather; mobile=msg.mobile; lowEnd=msg.lowEnd; renderScale=msg.renderScale;
   locationTimezone=msg.timezone??""; // ✅ timezone set
+  hasSunTimes = false;
+  hasApiCurrentTime = false;
+  hasUtcOffset = false;
+  nightVisibility = 0;
+  applyTimeData(msg.timeData ?? null);
+  readyPosted = false;
 
   ctx=canvas.getContext("2d",{alpha:true,desynchronized:true});
   if (!ctx) throw new Error("Unable to initialize 2D context");
@@ -507,9 +819,13 @@ self.onmessage=(event: MessageEvent<WorkerMessage>)=>{
     case "init":       handleInit(msg); break;
     case "resize":     resizeCanvas(msg.width,msg.height,msg.dpr,msg.renderScale); break;
     case "weather":    weather=msg.weather; break;
+    case "timeData":   applyTimeData(msg.timeData); break;
     case "timezone":   // ✅ runtime timezone update
       locationTimezone=msg.timezone;
+      hasApiCurrentTime=false;
+      hasUtcOffset=false;
       lastClockUpdate=-1; // force clock recalculate immediately
+      lastDebugLogMinute=-1;
       break;
     case "pause":      paused=true; break;
     case "resume":     paused=false; break;

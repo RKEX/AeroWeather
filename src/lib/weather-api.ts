@@ -1,4 +1,5 @@
 import { WeatherData } from "@/types/weather";
+import { windFromApi, windSeriesFromApi } from "./wind";
 
 // Core API endpoints
 const WEATHER_API_URL = "https://api.open-meteo.com/v1/forecast";
@@ -48,6 +49,8 @@ export async function getWeatherData(lat: number, lon: number): Promise<WeatherD
     // Format response
     return {
       timezone: weatherData.timezone,
+      currentTime: weatherData.current?.time,
+      utcOffsetSeconds: weatherData.utc_offset_seconds,
       current: {
         temperature2m: weatherData.current.temperature_2m,
         relativeHumidity2m: weatherData.current.relative_humidity_2m,
@@ -61,9 +64,9 @@ export async function getWeatherData(lat: number, lon: number): Promise<WeatherD
         cloudCover: weatherData.current.cloud_cover,
         pressureMsl: weatherData.current.pressure_msl,
         surfacePressure: weatherData.current.surface_pressure,
-        windSpeed10m: weatherData.current.wind_speed_10m,
+        windSpeed10m: windFromApi(weatherData.current.wind_speed_10m),
         windDirection10m: weatherData.current.wind_direction_10m,
-        windGusts10m: weatherData.current.wind_gusts_10m,
+        windGusts10m: windFromApi(weatherData.current.wind_gusts_10m),
       },
       hourly: {
         time: weatherData.hourly.time,
@@ -74,7 +77,7 @@ export async function getWeatherData(lat: number, lon: number): Promise<WeatherD
         precipitation: weatherData.hourly.precipitation,
         weatherCode: weatherData.hourly.weather_code,
         visibility: weatherData.hourly.visibility,
-        windSpeed10m: weatherData.hourly.wind_speed_10m,
+        windSpeed10m: windSeriesFromApi(weatherData.hourly.wind_speed_10m),
         uvIndex: weatherData.hourly.uv_index,
       },
       daily: {

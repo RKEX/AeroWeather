@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { windFromApi, windSeriesFromApi } from "../lib/wind";
+
 self.onmessage = async (e: MessageEvent) => {
   const { weatherUrl, aqiUrl } = e.data;
 
@@ -20,6 +22,8 @@ self.onmessage = async (e: MessageEvent) => {
 
     const formattedData = {
       timezone: weatherData.timezone, // ✅ TOP LEVEL এ
+      currentTime: weatherData.current?.time,
+      utcOffsetSeconds: weatherData.utc_offset_seconds,
       current: {
         // timezone নেই এখানে
         temperature2m: weatherData.current.temperature_2m,
@@ -34,9 +38,9 @@ self.onmessage = async (e: MessageEvent) => {
         cloudCover: weatherData.current.cloud_cover,
         pressureMsl: weatherData.current.pressure_msl,
         surfacePressure: weatherData.current.surface_pressure,
-        windSpeed10m: weatherData.current.wind_speed_10m,
+        windSpeed10m: windFromApi(weatherData.current.wind_speed_10m),
         windDirection10m: weatherData.current.wind_direction_10m,
-        windGusts10m: weatherData.current.wind_gusts_10m,
+        windGusts10m: windFromApi(weatherData.current.wind_gusts_10m),
       },
       hourly: {
         time: weatherData.hourly.time,
@@ -47,7 +51,7 @@ self.onmessage = async (e: MessageEvent) => {
         precipitation: weatherData.hourly.precipitation,
         weatherCode: weatherData.hourly.weather_code,
         visibility: weatherData.hourly.visibility,
-        windSpeed10m: weatherData.hourly.wind_speed_10m,
+        windSpeed10m: windSeriesFromApi(weatherData.hourly.wind_speed_10m),
         uvIndex: weatherData.hourly.uv_index,
       },
       daily: {

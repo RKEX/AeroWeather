@@ -58,6 +58,8 @@ export function createFallbackWeatherData(): WeatherData {
 
   return {
     timezone: "UTC",
+    currentTime: now.toISOString().slice(0, 16),
+    utcOffsetSeconds: 0,
     current: {
       temperature2m: hourlyTemperature[0] ?? 22,
       relativeHumidity2m: hourlyHumidity[0] ?? 65,

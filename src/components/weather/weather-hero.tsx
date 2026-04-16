@@ -3,16 +3,23 @@
 import React from "react";
 
 import { GlassCard } from "@/components/ui/glass-card";
+import {
+  formatWindKmh,
+  getCurrentWindKmh,
+  getForecastPeakWindKmh,
+  roundWindKmh,
+} from "@/lib/wind";
 import { getWeatherConditionText, getWeatherIcon } from "@/lib/weather-theme";
 import { WeatherData } from "@/types/weather";
 import { Droplets, Eye, Thermometer, Wind } from "lucide-react";
-import { memo, useMemo } from "react";
+import { memo, useEffect, useMemo } from "react";
 
 interface WeatherHeroProps {
   weather: WeatherData;
   locationName: string;
   dayIndex?: number;
   showDetails?: boolean;
+  windSourceKmh?: number;
 }
 
 export const WeatherHero = memo(function WeatherHero({
@@ -20,6 +27,7 @@ export const WeatherHero = memo(function WeatherHero({
   locationName,
   dayIndex = -1,
   showDetails = true,
+  windSourceKmh,
 }: WeatherHeroProps) {
   const textPrimary = "text-white";
   const textTertiary = "text-white/60";
@@ -28,6 +36,7 @@ export const WeatherHero = memo(function WeatherHero({
     const isForecast = dayIndex >= 0;
     const current = weather.current;
     const daily = weather.daily;
+    const currentWind = windSourceKmh ?? getCurrentWindKmh(weather);
 
     const weatherCode = isForecast
       ? (daily.weatherCode[dayIndex] ?? current.weatherCode)
@@ -47,12 +56,8 @@ export const WeatherHero = memo(function WeatherHero({
       : current.relativeHumidity2m;
 
     const wind = isForecast
-      ? (() => {
-          const startH = dayIndex * 24;
-          const slice = weather.hourly.windSpeed10m.slice(startH, startH + 24);
-          return slice.length > 0 ? Math.round(Math.max(...slice)) : current.windSpeed10m;
-        })()
-      : current.windSpeed10m;
+      ? getForecastPeakWindKmh(weather, dayIndex)
+      : currentWind;
 
     const apparent = isForecast ? temperature : current.apparentTemperature;
     const visibilityKm =
@@ -70,7 +75,13 @@ export const WeatherHero = memo(function WeatherHero({
       wind,
       visibilityKm,
     };
-  }, [dayIndex, weather]);
+  }, [dayIndex, weather, windSourceKmh]);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "production") {
+      console.log("Wind Source:", roundWindKmh(model.wind));
+    }
+  }, [model.wind]);
 
   return (
     <GlassCard className="p-8">
@@ -107,7 +118,7 @@ export const WeatherHero = memo(function WeatherHero({
           <WeatherMetric
             icon={Wind}
             label="Wind"
-            value={showDetails ? `${model.wind} km/h` : "--"}
+            value={showDetails ? formatWindKmh(model.wind) : "--"}
           />
           <WeatherMetric
             icon={Eye}

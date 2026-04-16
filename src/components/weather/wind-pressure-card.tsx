@@ -1,9 +1,10 @@
 "use client";
 
 import { GlassCard } from "@/components/ui/glass-card";
+import { getCurrentWindKmh, roundWindKmh } from "@/lib/wind";
 import { WeatherData } from "@/types/weather";
 import { Gauge, Navigation } from "lucide-react";
-import { memo } from "react";
+import { memo, useEffect } from "react";
 
 function getWindDirection(deg: number): string {
   const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
@@ -36,13 +37,14 @@ function getPressureStatus(hpa: number): { label: string; color: string } {
 
 interface WindPressureCardProps {
   weather: WeatherData;
+  windSourceKmh?: number;
 }
 
-const WindPressureCardComponent = ({ weather }: WindPressureCardProps) => {
+const WindPressureCardComponent = ({ weather, windSourceKmh }: WindPressureCardProps) => {
   const { current } = weather;
-  const windSpeed = Math.round(current.windSpeed10m);
+  const windSpeed = roundWindKmh(windSourceKmh ?? getCurrentWindKmh(weather));
   const windDir = current.windDirection10m ?? 0;
-  const windGusts = Math.round(current.windGusts10m ?? 0);
+  const windGusts = roundWindKmh(current.windGusts10m ?? 0);
   const pressure = Math.round(current.pressureMsl ?? 1013);
   const surfacePressure = Math.round(current.surfacePressure ?? 1010);
 
@@ -52,6 +54,12 @@ const WindPressureCardComponent = ({ weather }: WindPressureCardProps) => {
 
   // Wind compass arc — progress 0→1 based on direction
   const compassAngle = windDir;
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "production") {
+      console.log("Wind Source:", windSpeed);
+    }
+  }, [windSpeed]);
 
   return (
     <GlassCard className="p-6 w-full flex flex-col gap-5">
@@ -109,7 +117,7 @@ const WindPressureCardComponent = ({ weather }: WindPressureCardProps) => {
         </div>
         <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-blue-400 via-yellow-400 to-red-500 transition-all duration-700"
+            className="h-full rounded-full bg-linear-to-r from-blue-400 via-yellow-400 to-red-500 transition-all duration-700"
             style={{ width: `${(beaufort.level / 12) * 100}%` }}
           />
         </div>
@@ -148,7 +156,7 @@ const WindPressureCardComponent = ({ weather }: WindPressureCardProps) => {
         </div>
         <div className="relative h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-blue-400 via-green-400 to-orange-400 transition-all duration-700"
+            className="h-full rounded-full bg-linear-to-r from-blue-400 via-green-400 to-orange-400 transition-all duration-700"
             style={{
               width: `${Math.min(100, Math.max(0, ((pressure - 980) / (1050 - 980)) * 100))}%`,
             }}

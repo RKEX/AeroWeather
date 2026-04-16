@@ -1,6 +1,7 @@
 // /components/weather/SkyEngine.tsx
 "use client";
 
+import type { SkyTimeData } from "@/lib/sky-time";
 import { useEffect, useRef } from "react";
 
 type WeatherKind = "clear" | "cloudy" | "rain" | "snow" | "fog" | "storm";
@@ -8,7 +9,9 @@ type WeatherKind = "clear" | "cloudy" | "rain" | "snow" | "fog" | "storm";
 type SkyEngineProps = {
   weather?: WeatherKind;
   timezone?: string;
+  timeData?: SkyTimeData | null;
   className?: string;
+  onReady?: () => void;
 };
 
 type WorkerInitMessage = {
@@ -22,6 +25,7 @@ type WorkerInitMessage = {
   lowEnd: boolean;
   renderScale: number;
   timezone?: string;
+  timeData?: SkyTimeData | null;
 };
 
 type WorkerResizeMessage = {
@@ -42,19 +46,34 @@ type WorkerTimezoneMessage = {
   timezone: string;
 };
 
+type WorkerTimeDataMessage = {
+  type: "timeData";
+  timeData: SkyTimeData;
+};
+
 type WorkerControlMessage =
   | { type: "pause" }
   | { type: "resume" }
   | { type: "visibility"; visible: boolean };
+
+type IncomingMessage = { type: "ready" };
 
 type OutgoingMessage =
   | WorkerInitMessage
   | WorkerResizeMessage
   | WorkerWeatherMessage
   | WorkerTimezoneMessage
+  | WorkerTimeDataMessage
   | WorkerControlMessage;
 
 type NavigatorWithMemory = Navigator & { deviceMemory?: number };
+type WindowWithIdleCallback = Window & {
+  requestIdleCallback: (
+    callback: IdleRequestCallback,
+    options?: IdleRequestOptions
+  ) => number;
+  cancelIdleCallback: (handle: number) => void;
+};
 type Timer = ReturnType<typeof setTimeout>;
 
 function detectDeviceTier() {
@@ -70,7 +89,7 @@ function detectDeviceTier() {
   return { mobile, lowEnd, renderScale };
 }
 
-export default function SkyEngine({ weather = "clear", timezone, className }: SkyEngineProps) {
+export default function SkyEngine({ weather = "clear", timezone, timeData, className, onReady }: SkyEngineProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const workerRef = useRef<Worker | null>(null);
   const offscreenRef = useRef<OffscreenCanvas | null>(null);
@@ -82,10 +101,28 @@ export default function SkyEngine({ weather = "clear", timezone, className }: Sk
   const terminateTimerRef = useRef<Timer | null>(null);
   const readyRef = useRef(false);
   const renderScaleRef = useRef(1);
+  const onReadyRef = useRef<SkyEngineProps["onReady"]>(onReady);
+  const readySignalSentRef = useRef(false);
+  const initCancelRef = useRef<(() => void) | null>(null);
+  const latestWeatherRef = useRef<WeatherKind>(weather);
+  const latestTimezoneRef = useRef<string | undefined>(timezone);
+  const latestTimeDataRef = useRef<SkyTimeData | null | undefined>(timeData);
+
+  useEffect(() => {
+    latestWeatherRef.current = weather;
+    latestTimezoneRef.current = timezone;
+    latestTimeDataRef.current = timeData;
+  }, [weather, timezone, timeData]);
+
+  useEffect(() => {
+    onReadyRef.current = onReady;
+  }, [onReady]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || !("transferControlToOffscreen" in canvas)) return;
+
+    let cancelled = false;
 
     mountCountRef.current += 1;
     if (terminateTimerRef.current !== null) {
@@ -93,9 +130,18 @@ export default function SkyEngine({ weather = "clear", timezone, className }: Sk
       terminateTimerRef.current = null;
     }
 
-    if (!initializedRef.current) {
+    const bootstrap = () => {
+      if (cancelled || initializedRef.current) return;
+
       const worker = new Worker(new URL("../../workers/sky.worker.ts", import.meta.url), { type: "module" });
       workerRef.current = worker;
+      readySignalSentRef.current = false;
+
+      worker.onmessage = (event: MessageEvent<IncomingMessage>) => {
+        if (event.data?.type !== "ready" || readySignalSentRef.current) return;
+        readySignalSentRef.current = true;
+        onReadyRef.current?.();
+      };
 
       const { mobile, lowEnd, renderScale } = detectDeviceTier();
       renderScaleRef.current = renderScale;
@@ -111,9 +157,10 @@ export default function SkyEngine({ weather = "clear", timezone, className }: Sk
 
       worker.postMessage({
         type: "init", canvas: offscreen,
-        width, height, dpr, weather,
+        width, height, dpr, weather: latestWeatherRef.current,
         mobile, lowEnd, renderScale,
-        timezone,
+        timezone: latestTimezoneRef.current,
+        timeData: latestTimeDataRef.current,
       } as WorkerInitMessage, [offscreen]);
 
       readyRef.current = true;
@@ -150,13 +197,34 @@ export default function SkyEngine({ weather = "clear", timezone, className }: Sk
       };
       visibilityHandlerRef.current = handleVisibilityChange;
       document.addEventListener("visibilitychange", handleVisibilityChange, { passive: true });
+    };
+
+    if (!initializedRef.current) {
+      const win = window as WindowWithIdleCallback;
+
+      if (typeof win.requestIdleCallback === "function") {
+        const idleId = win.requestIdleCallback(() => bootstrap(), { timeout: 180 });
+        initCancelRef.current = () => win.cancelIdleCallback(idleId);
+      } else {
+        const rafId = globalThis.requestAnimationFrame(() => bootstrap());
+        initCancelRef.current = () => globalThis.cancelAnimationFrame(rafId);
+      }
     }
 
     return () => {
+      cancelled = true;
+
+      if (initCancelRef.current) {
+        initCancelRef.current();
+        initCancelRef.current = null;
+      }
+
       mountCountRef.current -= 1;
       if (mountCountRef.current > 0) return;
+
       terminateTimerRef.current = setTimeout(() => {
         if (mountCountRef.current > 0) return;
+
         if (visibilityHandlerRef.current) {
           document.removeEventListener("visibilitychange", visibilityHandlerRef.current);
           visibilityHandlerRef.current = null;
@@ -166,10 +234,14 @@ export default function SkyEngine({ weather = "clear", timezone, className }: Sk
         resizeObserverRef.current?.disconnect();
         resizeObserverRef.current = null;
         workerRef.current?.terminate();
+        if (workerRef.current) {
+          workerRef.current.onmessage = null;
+        }
         workerRef.current = null;
         initializedRef.current = false;
         offscreenRef.current = null;
         readyRef.current = false;
+        readySignalSentRef.current = false;
       }, 0);
     };
   }, []);
@@ -185,6 +257,11 @@ export default function SkyEngine({ weather = "clear", timezone, className }: Sk
     if (!workerRef.current || !readyRef.current || !timezone) return;
     workerRef.current.postMessage({ type: "timezone", timezone } as OutgoingMessage);
   }, [timezone]);
+
+  useEffect(() => {
+    if (!workerRef.current || !readyRef.current || !timeData) return;
+    workerRef.current.postMessage({ type: "timeData", timeData } as OutgoingMessage);
+  }, [timeData]);
 
   return (
     <canvas ref={canvasRef} className={className} aria-hidden="true"

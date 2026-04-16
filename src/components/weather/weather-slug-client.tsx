@@ -5,6 +5,7 @@ import { WeatherHero } from "@/components/weather/weather-hero";
 import { WeatherSkeleton } from "@/components/weather/weather-skeleton";
 import { useWeather } from "@/hooks/useWeather";
 import { resolveDayIndex } from "@/lib/day-slug";
+import { extractSkyTimeData } from "@/lib/sky-time";
 import { getThemeClasses, getWeatherTheme } from "@/lib/weather-theme";
 import { useSkyStore } from "@/store/useSkyStore";
 import { WeatherData } from "@/types/weather";
@@ -13,7 +14,7 @@ import { ArrowLeft } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type TouchEvent, Suspense, useEffect, useRef, useState } from "react";
+import { type TouchEvent, Suspense, useEffect, useMemo, useRef } from "react";
 
 const AiWeatherInsight = dynamic(() => import("@/components/weather/ai-weather-insight").then(mod => mod.AiWeatherInsight), { ssr: false, loading: () => <div className="h-32 w-full rounded-3xl border border-white/10 bg-white/5" /> });
 const HourlyForecast = dynamic(() => import("@/components/weather/hourly-forecast").then(mod => mod.HourlyForecast), { ssr: false, loading: () => <HourlyForecastSkeleton /> });
@@ -53,22 +54,19 @@ function checkIsDaySlug(slug: string): boolean {
 export function WeatherSlugClient({ initialWeather, locationName, slug }: WeatherSlugClientProps) {
   const router = useRouter();
   const touchStartXRef = useRef<number | null>(null);
-  const { setWeather: setSkyWeather, setTimezone } = useSkyStore();
+  const { setWeather: setSkyWeather, setTimezone, setTimeData } = useSkyStore();
 
   const isDaySlug = checkIsDaySlug(slug);
 
   // ✅ Day slug হলে localStorage থেকে user এর saved location পড়ো
   // City slug হলে null — server data ব্যবহার হবে
-  const [clientLocation, setClientLocation] = useState<{
+  const clientLocation = useMemo<{
     lat: number;
     lon: number;
     name: string;
-  } | null>(null);
+  } | null>(() => {
+    if (!isDaySlug || typeof window === "undefined") return null;
 
-  useEffect(() => {
-    if (!isDaySlug) return;
-
-    // localStorage থেকে saved location পড়ো
     try {
       const saved = localStorage.getItem("aeroweather_location");
       if (saved) {
@@ -78,15 +76,14 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
           typeof parsed.lon === "number" &&
           typeof parsed.name === "string"
         ) {
-          setClientLocation({ lat: parsed.lat, lon: parsed.lon, name: parsed.name });
-          return;
+          return { lat: parsed.lat, lon: parsed.lon, name: parsed.name };
         }
       }
     } catch {
       // ignore
     }
-    // localStorage এ কিছু না থাকলে Kolkata default
-    setClientLocation(DEFAULT_LOCATION);
+
+    return DEFAULT_LOCATION;
   }, [isDaySlug]);
 
   // ✅ Day slug হলে client location দিয়ে weather fetch করো
@@ -106,12 +103,39 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
   const actualDayIndex = dayIndex >= 0 ? dayIndex : 0;
 
   useEffect(() => {
+    if (isDaySlug) {
+      // Wait for actual client-location weather on day routes to avoid showing stale/default sky.
+      if (!clientWeather) {
+        setTimezone("");
+        setTimeData(null);
+        return;
+      }
+      const code = clientWeather.daily.weatherCode[actualDayIndex] ?? 0;
+      setSkyWeather(codeToWeatherKind(code));
+      if (clientWeather.timezone) {
+        setTimezone(clientWeather.timezone);
+      }
+      setTimeData(extractSkyTimeData(clientWeather));
+      return;
+    }
+
     const code = displayWeather.daily.weatherCode[actualDayIndex] ?? 0;
     setSkyWeather(codeToWeatherKind(code));
     if (displayWeather.timezone) {
       setTimezone(displayWeather.timezone);
     }
-  }, [actualDayIndex, displayWeather.daily.weatherCode, displayWeather.timezone]);
+    setTimeData(extractSkyTimeData(displayWeather));
+  }, [
+    actualDayIndex,
+    clientWeather,
+    displayWeather,
+    displayWeather.daily.weatherCode,
+    displayWeather.timezone,
+    isDaySlug,
+    setSkyWeather,
+    setTimeData,
+    setTimezone,
+  ]);
 
   // Swipe navigation
   const allSlugs = displayWeather.daily.time.map((t) => {
