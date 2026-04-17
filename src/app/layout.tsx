@@ -35,21 +35,21 @@ export default async function RootLayout({ children }: Readonly<RootLayoutProps>
   const localizedPersonSchema = {
     ...personSchema,
     inLanguage: locale,
-    url: `https://www.aeroweather.app/${locale}/rick-das`,
+    url: "https://www.aeroweather.app/rick-das",
   };
   const localizedOrganizationSchema = {
     ...organizationSchema,
     inLanguage: locale,
-    url: `https://www.aeroweather.app/${locale}`,
+    url: "https://www.aeroweather.app",
     contactPoint: {
       ...organizationSchema.contactPoint,
-      url: `https://www.aeroweather.app/${locale}/contact`,
+      url: "https://www.aeroweather.app/contact",
     },
   };
   const localizedWebsiteSchema = {
     ...websiteSchema,
     inLanguage: locale,
-    url: `https://www.aeroweather.app/${locale}`,
+    url: "https://www.aeroweather.app",
   };
 
   return (

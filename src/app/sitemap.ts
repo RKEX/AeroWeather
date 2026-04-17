@@ -1,4 +1,3 @@
-import { SUPPORTED_LOCALES } from "@/lib/locales";
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -16,7 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "moscow","rio-de-janeiro"
   ];
 
-  const localizedStaticRoutes = [
+  const staticRoutes = [
     { path: "", changeFrequency: "hourly" as const, priority: 1 },
     { path: "/about", changeFrequency: "monthly" as const, priority: 0.6 },
     { path: "/rick-das", changeFrequency: "monthly" as const, priority: 0.7 },
@@ -25,37 +24,31 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/terms", changeFrequency: "yearly" as const, priority: 0.3 },
   ];
 
-  const localizedForecastRoutes = [
+  const forecastRoutes = [
     { path: "/weather/today", changeFrequency: "hourly" as const, priority: 0.9 },
     { path: "/weather/tomorrow", changeFrequency: "hourly" as const, priority: 0.9 },
   ];
 
-  const staticPages = SUPPORTED_LOCALES.flatMap((locale) =>
-    localizedStaticRoutes.map((route) => ({
-      url: `${baseUrl}/${locale}${route.path}`,
-      lastModified: new Date(),
-      changeFrequency: route.changeFrequency,
-      priority: route.priority,
-    }))
-  );
+  const staticPages = staticRoutes.map((route) => ({
+    url: `${baseUrl}${route.path}`,
+    lastModified: new Date(),
+    changeFrequency: route.changeFrequency,
+    priority: route.priority,
+  }));
 
-  const forecastPages = SUPPORTED_LOCALES.flatMap((locale) =>
-    localizedForecastRoutes.map((route) => ({
-      url: `${baseUrl}/${locale}${route.path}`,
-      lastModified: new Date(),
-      changeFrequency: route.changeFrequency,
-      priority: route.priority,
-    }))
-  );
+  const forecastPages = forecastRoutes.map((route) => ({
+    url: `${baseUrl}${route.path}`,
+    lastModified: new Date(),
+    changeFrequency: route.changeFrequency,
+    priority: route.priority,
+  }));
 
-  const cityUrls = SUPPORTED_LOCALES.flatMap((locale) =>
-    popularCities.map((city) => ({
-      url: `${baseUrl}/${locale}/weather/${city}`,
-      lastModified: new Date(),
-      changeFrequency: "daily" as const,
-      priority: 0.8,
-    }))
-  );
+  const cityUrls = popularCities.map((city) => ({
+    url: `${baseUrl}/weather/${city}`,
+    lastModified: new Date(),
+    changeFrequency: "daily" as const,
+    priority: 0.8,
+  }));
 
   return [...staticPages, ...forecastPages, ...cityUrls];
 }

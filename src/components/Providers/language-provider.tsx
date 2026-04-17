@@ -6,23 +6,17 @@ import {
     TranslationKey,
 } from "@/lib/i18n";
 import {
-    LOCALE_COOKIE_KEY,
     SupportedLocale,
     isRtlLocale,
-    isSupportedLocale,
     normalizeSupportedLocale,
-    withLocalePrefix,
 } from "@/lib/locales";
-import type { Route } from "next";
 import { useLocale, useMessages } from "next-intl";
-import { useRouter } from "next/navigation";
 import React, {
     createContext,
     useCallback,
     useContext,
     useEffect,
     useMemo,
-    useTransition,
 } from "react";
 import enMessages from "../../../messages/en.json";
 
@@ -36,8 +30,6 @@ type LanguageContextValue = {
 };
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
-const LANGUAGE_MANUAL_OVERRIDE_KEY = "aeroweather_lang_manual_override";
-const LANGUAGE_SETTINGS_ENABLED = false;
 
 function interpolate(template: string, params?: TranslateParams): string {
   if (!params) return template;
@@ -49,58 +41,17 @@ function interpolate(template: string, params?: TranslateParams): string {
 }
 
 function normalizeLocaleForUi(value?: string | null): SupportedLocale {
-  const normalized = normalizeSupportedLocale(value);
-  if (isSupportedLocale(normalized)) {
-    return normalized;
-  }
-  return "en";
-}
-
-function resolveTargetLocale(next: LanguageCode): SupportedLocale {
-  const normalized = String(next).toLowerCase();
-  if (isSupportedLocale(normalized)) {
-    return normalized;
-  }
-  return "en";
+  return normalizeSupportedLocale(value, "en");
 }
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
   const intlLocale = useLocale();
   const rawMessages = useMessages() as MessageDictionary;
-  const [isPending, startTransition] = useTransition();
 
   const language = normalizeLocaleForUi(intlLocale) as LanguageCode;
-
   const messages = useMemo(() => rawMessages, [rawMessages]);
 
-  const setLanguage = useCallback((next: LanguageCode) => {
-    if (!LANGUAGE_SETTINGS_ENABLED) {
-      return;
-    }
-
-    const nextLocale = resolveTargetLocale(next);
-
-    if (typeof window === "undefined") return;
-
-    const currentPathname = window.location.pathname;
-    const currentSearch = window.location.search;
-    const nextPathname = withLocalePrefix(currentPathname, nextLocale);
-    const currentUrl = `${currentPathname}${currentSearch}`;
-    const nextUrl = `${nextPathname}${currentSearch}`;
-
-    localStorage.setItem(LANGUAGE_STORAGE_KEY, nextLocale);
-    localStorage.setItem(LANGUAGE_MANUAL_OVERRIDE_KEY, "1");
-    document.cookie = `${LOCALE_COOKIE_KEY}=${nextLocale}; Path=/; Max-Age=${60 * 60 * 24 * 365}; SameSite=Lax`;
-
-    if (currentUrl === nextUrl) {
-      return;
-    }
-
-    startTransition(() => {
-      router.push(nextUrl as Route, { scroll: false });
-    });
-  }, [router]);
+  const setLanguage = useCallback(() => {}, []);
 
   const t = useCallback(
     (key: TranslationKey, params?: TranslateParams) => {
@@ -115,7 +66,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof document !== "undefined") {
       document.documentElement.lang = language;
-      document.documentElement.dir = isRtlLocale(language as SupportedLocale) ? "rtl" : "ltr";
+      document.documentElement.dir =
+        isRtlLocale(language as SupportedLocale) ? "rtl" : "ltr";
     }
 
     if (typeof window !== "undefined") {
@@ -130,9 +82,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <LanguageContext.Provider value={value}>
-      <React.Fragment key={language}>
-        {children}
-      </React.Fragment>
+      <React.Fragment key={language}>{children}</React.Fragment>
     </LanguageContext.Provider>
   );
 }

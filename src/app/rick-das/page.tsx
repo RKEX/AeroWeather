@@ -38,7 +38,7 @@ export async function generateMetadata({
       ...(founderBaseMetadata.openGraph ?? {}),
       title: copy.metadata.title,
       description: copy.metadata.openGraphDescription,
-      url: `https://www.aeroweather.app/${language}/rick-das`,
+      url: "https://www.aeroweather.app/rick-das",
       type: "profile",
     },
     twitter: {

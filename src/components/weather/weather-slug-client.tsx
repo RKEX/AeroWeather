@@ -1,7 +1,6 @@
 "use client";
 
 import { useLanguage } from "@/components/Providers/language-provider";
-import { LanguageSwitcher } from "@/components/language-switcher";
 import { DailyForecastSkeleton, HourlyForecastSkeleton } from "@/components/weather/ForecastSkeleton";
 import { WeatherHero } from "@/components/weather/weather-hero";
 import { WeatherSkeleton } from "@/components/weather/weather-skeleton";
@@ -167,12 +166,12 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
 
   const handleSwipe = (offsetX: number) => {
     if (offsetX < -60 && nextSlug) {
-      const nextPath = `/${language}/weather/${nextSlug}` as Route;
+      const nextPath = `/weather/${nextSlug}` as Route;
       router.push(nextPath);
     }
 
     if (offsetX > 60 && prevSlug) {
-      const prevPath = `/${language}/weather/${prevSlug}` as Route;
+      const prevPath = `/weather/${prevSlug}` as Route;
       router.push(prevPath);
     }
   };
@@ -218,9 +217,6 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
             {t("backToHome")}
           </Link>
           <div className="text-right">
-            <div className="mb-2 flex justify-end">
-              <LanguageSwitcher />
-            </div>
             <h2 className="text-2xl font-bold">
               {dateHeadingFormatter.format(
                 new Date(displayWeather.daily.time[actualDayIndex] + "T00:00:00")

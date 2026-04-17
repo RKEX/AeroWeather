@@ -1,5 +1,8 @@
-import { createNavigation } from "next-intl/navigation";
-import { locales } from "./i18n";
+import Link from "next/link";
+import { redirect, usePathname, useRouter } from "next/navigation";
 
-export const { Link, redirect, usePathname, useRouter, getPathname } =
-  createNavigation({ locales });
+export { Link, redirect, usePathname, useRouter };
+
+export function getPathname(pathname: string | { href: string }): string {
+  return typeof pathname === "string" ? pathname : pathname.href;
+}

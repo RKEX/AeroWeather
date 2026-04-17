@@ -1,6 +1,5 @@
 "use client";
 
-import { LanguageSwitcher } from "@/components/language-switcher";
 import { useLanguage } from "@/components/Providers/language-provider";
 import { usePerformance } from "@/components/Providers/performance-provider";
 import { DailyForecastSkeleton, HourlyForecastSkeleton } from "@/components/weather/ForecastSkeleton";
@@ -183,9 +182,6 @@ function ClientDashboard({
             </div>
           </div>
           <div className="flex w-full flex-col gap-2 sm:max-w-md lg:max-w-xl">
-            <div className="flex justify-end">
-              <LanguageSwitcher />
-            </div>
             <LocationSearch onSelect={handleLocationSelect} />
           </div>
         </header>

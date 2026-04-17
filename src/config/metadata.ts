@@ -1,6 +1,5 @@
 import {
     DEFAULT_LOCALE,
-    SUPPORTED_LOCALES,
     SupportedLocale,
 } from "@/lib/locales";
 import { defaultSEO } from "@/lib/seo-config";
@@ -60,25 +59,16 @@ function normalizeMetadataPathname(pathname?: string): string {
   return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
 }
 
-function buildLocaleAlternates(
-  pathname: string,
-  locale: SupportedLocale
-): Metadata["alternates"] {
+function buildCanonicalUrl(pathname: string): string {
   const normalizedPathname = normalizeMetadataPathname(pathname);
+  return normalizedPathname
+    ? `${SITE_CONFIG.url}${normalizedPathname}`
+    : SITE_CONFIG.url;
+}
 
-  const languages = Object.fromEntries(
-    SUPPORTED_LOCALES.map((targetLocale) => [
-      targetLocale,
-      `${SITE_CONFIG.url}/${targetLocale}${normalizedPathname}`,
-    ])
-  ) as Record<string, string>;
-
-  languages["x-default"] =
-    `${SITE_CONFIG.url}/${DEFAULT_LOCALE}${normalizedPathname}`;
-
+function buildAlternates(pathname: string): Metadata["alternates"] {
   return {
-    canonical: `${SITE_CONFIG.url}/${locale}${normalizedPathname}`,
-    languages,
+    canonical: buildCanonicalUrl(pathname),
   };
 }
 
@@ -141,11 +131,8 @@ export function constructMetadata({
     keywords === null
       ? undefined
       : [...metadataConfig.home.keywords, ...(keywords ?? [])];
-  const alternates = buildLocaleAlternates(pathname, locale);
-  const canonicalUrl =
-    typeof alternates?.canonical === "string" || alternates?.canonical instanceof URL
-      ? alternates.canonical
-      : `${SITE_CONFIG.url}/${locale}${normalizeMetadataPathname(pathname)}`;
+  const alternates = buildAlternates(pathname);
+  const canonicalUrl = buildCanonicalUrl(pathname);
 
   return {
     title: {

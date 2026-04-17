@@ -15,7 +15,7 @@ interface LocationSearchProps {
 }
 
 export function LocationSearch({ onSelect }: LocationSearchProps) {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<LocationResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -72,7 +72,7 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
       );
     }
 
-    const weatherPath = `/${language}/weather/${location.name
+    const weatherPath = `/weather/${location.name
       .toLowerCase()
       .replace(/\s+/g, "-")}` as Route;
     router.push(weatherPath);

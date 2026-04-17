@@ -8,7 +8,7 @@ export default function RickDasContent() {
   const { language } = useLanguage();
   const copy = getRickDasCopy(language);
   const ts = "text-white/70";
-  const localizedRickDasUrl = `https://www.aeroweather.app/${language}/rick-das`;
+  const localizedRickDasUrl = "https://www.aeroweather.app/rick-das";
 
   const personJsonLd = {
     "@context": "https://schema.org",

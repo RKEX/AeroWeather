@@ -9,7 +9,6 @@ export const SUPPORTED_LOCALES = locales;
 export type SupportedLocale = Locale;
 
 export const DEFAULT_LOCALE: SupportedLocale = defaultLocale;
-export const LOCALE_COOKIE_KEY = "aeroweather_locale";
 
 const RTL_LOCALES: ReadonlySet<SupportedLocale> = new Set(["ar"]);
 const SUPPORTED_LOCALE_SET: ReadonlySet<string> = new Set(SUPPORTED_LOCALES);
@@ -44,38 +43,6 @@ export function normalizeSupportedLocale(
 
 export function isRtlLocale(locale: SupportedLocale): boolean {
   return RTL_LOCALES.has(locale);
-}
-
-export function getLocaleFromPathname(pathname: string): SupportedLocale | null {
-  const [firstSegment] = pathname.split("/").filter(Boolean);
-  if (!firstSegment) return null;
-
-  const candidate = firstSegment.toLowerCase();
-  if (isSupportedLocale(candidate)) {
-    return candidate;
-  }
-
-  return null;
-}
-
-export function stripLocalePrefix(pathname: string): string {
-  const locale = getLocaleFromPathname(pathname);
-  if (!locale) return pathname || "/";
-
-  const segments = pathname.split("/").filter(Boolean);
-  const remaining = segments.slice(1);
-  return remaining.length > 0 ? `/${remaining.join("/")}` : "/";
-}
-
-export function withLocalePrefix(pathname: string, locale: SupportedLocale): string {
-  const normalizedPath = pathname.startsWith("/") ? pathname : `/${pathname}`;
-  const pathWithoutLocale = stripLocalePrefix(normalizedPath);
-
-  if (pathWithoutLocale === "/") {
-    return `/${locale}`;
-  }
-
-  return `/${locale}${pathWithoutLocale}`;
 }
 
 type LanguagePreference = {
@@ -165,38 +132,30 @@ export function detectLocaleFromCountry(
 }
 
 type ResolveRequestLocaleInput = {
-  urlLocale?: string | null;
   persistedLocale?: string | null;
   acceptLanguage?: string | null;
   countryCode?: string | null;
 };
 
 export function resolveRequestLocale({
-  urlLocale,
   persistedLocale,
   acceptLanguage,
   countryCode,
 }: ResolveRequestLocaleInput): SupportedLocale {
-  // 1) URL locale has top priority.
-  const localeFromUrl = parseBaseLocale(urlLocale);
-  if (localeFromUrl && isSupportedLocale(localeFromUrl)) {
-    return localeFromUrl;
-  }
-
-  // 2) Persisted user override (cookie/localStorage mirror).
+  // 1) Persisted user override (cookie/localStorage mirror).
   const persisted = parseBaseLocale(persistedLocale);
   if (persisted && isSupportedLocale(persisted)) {
     return persisted;
   }
 
-  // 3) Browser preference via Accept-Language.
+  // 2) Browser preference via Accept-Language.
   const localeFromBrowser = detectLocaleFromAcceptLanguage(acceptLanguage);
   if (localeFromBrowser) return localeFromBrowser;
 
-  // 4) Optional IP/country signal.
+  // 3) Optional IP/country signal.
   const localeFromCountry = detectLocaleFromCountry(countryCode, acceptLanguage);
   if (localeFromCountry) return localeFromCountry;
 
-  // 5) Safe global fallback.
+  // 4) Safe global fallback.
   return DEFAULT_LOCALE;
 }
