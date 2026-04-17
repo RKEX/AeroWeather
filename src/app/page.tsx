@@ -1,6 +1,6 @@
+import { FounderSeoLinks } from "@/components/home/founder-seo-links";
 import ClientDashboard from "@/components/weather/client-dashboard";
 import { constructMetadata, metadataConfig } from "@/config/metadata";
-import { FounderSeoLinks } from "@/components/home/founder-seo-links";
 import { createFallbackWeatherData } from "@/lib/fallback-weather";
 
 export const metadata = constructMetadata({

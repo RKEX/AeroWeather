@@ -1,7 +1,7 @@
 "use client";
 
-import { useLanguage } from "@/components/Providers/language-provider";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { useLanguage } from "@/components/Providers/language-provider";
 import { usePerformance } from "@/components/Providers/performance-provider";
 import { DailyForecastSkeleton, HourlyForecastSkeleton } from "@/components/weather/ForecastSkeleton";
 import { LocationSearch } from "@/components/weather/location-search";

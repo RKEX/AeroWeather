@@ -1,12 +1,12 @@
 "use client";
 
 import {
-  LANGUAGE_STORAGE_KEY,
-  LanguageCode,
-  TranslationKey,
-  isLanguageCode,
-  normalizeLanguage,
-  translations,
+    LANGUAGE_STORAGE_KEY,
+    LanguageCode,
+    TranslationKey,
+    isLanguageCode,
+    normalizeLanguage,
+    translations,
 } from "@/lib/i18n";
 import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
 

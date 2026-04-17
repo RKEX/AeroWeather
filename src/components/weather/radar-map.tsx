@@ -58,11 +58,13 @@ const StaticRadarPreview = memo(function StaticRadarPreview({
   lon,
   isNight,
   activeTimestamp,
+  useFrostedOverlay = false,
 }: {
   lat: number;
   lon: number;
   isNight: boolean;
   activeTimestamp: number | null;
+  useFrostedOverlay?: boolean;
 }) {
   const { t } = useLanguage();
   const staticMapUrl = useMemo(() => {
@@ -72,13 +74,22 @@ const StaticRadarPreview = memo(function StaticRadarPreview({
 
   return (
     <div className="relative h-full w-full">
-      <div
-        className={`h-full w-full bg-cover bg-center ${isNight ? "bg-slate-900" : "bg-slate-300"}`}
-        style={{ backgroundImage: `url(${staticMapUrl})` }}
-        aria-hidden="true"
-      />
+      {!useFrostedOverlay ? (
+        <div
+          className={`h-full w-full bg-cover bg-center ${isNight ? "bg-slate-900" : "bg-slate-300"}`}
+          style={{ backgroundImage: `url(${staticMapUrl})` }}
+          aria-hidden="true"
+        />
+      ) : (
+        <div
+          className="h-full w-full bg-transparent"
+          aria-hidden="true"
+        />
+      )}
 
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_24%,rgba(56,189,248,0.22),transparent_42%),radial-gradient(circle_at_78%_30%,rgba(59,130,246,0.2),transparent_44%),linear-gradient(to_bottom,rgba(2,6,23,0.14),rgba(2,6,23,0.52))]" />
+      {!useFrostedOverlay && (
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_24%,rgba(56,189,248,0.22),transparent_42%),radial-gradient(circle_at_78%_30%,rgba(59,130,246,0.2),transparent_44%),linear-gradient(to_bottom,rgba(2,6,23,0.14),rgba(2,6,23,0.52))]" />
+      )}
 
       <div className="pointer-events-none absolute right-4 bottom-4 rounded-xl border border-white/15 bg-black/35 px-3 py-2 text-xs text-white/85 backdrop-blur-sm">
         {activeTimestamp
@@ -112,6 +123,7 @@ const RadarMapComponent = ({
   const tileSize = quality === "ULTRA" ? 512 : 256;
   const activeTimestamp = timestamps[currentIndex] ?? null;
   const shouldRunMapEngine = hasActivated && isActive && isInView;
+  const shouldRenderMapLayers = hasActivated && isInView;
 
   const handleMapReady = useCallback((map: LeafletMap) => {
     if (mapRef.current === map) return;
@@ -268,7 +280,7 @@ const RadarMapComponent = ({
             type="button"
             onClick={handleActivate}
             onTouchStart={handleActivate}
-            className="h-full w-full cursor-pointer focus:outline-none"
+            className="h-full w-full cursor-pointer bg-transparent focus:outline-none"
             aria-label={t("radarActivateAria")}
           >
             <StaticRadarPreview
@@ -276,6 +288,7 @@ const RadarMapComponent = ({
               lon={lon}
               isNight={isNight}
               activeTimestamp={activeTimestamp}
+              useFrostedOverlay={hasActivated}
             />
           </button>
         </div>
@@ -283,7 +296,7 @@ const RadarMapComponent = ({
         {hasActivated && (
           <div
             className={`absolute inset-0 z-10 transition-opacity duration-300 ${
-              isActive ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+              isActive ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-100"
             }`}
           >
             <MapContainer
@@ -300,7 +313,7 @@ const RadarMapComponent = ({
             >
               <MapReadyController onMapReady={handleMapReady} />
 
-              {shouldRunMapEngine && (
+              {shouldRenderMapLayers && (
                 <>
                   <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

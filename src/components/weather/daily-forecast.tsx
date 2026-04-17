@@ -141,3 +141,4 @@ export const DailyForecast = memo(DailyForecastComponent);
 DailyForecast.displayName = "DailyForecast";
 
 export { DetailMetric as _DetailMetric, tempColor };
+

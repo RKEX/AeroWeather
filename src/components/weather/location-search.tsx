@@ -7,7 +7,7 @@ import { prefetchWeather } from "@/lib/prefetch";
 import { LocationResult } from "@/types/weather";
 import { Loader2, MapPin, Navigation, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { type WheelEvent, useEffect, useRef, useState } from "react";
 
 interface LocationSearchProps {
   onSelect: (location: LocationResult) => void;
@@ -132,6 +132,12 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
     );
   };
 
+  const handleDropdownWheel = (event: WheelEvent<HTMLUListElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.currentTarget.scrollTop += event.deltaY;
+  };
+
   return (
     <div
       className="relative z-50 mx-auto w-full max-w-md"
@@ -168,7 +174,7 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
           onClick={handleCurrentLocation}
           disabled={locating}
           title={t("useCurrentLocation")}
-          className="flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-2xl border border-white/25 bg-white/15 text-white shadow-[0_10px_40px_rgba(0,0,0,0.45)] transition-colors hover:bg-white/25 disabled:opacity-50"
+          className="flex h-11.5 w-11.5 shrink-0 items-center justify-center rounded-2xl border border-white/25 bg-white/15 text-white shadow-[0_10px_40px_rgba(0,0,0,0.45)] transition-colors hover:bg-white/25 disabled:opacity-50"
         >
           {locating ? (
             <Loader2 className="h-5 w-5 animate-spin" />
@@ -179,8 +185,12 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
       </div>
 
       {open && results.length > 0 && (
-        <div className="absolute top-full left-0 right-0 z-[999] mt-2 rounded-2xl border border-white/10 bg-[#030712] shadow-2xl">
-          <ul className="glass-scroll flex max-h-60 flex-col overflow-y-auto p-2">
+        <div className="absolute top-full left-0 right-0 z-999 mt-2 rounded-2xl border border-white/10 bg-[#030712] shadow-2xl">
+          <ul
+            data-lenis-prevent
+            onWheel={handleDropdownWheel}
+            className="glass-scroll flex max-h-60 flex-col overflow-y-auto p-2"
+          >
             {results.map((loc) => (
               <li key={`${loc.id}-${loc.latitude}`}>
                 <button
