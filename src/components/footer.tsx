@@ -3,6 +3,7 @@
 import { useLanguage } from "@/components/Providers/language-provider";
 import { Link } from "@/navigation";
 import { Navigation } from "lucide-react";
+import type { Route } from "next";
 
 export function Footer() {
   const { t } = useLanguage();
@@ -128,7 +129,7 @@ function FooterLink({
   }
 
   return (
-    <Link href={href} className="group">
+    <Link href={href as Route} className="group">
       {content}
     </Link>
   );
