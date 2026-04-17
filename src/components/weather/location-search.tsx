@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/components/Providers/language-provider";
 import { useDebounce } from "@/hooks/useDebounce";
 import { searchLocations } from "@/lib/geocode";
 import { prefetchWeather } from "@/lib/prefetch";
@@ -13,6 +14,7 @@ interface LocationSearchProps {
 }
 
 export function LocationSearch({ onSelect }: LocationSearchProps) {
+  const { t } = useLanguage();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<LocationResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -93,7 +95,7 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
             data?.address?.town ||
             data?.address?.village ||
             data?.address?.county ||
-            "Current Location";
+            t("currentLocation");
 
           const country = data?.address?.country ?? "";
           const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -156,7 +158,7 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
             onFocus={() => {
               if (results.length > 0) setOpen(true);
             }}
-            placeholder="Search for a city..."
+            placeholder={t("searchPlaceholder")}
             className="w-full rounded-2xl border border-white/25 bg-white/15 py-3 pl-11 pr-4 text-white shadow-[0_10px_40px_rgba(0,0,0,0.45)] placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
           />
         </div>
@@ -165,7 +167,7 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
         <button
           onClick={handleCurrentLocation}
           disabled={locating}
-          title="Use current location"
+          title={t("useCurrentLocation")}
           className="flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-2xl border border-white/25 bg-white/15 text-white shadow-[0_10px_40px_rgba(0,0,0,0.45)] transition-colors hover:bg-white/25 disabled:opacity-50"
         >
           {locating ? (

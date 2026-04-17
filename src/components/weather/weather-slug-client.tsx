@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "@/components/Providers/language-provider";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { DailyForecastSkeleton, HourlyForecastSkeleton } from "@/components/weather/ForecastSkeleton";
 import { WeatherHero } from "@/components/weather/weather-hero";
 import { WeatherSkeleton } from "@/components/weather/weather-skeleton";
@@ -55,6 +57,7 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
   const router = useRouter();
   const touchStartXRef = useRef<number | null>(null);
   const { setWeather: setSkyWeather, setTimezone, setTimeData } = useSkyStore();
+  const { t } = useLanguage();
 
   const isDaySlug = checkIsDaySlug(slug);
 
@@ -195,13 +198,16 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
             href="/"
             className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/15">
             <ArrowLeft className="h-4 w-4" />
-            Back to Home
+            {t("backToHome")}
           </Link>
           <div className="text-right">
+            <div className="mb-2 flex justify-end">
+              <LanguageSwitcher />
+            </div>
             <h2 className="text-2xl font-bold">
               {format(new Date(displayWeather.daily.time[actualDayIndex] + "T00:00:00"), "EEEE, MMM do")}
             </h2>
-            <p className="text-white/60">Weather in {displayName}</p>
+            <p className="text-white/60">{t("weatherIn", { city: displayName })}</p>
           </div>
         </div>
 

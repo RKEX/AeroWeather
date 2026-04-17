@@ -1,6 +1,8 @@
 "use client";
 
+import { useLanguage } from "@/components/Providers/language-provider";
 import { GlassCard } from "@/components/ui/glass-card";
+import { TranslationKey } from "@/lib/i18n";
 import { getCurrentWindKmh, roundWindKmh } from "@/lib/wind";
 import { WeatherData } from "@/types/weather";
 import { Gauge, Navigation } from "lucide-react";
@@ -11,28 +13,28 @@ function getWindDirection(deg: number): string {
   return dirs[Math.round(deg / 45) % 8] ?? "N";
 }
 
-function getBeaufortScale(speed: number): { level: number; label: string } {
-  if (speed < 1) return { level: 0, label: "Calm" };
-  if (speed < 6) return { level: 1, label: "Light air" };
-  if (speed < 12) return { level: 2, label: "Light breeze" };
-  if (speed < 20) return { level: 3, label: "Gentle breeze" };
-  if (speed < 29) return { level: 4, label: "Moderate breeze" };
-  if (speed < 39) return { level: 5, label: "Fresh breeze" };
-  if (speed < 50) return { level: 6, label: "Strong breeze" };
-  if (speed < 62) return { level: 7, label: "Near gale" };
-  if (speed < 75) return { level: 8, label: "Gale" };
-  if (speed < 89) return { level: 9, label: "Severe gale" };
-  if (speed < 103) return { level: 10, label: "Storm" };
-  if (speed < 118) return { level: 11, label: "Violent storm" };
-  return { level: 12, label: "Hurricane" };
+function getBeaufortScale(speed: number): { level: number; labelKey: TranslationKey } {
+  if (speed < 1) return { level: 0, labelKey: "beaufortCalm" };
+  if (speed < 6) return { level: 1, labelKey: "beaufortLightAir" };
+  if (speed < 12) return { level: 2, labelKey: "beaufortLightBreeze" };
+  if (speed < 20) return { level: 3, labelKey: "beaufortGentleBreeze" };
+  if (speed < 29) return { level: 4, labelKey: "beaufortModerateBreeze" };
+  if (speed < 39) return { level: 5, labelKey: "beaufortFreshBreeze" };
+  if (speed < 50) return { level: 6, labelKey: "beaufortStrongBreeze" };
+  if (speed < 62) return { level: 7, labelKey: "beaufortNearGale" };
+  if (speed < 75) return { level: 8, labelKey: "beaufortGale" };
+  if (speed < 89) return { level: 9, labelKey: "beaufortSevereGale" };
+  if (speed < 103) return { level: 10, labelKey: "beaufortStorm" };
+  if (speed < 118) return { level: 11, labelKey: "beaufortViolentStorm" };
+  return { level: 12, labelKey: "beaufortHurricane" };
 }
 
-function getPressureStatus(hpa: number): { label: string; color: string } {
-  if (hpa < 1000) return { label: "Low pressure", color: "text-blue-400" };
-  if (hpa < 1013) return { label: "Below normal", color: "text-sky-300" };
-  if (hpa < 1020) return { label: "Normal", color: "text-green-400" };
-  if (hpa < 1030) return { label: "High pressure", color: "text-orange-400" };
-  return { label: "Very high", color: "text-red-400" };
+function getPressureStatus(hpa: number): { labelKey: TranslationKey; color: string } {
+  if (hpa < 1000) return { labelKey: "pressureLow", color: "text-blue-400" };
+  if (hpa < 1013) return { labelKey: "pressureBelowNormal", color: "text-sky-300" };
+  if (hpa < 1020) return { labelKey: "pressureNormal", color: "text-green-400" };
+  if (hpa < 1030) return { labelKey: "pressureHigh", color: "text-orange-400" };
+  return { labelKey: "pressureVeryHigh", color: "text-red-400" };
 }
 
 interface WindPressureCardProps {
@@ -41,6 +43,7 @@ interface WindPressureCardProps {
 }
 
 const WindPressureCardComponent = ({ weather, windSourceKmh }: WindPressureCardProps) => {
+  const { t } = useLanguage();
   const { current } = weather;
   const windSpeed = roundWindKmh(windSourceKmh ?? getCurrentWindKmh(weather));
   const windDir = current.windDirection10m ?? 0;
@@ -64,7 +67,7 @@ const WindPressureCardComponent = ({ weather, windSourceKmh }: WindPressureCardP
   return (
     <GlassCard className="p-6 w-full flex flex-col gap-5">
       <h3 className="text-xl font-medium text-white drop-shadow-sm">
-        Wind & Pressure
+        {t("windPressureTitle")}
       </h3>
 
       {/* ✅ Wind compass */}
@@ -102,15 +105,17 @@ const WindPressureCardComponent = ({ weather, windSourceKmh }: WindPressureCardP
             <span className="text-3xl font-light text-white">{windSpeed}</span>
             <span className="mb-1 text-sm text-white/60">km/h</span>
           </div>
-          <span className="text-xs text-white/50">From {dirLabel} · {beaufort.label}</span>
-          <span className="text-xs text-white/40">Gusts up to {windGusts} km/h</span>
+          <span className="text-xs text-white/50">
+            {t("fromDirection", { direction: dirLabel, level: t(beaufort.labelKey) })}
+          </span>
+          <span className="text-xs text-white/40">{t("gustsUpTo", { value: windGusts })}</span>
         </div>
       </div>
 
       {/* ✅ Beaufort scale bar */}
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-white/50">Beaufort Scale</span>
+          <span className="text-xs text-white/50">{t("beaufortScale")}</span>
           <span className="text-xs font-semibold text-white">
             {beaufort.level} / 12
           </span>
@@ -137,10 +142,10 @@ const WindPressureCardComponent = ({ weather, windSourceKmh }: WindPressureCardP
             <span className="mb-0.5 text-sm text-white/60">hPa</span>
           </div>
           <span className={`text-xs font-medium ${pressureStatus.color}`}>
-            {pressureStatus.label}
+            {t(pressureStatus.labelKey)}
           </span>
           <span className="text-xs text-white/40">
-            Surface: {surfacePressure} hPa
+            {t("surfacePressure", { value: surfacePressure })}
           </span>
         </div>
       </div>

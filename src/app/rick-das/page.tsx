@@ -4,24 +4,11 @@ import Link from "next/link";
 
 /* ─────────── METADATA (SSR) ─────────── */
 const founderDescription = `${metadataConfig.founder.description} Explore his background, skills, research, and projects.`;
-const founderKeywords = Array.from(
-  new Set([
-    ...metadataConfig.founder.keywords,
-    "Rick Das NASA ISRO",
-    "Who is Rick Das",
-    "Who is Rick Das from barasat",
-    "Rick Das",
-    "Rick Das quantum computing",
-    "Rick Das Google Cloud",
-    "Rick Das Kolkata",
-    "Rick Das full stack developer",
-  ])
-);
 
 const founderBaseMetadata = constructMetadata({
   title: metadataConfig.founder.title,
   description: founderDescription,
-  keywords: founderKeywords,
+  keywords: null,
 });
 
 export const metadata: Metadata = {
@@ -121,6 +108,7 @@ const personJsonLd = {
 const faqJsonLd = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  inLanguage: ["en", "bn", "hi", "ja", "ko"],
   mainEntity: [
     {
       "@type": "Question",
@@ -128,6 +116,38 @@ const faqJsonLd = {
       acceptedAnswer: {
         "@type": "Answer",
         text: "Rick Das is an Indian full-stack developer and quantum computing researcher based in Kolkata, India. He is the founder and developer of AeroWeather, a real-time weather intelligence platform. He is a registered NASA Virtual Guest, ISRO START-2026 participant, and currently pursuing a BSc in Computer Science (Honours).",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "রিক দাস কে?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Rick Das AeroWeather-এর প্রতিষ্ঠাতা ও ডেভেলপার। তিনি কলকাতা, ভারতের একজন ফুল-স্ট্যাক ডেভেলপার এবং কোয়ান্টাম কম্পিউটিং গবেষক।",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "रिक दास कौन है?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Rick Das AeroWeather के संस्थापक और डेवलपर हैं। वह कोलकाता, भारत के फुल-स्टैक डेवलपर और क्वांटम कंप्यूटिंग शोधकर्ता हैं।",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "リック・ダスとは誰ですか？",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Rick DasはAeroWeatherの創設者兼開発者です。インド・コルカタを拠点とするフルスタック開発者であり、量子コンピューティングの研究者です。",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "릭 다스는 누구인가요?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Rick Das는 AeroWeather의 창립자이자 개발자입니다. 인도 콜카타를 기반으로 활동하는 풀스택 개발자이며 양자컴퓨팅 연구자입니다.",
       },
     },
     {
@@ -234,6 +254,52 @@ export default function WhoIsRickDasPage() {
           algorithms, operating systems, computer networks, software
           engineering, and artificial intelligence.
         </p>
+      </section>
+
+      {/* ═══════════════ MULTILINGUAL SEO ═══════════════ */}
+      <section className="mb-12">
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 md:p-8">
+          <h2 className="mb-5 text-xl font-bold text-white">
+            Multilingual Profile Snapshot
+          </h2>
+
+          <div className="space-y-5">
+            <div>
+              <h3 className="text-lg font-semibold text-white">Who is Rick Das?</h3>
+              <p className={`${ts} mt-1 text-sm`}>
+                Rick Das is the founder of AeroWeather, a full-stack developer, and a quantum computing researcher based in Kolkata, India.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-white">রিক দাস কে?</h3>
+              <p className={`${ts} mt-1 text-sm`}>
+                Rick Das AeroWeather-এর প্রতিষ্ঠাতা, ফুল-স্ট্যাক ডেভেলপার এবং কোয়ান্টাম কম্পিউটিং গবেষক।
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-white">रिक दास कौन है?</h3>
+              <p className={`${ts} mt-1 text-sm`}>
+                Rick Das AeroWeather के संस्थापक, फुल-स्टैक डेवलपर और क्वांटम कंप्यूटिंग शोधकर्ता हैं।
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-white">リック・ダスとは誰ですか？</h3>
+              <p className={`${ts} mt-1 text-sm`}>
+                Rick DasはAeroWeatherの創設者であり、フルスタック開発者、量子コンピューティング研究者です。
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-white">릭 다스는 누구인가요?</h3>
+              <p className={`${ts} mt-1 text-sm`}>
+                Rick Das는 AeroWeather의 창립자이며, 풀스택 개발자이자 양자컴퓨팅 연구자입니다.
+              </p>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* ═══════════════ PROJECTS ═══════════════ */}

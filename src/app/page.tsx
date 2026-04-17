@@ -1,7 +1,7 @@
 import ClientDashboard from "@/components/weather/client-dashboard";
 import { constructMetadata, metadataConfig } from "@/config/metadata";
+import { FounderSeoLinks } from "@/components/home/founder-seo-links";
 import { createFallbackWeatherData } from "@/lib/fallback-weather";
-import Link from "next/link";
 
 export const metadata = constructMetadata({
   title: metadataConfig.home.title,
@@ -22,14 +22,7 @@ export default async function Home() {
         initialLocation={{ lat: defaultLat, lon: defaultLon, name: "Kolkata" }}
       />
 
-      <section className="mx-auto max-w-7xl px-4 pb-2">
-        <p className="text-center text-xs text-white/60">
-          Founded by{" "}
-          <Link href="/rick-das" className="text-indigo-300 underline hover:text-indigo-200">
-            Rick Das
-          </Link>
-        </p>
-      </section>
+      <FounderSeoLinks />
     </>
   );
 }

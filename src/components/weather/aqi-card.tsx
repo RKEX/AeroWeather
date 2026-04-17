@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/components/Providers/language-provider";
 import { GlassCard } from "@/components/ui/glass-card";
 import { WeatherData } from "@/types/weather";
 import { Wind } from "lucide-react";
@@ -27,17 +28,18 @@ const Pollutant = memo(({ label, value, unit }: { label: string, value: number, 
 Pollutant.displayName = "Pollutant";
 
 export const AqiCard = memo(({ aqiData }: AqiCardProps) => {
+    const { t } = useLanguage();
     if (!aqiData) return null;
     const textPrimary = "text-white";
     const textSecondary = "text-white/80";
 
     const getAqiStatus = (aqi: number) => {
-        if (aqi <= 50) return { label: 'Good', color: 'bg-green-500', text: 'text-green-500' };
-        if (aqi <= 100) return { label: 'Moderate', color: 'bg-yellow-500', text: 'text-yellow-500' };
-        if (aqi <= 150) return { label: 'Unhealthy for Sensitive Groups', color: 'bg-orange-500', text: 'text-orange-500' };
-        if (aqi <= 200) return { label: 'Unhealthy', color: 'bg-red-500', text: 'text-red-500' };
-        if (aqi <= 300) return { label: 'Very Unhealthy', color: 'bg-purple-500', text: 'text-purple-500' };
-        return { label: 'Hazardous', color: 'bg-rose-900', text: 'text-rose-900' };
+        if (aqi <= 50) return { label: t("aqiGood"), color: 'bg-green-500', text: 'text-green-500' };
+        if (aqi <= 100) return { label: t("aqiModerate"), color: 'bg-yellow-500', text: 'text-yellow-500' };
+        if (aqi <= 150) return { label: t("aqiUnhealthySensitive"), color: 'bg-orange-500', text: 'text-orange-500' };
+        if (aqi <= 200) return { label: t("aqiUnhealthy"), color: 'bg-red-500', text: 'text-red-500' };
+        if (aqi <= 300) return { label: t("aqiVeryUnhealthy"), color: 'bg-purple-500', text: 'text-purple-500' };
+        return { label: t("aqiHazardous"), color: 'bg-rose-900', text: 'text-rose-900' };
     };
 
     const status = getAqiStatus(aqiData.usAqi);
@@ -46,8 +48,8 @@ export const AqiCard = memo(({ aqiData }: AqiCardProps) => {
         <GlassCard className="w-full p-6 transition-all">
             <div className="flex justify-between items-start mb-6">
                 <div>
-                     <h3 className={`text-xl font-medium flex items-center gap-2 drop-shadow-sm ${textPrimary}`}><Wind className="w-5 h-5"/> Air Quality Index</h3>
-                     <p className={`text-sm mt-1 drop-shadow-sm ${textSecondary}`}>Based on US AQI standard</p>
+                     <h3 className={`text-xl font-medium flex items-center gap-2 drop-shadow-sm ${textPrimary}`}><Wind className="w-5 h-5"/> {t("aqiTitle")}</h3>
+                     <p className={`text-sm mt-1 drop-shadow-sm ${textSecondary}`}>{t("aqiBasedOnUs")}</p>
                 </div>
                 <div className="text-right">
                     <div className={`text-4xl font-bold ${status.text} drop-shadow-md`}>{aqiData.usAqi}</div>

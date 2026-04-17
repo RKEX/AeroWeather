@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "@/components/Providers/language-provider";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { usePerformance } from "@/components/Providers/performance-provider";
 import { DailyForecastSkeleton, HourlyForecastSkeleton } from "@/components/weather/ForecastSkeleton";
 import { LocationSearch } from "@/components/weather/location-search";
@@ -103,6 +105,7 @@ function ClientDashboard({
   const [priority2Ready, setPriority2Ready] = useState(false);
   const [priority3Ready, setPriority3Ready] = useState(false);
   const { tier } = usePerformance();
+  const { t } = useLanguage();
   const isLowEnd = tier === "LOW";
 
   const { weather, error } = useWeather(activeLocation.lat, activeLocation.lon);
@@ -176,10 +179,13 @@ function ClientDashboard({
               <h1 className="text-2xl font-bold tracking-tight text-white drop-shadow-sm">
                 AeroWeather
               </h1>
-              <p className="text-sm font-medium text-white/60">Ultra-Premium Forecast</p>
+              <p className="text-sm font-medium text-white/60">{t("appTagline")}</p>
             </div>
           </div>
-          <div className="w-full sm:max-w-md lg:max-w-xl">
+          <div className="flex w-full flex-col gap-2 sm:max-w-md lg:max-w-xl">
+            <div className="flex justify-end">
+              <LanguageSwitcher />
+            </div>
             <LocationSearch onSelect={handleLocationSelect} />
           </div>
         </header>

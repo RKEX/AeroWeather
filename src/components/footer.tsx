@@ -1,8 +1,14 @@
+"use client";
+
+import { useLanguage } from "@/components/Providers/language-provider";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { Navigation } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 
 export function Footer() {
+  const { t } = useLanguage();
+
   return (
     // ✅ animate-in fade-in slide-in-from-bottom-4 সরানো হয়েছে
     // filter-related property GPU composited না — CLS বাড়াচ্ছিল
@@ -23,14 +29,15 @@ export function Footer() {
                 AeroWeather
               </span>
             </div>
+            <div>
+              <LanguageSwitcher />
+            </div>
             <div className="flex flex-col gap-4">
               <p className="text-sm leading-relaxed font-medium text-white/60">
-                Ultra-Premium Weather Intelligence Platform providing real-time
-                forecasts, interactive radar and AI weather insights for a
-                global audience.
+                {t("footerDescription")}
               </p>
               <p className="text-[11px] font-bold tracking-widest text-indigo-400/80 uppercase">
-                Weather data powered by Open-Meteo API
+                {t("footerDataPowered")}
               </p>
             </div>
           </div>
@@ -38,47 +45,49 @@ export function Footer() {
           {/* Navigation Section */}
           <div className="flex flex-col gap-6">
             <h4 className="text-xs font-bold tracking-[0.2em] text-white uppercase">
-              Navigation
+              {t("footerNavigation")}
             </h4>
             <nav className="flex flex-col gap-3">
-              <FooterLink href="/weather/today">7 Day Forecast</FooterLink>
-              <FooterLink href="/weather/tomorrow">Hourly Forecast</FooterLink>
-              <FooterLink href="/">Weather Radar</FooterLink>
-              <FooterLink href="/sitemap.xml">City Weather</FooterLink>
-              <FooterLink href="/">Weather Maps</FooterLink>
+              <FooterLink href="/weather/today">{t("footer7DayForecast")}</FooterLink>
+              <FooterLink href="/weather/tomorrow">{t("footerHourlyForecast")}</FooterLink>
+              <FooterLink href="/">{t("footerWeatherRadar")}</FooterLink>
+              <FooterLink href="/sitemap.xml">{t("footerCityWeather")}</FooterLink>
+              <FooterLink href="/">{t("footerWeatherMaps")}</FooterLink>
             </nav>
           </div>
 
           {/* Popular Cities Section */}
           <div className="flex flex-col gap-6">
             <h4 className="text-xs font-bold tracking-[0.2em] text-white uppercase">
-              Popular Cities
+              {t("footerPopularCities")}
             </h4>
             <nav className="flex flex-col gap-3">
               <FooterLink href="/weather/kolkata">
-                Weather in Kolkata
+                {t("footerWeatherInKolkata")}
               </FooterLink>
-              <FooterLink href="/weather/delhi">Weather in Delhi</FooterLink>
-              <FooterLink href="/weather/mumbai">Weather in Mumbai</FooterLink>
-              <FooterLink href="/weather/london">Weather in London</FooterLink>
+              <FooterLink href="/weather/delhi">{t("footerWeatherInDelhi")}</FooterLink>
+              <FooterLink href="/weather/mumbai">{t("footerWeatherInMumbai")}</FooterLink>
+              <FooterLink href="/weather/london">{t("footerWeatherInLondon")}</FooterLink>
               <FooterLink href="/weather/new-york">
-                Weather in New York
+                {t("footerWeatherInNewYork")}
               </FooterLink>
-              <FooterLink href="/weather/tokyo">Weather in Tokyo</FooterLink>
+              <FooterLink href="/weather/tokyo">{t("footerWeatherInTokyo")}</FooterLink>
             </nav>
           </div>
 
           {/* Company Section */}
           <div className="flex flex-col gap-6">
             <h4 className="text-xs font-bold tracking-[0.2em] text-white uppercase">
-              Company
+              {t("footerCompany")}
             </h4>
             <nav className="flex flex-col gap-3">
-              <FooterLink href="/privacy">Privacy Policy</FooterLink>
-              <FooterLink href="/terms">Terms of Service</FooterLink>
-              <FooterLink href="/contact">Contact us</FooterLink>
-              <FooterLink href="/about">About AeroWeather</FooterLink>
-              <FooterLink href="/rick-das">Rick Das (Founder)</FooterLink>
+              <FooterLink href="/privacy">{t("footerPrivacyPolicy")}</FooterLink>
+              <FooterLink href="/terms">{t("footerTermsOfService")}</FooterLink>
+              <FooterLink href="/contact">{t("footerContactUs")}</FooterLink>
+              <FooterLink href="/about">{t("footerAboutAeroWeather")}</FooterLink>
+              <FooterLink href="/rick-das">{t("footerRickDasFounder")}</FooterLink>
+              <FooterLink href="/rick-das">{t("footerLearnRickDasBn")}</FooterLink>
+              <FooterLink href="/rick-das">{t("footerLearnRickDasHi")}</FooterLink>
             </nav>
           </div>
         </div>
@@ -88,12 +97,12 @@ export function Footer() {
           <p className="text-sm text-white/50">
             &copy; 2026{" "}
             <span className="font-semibold text-white/80">AeroWeather</span>.
-            All rights reserved.
+            {t("footerRightsReserved")}
           </p>
           <div className="flex items-center gap-2">
             <div className="h-px w-8 bg-white/10" />
             <p className="text-[10px] font-black tracking-[0.3em] text-white/30 uppercase">
-              Built and maintained by{" "}
+              {t("footerBuiltBy")}{" "}
               <Link href="/rick-das" className="text-indigo-400/70 hover:text-indigo-300">
                 Rick Das
               </Link>

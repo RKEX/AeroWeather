@@ -1,0 +1,80 @@
+"use client";
+
+import { useLanguage } from "@/components/Providers/language-provider";
+import { GlassCard } from "@/components/ui/glass-card";
+import { AlertTriangle, FileText, LucideIcon, Mail, Scale, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+
+export default function TermsContent() {
+  const { t } = useLanguage();
+  const textSecondary = "text-white/70";
+
+  return (
+    <main className="max-w-4xl mx-auto px-6 py-20">
+      <div className="mb-8">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/15"
+        >
+          ← {t("backToHome")}
+        </Link>
+      </div>
+
+      <div className="text-center mb-16">
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">{t("termsTitle")}</h1>
+        <p className={`${textSecondary} text-lg`}>{t("termsSubtitle")}</p>
+      </div>
+
+      <div className="flex flex-col gap-8">
+        <TermsSection
+          icon={FileText}
+          title={t("termsIntroductionTitle")}
+          content={t("termsIntroductionContent")}
+        />
+        <TermsSection
+          icon={ShieldCheck}
+          title={t("termsDataDisclaimerTitle")}
+          content={t("termsDataDisclaimerContent")}
+        />
+        <TermsSection
+          icon={AlertTriangle}
+          title={t("termsNoLiabilityTitle")}
+          content={t("termsNoLiabilityContent")}
+        />
+        <TermsSection
+          icon={Scale}
+          title={t("termsPlatformUsageTitle")}
+          content={t("termsPlatformUsageContent")}
+        />
+
+        <GlassCard className="p-8 text-center mt-8">
+          <h2 className="text-xl font-bold text-white mb-4">{t("termsClarificationTitle")}</h2>
+          <p className={`${textSecondary} mb-6`}>{t("termsClarificationBody")}</p>
+          <a
+            href="mailto:rickd7587@gmail.com"
+            className="inline-flex items-center gap-2 px-8 py-3 rounded-2xl bg-indigo-600 border border-indigo-400/30 text-white font-bold transition-all hover:bg-indigo-500 hover:shadow-[0_0_20px_rgba(99,102,241,0.3)]"
+          >
+            <Mail className="w-5 h-5" />
+            {t("footerContactUs")}
+          </a>
+        </GlassCard>
+      </div>
+    </main>
+  );
+}
+
+function TermsSection({ icon: Icon, title, content }: { icon: LucideIcon; title: string; content: string }) {
+  return (
+    <GlassCard className="p-6 md:p-8">
+      <div className="flex gap-6">
+        <div className="shrink-0 w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+          <Icon className="w-6 h-6 text-indigo-400" />
+        </div>
+        <div>
+          <h2 className="text-xl font-bold text-white mb-2">{title}</h2>
+          <p className="text-white/60 leading-relaxed">{content}</p>
+        </div>
+      </div>
+    </GlassCard>
+  );
+}

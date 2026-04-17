@@ -1,10 +1,12 @@
 "use client";
 
+import { useLanguage } from "@/components/Providers/language-provider";
 import { GlassCard } from "@/components/ui/glass-card";
 import {
     generateWeatherInsight,
     type InsightCategory,
 } from "@/lib/ai-insight";
+import type { TranslationKey } from "@/lib/i18n";
 import { WeatherData } from "@/types/weather";
 import {
     CloudLightning,
@@ -26,7 +28,7 @@ interface AiWeatherInsightProps {
 }
 
 function accentTheme(category: InsightCategory): {
-  label: string;
+  labelKey: TranslationKey;
   icon: LucideIcon;
   border: string;
   glow: string;
@@ -36,7 +38,7 @@ function accentTheme(category: InsightCategory): {
 } {
   if (category === "rain") {
     return {
-      label: "Rain Outlook",
+      labelKey: "insightRainOutlook",
       icon: CloudRain,
       border: "from-blue-500/40 via-cyan-500/20 to-transparent",
       glow: "shadow-blue-500/20",
@@ -48,7 +50,7 @@ function accentTheme(category: InsightCategory): {
 
   if (category === "storm") {
     return {
-      label: "Storm Advisory",
+      labelKey: "insightStormAdvisory",
       icon: CloudLightning,
       border: "from-purple-500/40 via-violet-500/20 to-transparent",
       glow: "shadow-purple-500/20",
@@ -60,7 +62,7 @@ function accentTheme(category: InsightCategory): {
 
   if (category === "snow") {
     return {
-      label: "Snow Watch",
+      labelKey: "insightSnowWatch",
       icon: CloudSnow,
       border: "from-sky-400/40 via-blue-300/20 to-transparent",
       glow: "shadow-sky-400/20",
@@ -72,7 +74,7 @@ function accentTheme(category: InsightCategory): {
 
   if (category === "wind") {
     return {
-      label: "Wind Trend",
+      labelKey: "insightWindTrend",
       icon: Wind,
       border: "from-teal-400/40 via-emerald-400/20 to-transparent",
       glow: "shadow-teal-400/20",
@@ -84,7 +86,7 @@ function accentTheme(category: InsightCategory): {
 
   if (category === "humidity") {
     return {
-      label: "Humidity Signal",
+      labelKey: "insightHumiditySignal",
       icon: Droplets,
       border: "from-emerald-500/40 via-teal-500/20 to-transparent",
       glow: "shadow-emerald-500/20",
@@ -96,7 +98,7 @@ function accentTheme(category: InsightCategory): {
 
   if (category === "uv") {
     return {
-      label: "UV Alert",
+      labelKey: "insightUvAlert",
       icon: Sun,
       border: "from-amber-500/40 via-orange-500/20 to-transparent",
       glow: "shadow-amber-500/20",
@@ -108,7 +110,7 @@ function accentTheme(category: InsightCategory): {
 
   if (category === "heat") {
     return {
-      label: "Heat Signal",
+      labelKey: "insightHeatSignal",
       icon: Flame,
       border: "from-orange-500/40 via-red-500/20 to-transparent",
       glow: "shadow-orange-500/20",
@@ -120,7 +122,7 @@ function accentTheme(category: InsightCategory): {
 
   if (category === "cold") {
     return {
-      label: "Cold Trend",
+      labelKey: "insightColdTrend",
       icon: Snowflake,
       border: "from-cyan-500/40 via-sky-500/20 to-transparent",
       glow: "shadow-cyan-500/20",
@@ -132,7 +134,7 @@ function accentTheme(category: InsightCategory): {
 
   if (category === "clear") {
     return {
-      label: "Clear Window",
+      labelKey: "insightClearWindow",
       icon: MoonStar,
       border: "from-indigo-500/40 via-sky-500/20 to-transparent",
       glow: "shadow-indigo-500/20",
@@ -143,7 +145,7 @@ function accentTheme(category: InsightCategory): {
   }
 
   return {
-    label: "AI Insight",
+    labelKey: "insightAiInsight",
     icon: Sparkles,
     border: "from-indigo-400/40 via-violet-400/20 to-transparent",
     glow: "shadow-indigo-400/20",
@@ -156,6 +158,7 @@ function accentTheme(category: InsightCategory): {
 export function AiWeatherInsight({ weather, dayIndex = -1 }: AiWeatherInsightProps) {
   const textPrimary = "text-white";
   const textTertiary = "text-white/60";
+  const { t } = useLanguage();
 
   const insight = generateWeatherInsight(weather, dayIndex);
   const theme = accentTheme(insight.category);
@@ -183,7 +186,7 @@ export function AiWeatherInsight({ weather, dayIndex = -1 }: AiWeatherInsightPro
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <span className={`text-xs font-semibold uppercase tracking-widest ${textTertiary}`}>
-              {theme.label}
+              {t(theme.labelKey)}
             </span>
             {/* Animated indicator */}
             <div className="relative ml-2 flex items-center">

@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/components/Providers/language-provider";
 import { GlassCard } from "@/components/ui/glass-card";
 import { getWeatherIcon } from "@/lib/weather-theme";
 import { WeatherData } from "@/types/weather";
@@ -30,6 +31,7 @@ const HourlyForecastComponent = ({
 }: HourlyForecastProps) => {
   const textPrimary = "text-white";
   const textSecondary = "text-white/80";
+  const { t } = useLanguage();
 
   const isForecast = dayIndex >= 0;
 
@@ -65,7 +67,7 @@ const HourlyForecastComponent = ({
   return (
     <GlassCard className="w-full p-6">
       <h3 className={`mb-6 text-xl font-medium drop-shadow-sm ${textPrimary}`}>
-        Hourly Forecast
+        {t("hourlyForecast")}
       </h3>
 
       {/* Timeline cards */}
@@ -80,7 +82,7 @@ const HourlyForecastComponent = ({
               key={i}
               className={`flex min-w-17.5 flex-col items-center justify-center rounded-2xl border p-3 transition-colors ${itemBg}`}>
               <span className={`mb-2 text-sm ${textSecondary}`}>
-                {i === 0 ? "Now" : hour.time}
+                {i === 0 ? t("now") : hour.time}
               </span>
 
               <Icon className={`mb-2 h-6 w-6 shadow-sm ${textPrimary}`} />

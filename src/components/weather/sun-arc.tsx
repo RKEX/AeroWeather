@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/components/Providers/language-provider";
 import { GlassCard } from "@/components/ui/glass-card";
 import { WeatherData } from "@/types/weather";
 import { memo, useEffect, useId, useState } from "react";
@@ -37,6 +38,7 @@ const SunArcComponent = ({
   dayIndex?: number;
   timezone?: string;
 }) => {
+  const { t } = useLanguage();
   // ✅ React useId — SSR-safe, always unique per instance
   const uid = useId().replace(/:/g, "");
   const gradId = `sunGrad-${uid}`;
@@ -44,7 +46,6 @@ const SunArcComponent = ({
 
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
-    setNow(new Date());
     const t = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(t);
   }, []);
@@ -66,12 +67,12 @@ const SunArcComponent = ({
   let statusText = "";
   if (now < sunriseUTC) {
     const diff = Math.round((sunriseUTC.getTime() - now.getTime()) / 60000);
-    statusText = diff < 60 ? `Sunrise in ${diff}m` : "Waiting for sunrise";
+    statusText = diff < 60 ? t("sunriseIn", { minutes: diff }) : t("waitingForSunrise");
   } else if (now < sunsetUTC) {
     const diff = Math.round((sunsetUTC.getTime() - now.getTime()) / 60000);
-    statusText = diff < 60 ? `Sunset in ${diff}m` : "Sun is up";
+    statusText = diff < 60 ? t("sunsetIn", { minutes: diff }) : t("sunIsUp");
   } else {
-    statusText = "Sun has set";
+    statusText = t("sunHasSet");
   }
 
   const formatRawTime = (str: string): string => {
@@ -114,7 +115,7 @@ const SunArcComponent = ({
   return (
     <GlassCard className="p-6 w-full relative transition-all">
       <h3 className="text-xl font-medium mb-2 drop-shadow-sm text-white">
-        Sunrise &amp; Sunset
+        {t("sunTitle")}
       </h3>
 
       <svg

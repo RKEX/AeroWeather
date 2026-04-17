@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/components/Providers/language-provider";
 import React from "react";
 
 import { GlassCard } from "@/components/ui/glass-card";
@@ -31,6 +32,7 @@ export const WeatherHero = memo(function WeatherHero({
 }: WeatherHeroProps) {
   const textPrimary = "text-white";
   const textTertiary = "text-white/60";
+  const { t } = useLanguage();
 
   const model = useMemo(() => {
     const isForecast = dayIndex >= 0;
@@ -63,7 +65,7 @@ export const WeatherHero = memo(function WeatherHero({
     const visibilityKm =
       !isForecast && weather.hourly?.visibility?.[0]
         ? `${(weather.hourly.visibility[0] / 1000).toFixed(1)} km`
-        : "Forecast";
+        : t("forecastWord");
 
     return {
       weatherCode,
@@ -75,7 +77,7 @@ export const WeatherHero = memo(function WeatherHero({
       wind,
       visibilityKm,
     };
-  }, [dayIndex, weather, windSourceKmh]);
+  }, [dayIndex, t, weather, windSourceKmh]);
 
   useEffect(() => {
     if (process.env.NODE_ENV !== "production") {
@@ -107,22 +109,22 @@ export const WeatherHero = memo(function WeatherHero({
         <div className="grid w-full grid-cols-2 gap-4 md:w-auto">
           <WeatherMetric
             icon={Thermometer}
-            label="Feels Like"
+            label={t("feelsLike")}
             value={showDetails ? `${Math.round(model.apparent)}°` : "--"}
           />
           <WeatherMetric
             icon={Droplets}
-            label="Humidity"
+            label={t("humidity")}
             value={showDetails ? `${Math.round(model.humidity)}%` : "--"}
           />
           <WeatherMetric
             icon={Wind}
-            label="Wind"
+            label={t("wind")}
             value={showDetails ? formatWindKmh(model.wind) : "--"}
           />
           <WeatherMetric
             icon={Eye}
-            label="Visibility"
+            label={t("visibility")}
             value={showDetails ? model.visibilityKm : "--"}
           />
         </div>

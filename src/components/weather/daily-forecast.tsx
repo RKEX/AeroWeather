@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/components/Providers/language-provider";
 import { GlassCard } from "@/components/ui/glass-card";
 import { getDaySlug } from "@/lib/day-slug";
 import { getWeatherIcon } from "@/lib/weather-theme";
@@ -45,6 +46,7 @@ DetailMetric.displayName = "DetailMetric";
 const DailyForecastComponent = ({ weather }: DailyForecastProps) => {
   const textPrimary = "text-white";
   const textSecondary = "text-white/80";
+  const { t } = useLanguage();
 
   const daily = weather.daily;
   const hourly = weather.hourly;
@@ -90,13 +92,13 @@ const DailyForecastComponent = ({ weather }: DailyForecastProps) => {
   return (
     <GlassCard className="flex w-full flex-col gap-3 p-6">
       <h3 className={`mb-2 text-xl font-semibold tracking-tight drop-shadow-sm ${textPrimary}`}>
-        7-Day Forecast
+        {t("sevenDayForecast")}
       </h3>
 
       <div className="flex flex-col gap-2">
         {forecastDays.map((day, i) => {
           const Icon = getWeatherIcon(day.code, true);
-          const label = i === 0 ? "Tomorrow" : format(day.date, "EEE, MMM d");
+          const label = i === 0 ? t("tomorrow") : format(day.date, "EEE, MMM d");
           const itemBg = "bg-white/10 border-white/15 hover:bg-white/20";
 
           return (

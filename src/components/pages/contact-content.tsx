@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/components/Providers/language-provider";
 import { GlassCard } from "@/components/ui/glass-card";
 import {
     CheckCircle,
@@ -14,6 +15,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 export default function ContactContent() {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -43,11 +45,11 @@ export default function ContactContent() {
         setFormData({ name: "", email: "", message: "" });
       } else {
         setStatus("error");
-        setErrorMessage(data.error || "Something went wrong.");
+        setErrorMessage(data.error || t("contactErrorGeneric"));
       }
     } catch {
       setStatus("error");
-      setErrorMessage("Failed to send message. Please check your connection.");
+      setErrorMessage(t("contactErrorNetwork"));
     }
   };
 
@@ -57,17 +59,16 @@ export default function ContactContent() {
         <Link
           href="/"
           className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/15">
-          ← Back to Home
+          ← {t("backToHome")}
         </Link>
       </div>
 
       <div className="mb-12 text-center">
         <h1 className="mb-6 text-4xl font-bold text-white md:text-5xl">
-          Get in Touch
+          {t("contactTitle")}
         </h1>
         <p className="mx-auto max-w-xl text-lg text-white/60">
-          Have a question about AeroWeather or interested in working together?
-          Send a message below.
+          {t("contactSubtitle")}
         </p>
       </div>
 
@@ -81,17 +82,16 @@ export default function ContactContent() {
                 </div>
                 <div>
                   <h2 className="mb-2 text-2xl font-bold text-white">
-                    Message Sent!
+                    {t("contactMessageSentTitle")}
                   </h2>
                   <p className="text-white/60">
-                    Thank you for reaching out. I&apos;ll get back to you as
-                    soon as possible.
+                    {t("contactMessageSentBody")}
                   </p>
                 </div>
                 <button
                   onClick={() => setStatus("idle")}
                   className="rounded-2xl border border-white/20 bg-white/10 px-8 py-3 font-bold text-white transition-all hover:bg-white/20">
-                  Send another message
+                  {t("contactSendAnother")}
                 </button>
               </div>
             : <form
@@ -100,12 +100,12 @@ export default function ContactContent() {
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <div className="space-y-2">
                     <label className="ml-1 text-sm font-bold tracking-widest text-white/40 uppercase">
-                      Name
+                      {t("contactName")}
                     </label>
                     <input
                       required
                       type="text"
-                      placeholder="Enter your name"
+                      placeholder={t("contactNamePlaceholder")}
                       className="w-full rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-white transition-all placeholder:text-white/20 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none"
                       value={formData.name}
                       onChange={(e) =>
@@ -115,12 +115,12 @@ export default function ContactContent() {
                   </div>
                   <div className="space-y-2">
                     <label className="ml-1 text-sm font-bold tracking-widest text-white/40 uppercase">
-                      Email
+                      {t("contactEmail")}
                     </label>
                     <input
                       required
                       type="email"
-                      placeholder="Enter your email"
+                      placeholder={t("contactEmailPlaceholder")}
                       className="w-full rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-white transition-all placeholder:text-white/20 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none"
                       value={formData.email}
                       onChange={(e) =>
@@ -131,12 +131,12 @@ export default function ContactContent() {
                 </div>
                 <div className="space-y-2">
                   <label className="ml-1 text-sm font-bold tracking-widest text-white/40 uppercase">
-                    Message
+                    {t("contactMessage")}
                   </label>
                   <textarea
                     required
                     rows={6}
-                    placeholder="Tell me what's on your mind..."
+                    placeholder={t("contactMessagePlaceholder")}
                     className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-white transition-all placeholder:text-white/20 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none"
                     value={formData.message}
                     onChange={(e) =>
@@ -158,11 +158,11 @@ export default function ContactContent() {
                   {status === "loading" ?
                     <>
                       <Loader2 className="h-6 w-6 animate-spin" />
-                      Sending...
+                      {t("contactSending")}
                     </>
                   : <>
                       <Send className="h-5 w-5" />
-                      Send Message
+                      {t("contactSendMessage")}
                     </>
                   }
                 </button>

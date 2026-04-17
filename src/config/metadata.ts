@@ -78,15 +78,20 @@ export function constructMetadata({
   description?: string;
   image?: string;
   noIndex?: boolean;
-  keywords?: string[];
+  keywords?: string[] | null;
 } = {}): Metadata {
+  const resolvedKeywords =
+    keywords === null
+      ? undefined
+      : [...metadataConfig.home.keywords, ...(keywords ?? [])];
+
   return {
     title: {
       default: title ? `${title} | AeroWeather` : SITE_CONFIG.name,
       template: "%s | AeroWeather",
     },
     description: description || SITE_CONFIG.description,
-    keywords: [...(metadataConfig.home.keywords), ...keywords],
+    ...(resolvedKeywords ? { keywords: resolvedKeywords } : {}),
     authors: [
       {
         name: SITE_CONFIG.author,
