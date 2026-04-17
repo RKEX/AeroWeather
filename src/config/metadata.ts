@@ -1,3 +1,8 @@
+import {
+    DEFAULT_LOCALE,
+    SUPPORTED_LOCALES,
+    SupportedLocale,
+} from "@/lib/locales";
 import { defaultSEO } from "@/lib/seo-config";
 import { Metadata } from "next";
 
@@ -26,8 +31,56 @@ const founderSeoKeywords = Array.from(
     "AeroWeather founder",
     "Rick Das biography",
     "Rick Das developer",
+    "রিক দাস",
+    "रिक दास",
+    "リック・ダス",
+    "릭 다스",
+    "里克·达斯",
   ])
 );
+
+const OPEN_GRAPH_LOCALE_MAP: Record<SupportedLocale, string> = {
+  en: "en_US",
+  bn: "bn_BD",
+  hi: "hi_IN",
+  zh: "zh_CN",
+  ja: "ja_JP",
+  ko: "ko_KR",
+  es: "es_ES",
+  fr: "fr_FR",
+  de: "de_DE",
+  ar: "ar_SA",
+  ru: "ru_RU",
+  pt: "pt_PT",
+};
+
+function normalizeMetadataPathname(pathname?: string): string {
+  const trimmed = (pathname ?? "").trim();
+  if (!trimmed || trimmed === "/") return "";
+  return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+}
+
+function buildLocaleAlternates(
+  pathname: string,
+  locale: SupportedLocale
+): Metadata["alternates"] {
+  const normalizedPathname = normalizeMetadataPathname(pathname);
+
+  const languages = Object.fromEntries(
+    SUPPORTED_LOCALES.map((targetLocale) => [
+      targetLocale,
+      `${SITE_CONFIG.url}/${targetLocale}${normalizedPathname}`,
+    ])
+  ) as Record<string, string>;
+
+  languages["x-default"] =
+    `${SITE_CONFIG.url}/${DEFAULT_LOCALE}${normalizedPathname}`;
+
+  return {
+    canonical: `${SITE_CONFIG.url}/${locale}${normalizedPathname}`,
+    languages,
+  };
+}
 
 export const metadataConfig = {
   home: {
@@ -73,17 +126,26 @@ export function constructMetadata({
   image = SITE_CONFIG.ogImage,
   noIndex = false,
   keywords = [],
+  locale = DEFAULT_LOCALE,
+  pathname = "/",
 }: {
   title?: string;
   description?: string;
   image?: string;
   noIndex?: boolean;
   keywords?: string[] | null;
+  locale?: SupportedLocale;
+  pathname?: string;
 } = {}): Metadata {
   const resolvedKeywords =
     keywords === null
       ? undefined
       : [...metadataConfig.home.keywords, ...(keywords ?? [])];
+  const alternates = buildLocaleAlternates(pathname, locale);
+  const canonicalUrl =
+    typeof alternates?.canonical === "string" || alternates?.canonical instanceof URL
+      ? alternates.canonical
+      : `${SITE_CONFIG.url}/${locale}${normalizeMetadataPathname(pathname)}`;
 
   return {
     title: {
@@ -101,10 +163,11 @@ export function constructMetadata({
     creator: SITE_CONFIG.author,
     publisher: SITE_CONFIG.name,
     metadataBase: new URL(SITE_CONFIG.url),
+    alternates,
     openGraph: {
       title: title || SITE_CONFIG.name,
       description: description || SITE_CONFIG.description,
-      url: SITE_CONFIG.url,
+      url: canonicalUrl,
       siteName: SITE_CONFIG.name,
       images: [
         {
@@ -114,7 +177,7 @@ export function constructMetadata({
           alt: `${SITE_CONFIG.name} - Ultra Accurate Weather Forecast`,
         },
       ],
-      locale: "en_US",
+      locale: OPEN_GRAPH_LOCALE_MAP[locale] ?? "en_US",
       type: "website",
     },
     twitter: {

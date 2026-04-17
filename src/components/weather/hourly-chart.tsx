@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/components/Providers/language-provider";
 import { memo, useEffect, useMemo, useRef } from "react";
 
 interface HourlyChartPoint {
@@ -36,6 +37,7 @@ function smoothPath(pts: { x: number; y: number }[]): string {
 
 function HourlyChartComponent({ data }: HourlyChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { t } = useLanguage();
 
   // ✅ Refs for DOM elements we'll mutate directly (no re-render)
   const lineRef      = useRef<SVGLineElement>(null);
@@ -92,7 +94,6 @@ function HourlyChartComponent({ data }: HourlyChartProps) {
     const HIDDEN = "none";
     const VISIBLE = "block";
 
-    const show = (el: SVGElement | null) => { if (el) el.style.display = VISIBLE; };
     const hide = (el: SVGElement | null) => { if (el) el.style.display = HIDDEN; };
 
     const hideAll = () => {
@@ -171,7 +172,7 @@ function HourlyChartComponent({ data }: HourlyChartProps) {
         const pd = ttPDotRef.current;
         if (pd) { pd.setAttribute("cx", (ttX + 18).toFixed(1)); pd.setAttribute("cy", (ttY + 57).toFixed(1)); pd.style.display = VISIBLE; }
         const pt = ttPrecipRef.current;
-        if (pt) { pt.setAttribute("x", (ttX + 28).toFixed(1)); pt.setAttribute("y", (ttY + 61).toFixed(1)); pt.textContent = `${d.precip}% rain`; pt.style.display = VISIBLE; }
+        if (pt) { pt.setAttribute("x", (ttX + 28).toFixed(1)); pt.setAttribute("y", (ttY + 61).toFixed(1)); pt.textContent = `${d.precip}% ${t("weatherConditionRain")}`; pt.style.display = VISIBLE; }
       } else {
         hide(ttPDotRef.current);
         hide(ttPrecipRef.current);
@@ -185,7 +186,7 @@ function HourlyChartComponent({ data }: HourlyChartProps) {
       svg.removeEventListener("mousemove", onMove);
       svg.removeEventListener("mouseleave", hideAll);
     };
-  }, [chart.pts, data]);
+  }, [chart.pts, data, t]);
 
   return (
     <div ref={containerRef} className="w-full overflow-x-auto">

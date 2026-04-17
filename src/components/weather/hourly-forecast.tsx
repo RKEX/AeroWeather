@@ -2,12 +2,12 @@
 
 import { useLanguage } from "@/components/Providers/language-provider";
 import { GlassCard } from "@/components/ui/glass-card";
+import { toLocaleTag } from "@/lib/i18n";
 import { getWeatherIcon } from "@/lib/weather-theme";
 import { WeatherData } from "@/types/weather";
-import { format } from "date-fns";
 import { Droplets } from "lucide-react";
 import dynamic from "next/dynamic";
-import { memo } from "react";
+import { memo, useMemo } from "react";
 
 const HourlyChart = dynamic(
   () => import("@/components/weather/hourly-chart").then((mod) => mod.HourlyChart),
@@ -31,7 +31,11 @@ const HourlyForecastComponent = ({
 }: HourlyForecastProps) => {
   const textPrimary = "text-white";
   const textSecondary = "text-white/80";
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const hourFormatter = useMemo(
+    () => new Intl.DateTimeFormat(toLocaleTag(language), { hour: "numeric" }),
+    [language]
+  );
 
   const isForecast = dayIndex >= 0;
 
@@ -55,7 +59,7 @@ const HourlyForecastComponent = ({
       const globalIdx = startIndex + idx;
 
       return {
-        time: format(new Date(time), "ha"),
+        time: hourFormatter.format(new Date(time)),
         temp: Math.round(weather.hourly.temperature2m[globalIdx]),
         precip: weather.hourly.precipitationProbability[globalIdx],
         wind: Math.round(weather.hourly.windSpeed10m[globalIdx]),

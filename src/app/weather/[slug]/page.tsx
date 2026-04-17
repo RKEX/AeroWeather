@@ -1,20 +1,33 @@
+import { WeatherSlugClient } from "@/components/weather/weather-slug-client";
+import { WeatherSlugError } from "@/components/weather/weather-slug-error";
+import { constructMetadata } from "@/config/metadata";
 import { resolveDayIndex } from "@/lib/day-slug";
 import { searchLocations } from "@/lib/geocode";
+import {
+    getLocaleDictionary,
+    interpolateLocaleText,
+    resolveUiLanguageFromRequest,
+    type SearchParamsRecord,
+} from "@/lib/route-locale";
 import { getWeatherData } from "@/lib/weather-api";
-import { WeatherSlugClient } from "@/components/weather/weather-slug-client";
 import { Metadata } from "next";
-export const runtime = "edge";
 
 interface Props {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<SearchParamsRecord>;
 }
 
-import { constructMetadata } from "@/config/metadata";
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: Props): Promise<Metadata> {
   const { slug } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const language = await resolveUiLanguageFromRequest(resolvedSearchParams);
+  const dictionary = await getLocaleDictionary(language);
   const decodedSlug = decodeURIComponent(slug);
-  
+  const metadataPathname = `/weather/${decodedSlug.toLowerCase()}`;
+
   // 1. Check if it's a day slug
   const dummyDates = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
@@ -26,9 +39,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (dayIndex >= 0) {
     const dayName = decodedSlug.charAt(0).toUpperCase() + decodedSlug.slice(1);
     return constructMetadata({
-      title: `${dayName} Weather Forecast`,
-      description: `Get the detailed weather forecast for ${decodedSlug} including temperature, metrics, and AI insights.`,
-      keywords: [dayName.toLowerCase(), "forecast", "weather"],
+      title: `${dayName} ${dictionary.forecastWord}`,
+      description: interpolateLocaleText(dictionary.weatherIn, { city: dayName }),
+      locale: language,
+      pathname: metadataPathname,
     });
   }
 
@@ -38,9 +52,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     if (locations && locations.length > 0) {
       const city = locations[0].name;
       return constructMetadata({
-        title: `${city} Weather Today`,
-        description: `Live weather forecast for ${city} including hourly temperature, 7-day forecast, humidity, wind speed, and radar.`,
-        keywords: [city.toLowerCase(), "local weather", "storm tracker"],
+        title: `${city} ${dictionary.forecastWord}`,
+        description: interpolateLocaleText(dictionary.weatherIn, { city }),
+        locale: language,
+        pathname: metadataPathname,
       });
     }
   } catch (e) {
@@ -48,8 +63,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return constructMetadata({
-    title: "Weather Forecast",
-    description: "Check current weather and forecasts for any city.",
+    title: dictionary.forecastWord,
+    description: dictionary.footerDescription,
+    locale: language,
+    pathname: metadataPathname,
   });
 }
 
@@ -86,11 +103,7 @@ export default async function WeatherSlugPage({ params }: Props) {
   const weather = await getWeatherData(lat, lon);
 
   if (!weather) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-900 text-white">
-        <p className="text-white/60">Failed to load weather data.</p>
-      </div>
-    );
+    return <WeatherSlugError />;
   }
 
   return (

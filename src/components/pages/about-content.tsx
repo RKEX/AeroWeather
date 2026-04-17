@@ -1,9 +1,9 @@
 "use client";
 
 import { useLanguage } from "@/components/Providers/language-provider";
+import { Link } from "@/navigation";
 import type { LucideIcon } from "lucide-react";
 import { Cloud, Compass, Eye, FileText, Rocket } from "lucide-react";
-import Link from "next/link";
 
 export default function AboutContent() {
   const { t } = useLanguage();

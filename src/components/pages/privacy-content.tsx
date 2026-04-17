@@ -2,8 +2,8 @@
 
 import { useLanguage } from "@/components/Providers/language-provider";
 import { GlassCard } from "@/components/ui/glass-card";
+import { Link } from "@/navigation";
 import { Database, LucideIcon, Mail, MapPin, Share2, Shield } from "lucide-react";
-import Link from "next/link";
 
 export default function PrivacyContent() {
   const { t } = useLanguage();

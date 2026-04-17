@@ -1,10 +1,8 @@
 "use client";
 
 import { useLanguage } from "@/components/Providers/language-provider";
-import { LanguageSwitcher } from "@/components/language-switcher";
+import { Link } from "@/navigation";
 import { Navigation } from "lucide-react";
-import type { Route } from "next";
-import Link from "next/link";
 
 export function Footer() {
   const { t } = useLanguage();
@@ -28,9 +26,6 @@ export function Footer() {
               <span className="text-xl font-bold tracking-tight text-white">
                 AeroWeather
               </span>
-            </div>
-            <div>
-              <LanguageSwitcher />
             </div>
             <div className="flex flex-col gap-4">
               <p className="text-sm leading-relaxed font-medium text-white/60">
@@ -86,8 +81,6 @@ export function Footer() {
               <FooterLink href="/contact">{t("footerContactUs")}</FooterLink>
               <FooterLink href="/about">{t("footerAboutAeroWeather")}</FooterLink>
               <FooterLink href="/rick-das">{t("footerRickDasFounder")}</FooterLink>
-              <FooterLink href="/rick-das">{t("footerLearnRickDasBn")}</FooterLink>
-              <FooterLink href="/rick-das">{t("footerLearnRickDasHi")}</FooterLink>
             </nav>
           </div>
         </div>
@@ -135,7 +128,7 @@ function FooterLink({
   }
 
   return (
-    <Link href={href as Route} className="group">
+    <Link href={href} className="group">
       {content}
     </Link>
   );

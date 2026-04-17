@@ -1,7 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/components/Providers/language-provider";
-import Link from "next/link";
+import { Link } from "@/navigation";
 
 export function FounderSeoLinks() {
   const { t } = useLanguage();
@@ -14,14 +14,6 @@ export function FounderSeoLinks() {
           Rick Das
         </Link>
       </p>
-      <div className="mt-2 flex flex-wrap items-center justify-center gap-4 text-[11px] text-white/70">
-        <Link href="/rick-das" className="underline decoration-white/40 underline-offset-2 hover:text-indigo-200">
-          {t("homeLearnRickDasBn")}
-        </Link>
-        <Link href="/rick-das" className="underline decoration-white/40 underline-offset-2 hover:text-indigo-200">
-          {t("homeLearnRickDasHi")}
-        </Link>
-      </div>
     </section>
   );
 }

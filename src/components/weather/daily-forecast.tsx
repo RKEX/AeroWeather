@@ -3,11 +3,11 @@
 import { useLanguage } from "@/components/Providers/language-provider";
 import { GlassCard } from "@/components/ui/glass-card";
 import { getDaySlug } from "@/lib/day-slug";
+import { toLocaleTag } from "@/lib/i18n";
 import { getWeatherIcon } from "@/lib/weather-theme";
+import { Link } from "@/navigation";
 import { WeatherData } from "@/types/weather";
-import { format } from "date-fns";
 import { Droplets } from "lucide-react";
-import Link from "next/link";
 import { ElementType, memo, useMemo } from "react";
 
 interface DailyForecastProps {
@@ -46,7 +46,16 @@ DetailMetric.displayName = "DetailMetric";
 const DailyForecastComponent = ({ weather }: DailyForecastProps) => {
   const textPrimary = "text-white";
   const textSecondary = "text-white/80";
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const dayLabelFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat(toLocaleTag(language), {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      }),
+    [language]
+  );
 
   const daily = weather.daily;
   const hourly = weather.hourly;
@@ -98,7 +107,7 @@ const DailyForecastComponent = ({ weather }: DailyForecastProps) => {
       <div className="flex flex-col gap-2">
         {forecastDays.map((day, i) => {
           const Icon = getWeatherIcon(day.code, true);
-          const label = i === 0 ? t("tomorrow") : format(day.date, "EEE, MMM d");
+          const label = i === 0 ? t("tomorrow") : dayLabelFormatter.format(day.date);
           const itemBg = "bg-white/10 border-white/15 hover:bg-white/20";
 
           return (

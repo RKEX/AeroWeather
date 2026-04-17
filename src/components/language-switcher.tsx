@@ -8,30 +8,29 @@ import { type WheelEvent, memo, useEffect, useMemo, useRef, useState } from "rea
 const options: { code: LanguageCode; key: TranslationKey }[] = [
   { code: "en", key: "english" },
   { code: "zh", key: "chinese" },
-  { code: "es", key: "spanish" },
-  { code: "ar", key: "arabic" },
-  { code: "pt", key: "portuguese" },
-  { code: "fr", key: "french" },
-  { code: "de", key: "german" },
-  { code: "ru", key: "russian" },
-  { code: "it", key: "italian" },
-  { code: "tr", key: "turkish" },
-  { code: "vi", key: "vietnamese" },
-  { code: "id", key: "indonesian" },
-  { code: "ur", key: "urdu" },
-  { code: "pl", key: "polish" },
-  { code: "nl", key: "dutch" },
-  { code: "bn", key: "bengali" },
-  { code: "hi", key: "hindi" },
   { code: "ja", key: "japanese" },
   { code: "ko", key: "korean" },
+  { code: "es", key: "spanish" },
+  { code: "fr", key: "french" },
+  { code: "de", key: "german" },
+  { code: "ar", key: "arabic" },
+  { code: "ru", key: "russian" },
+  { code: "pt", key: "portuguese" },
+  { code: "bn", key: "bengali" },
+  { code: "hi", key: "hindi" },
 ];
+
+const LANGUAGE_SETTINGS_ENABLED = false;
 
 function LanguageSwitcherComponent({
   className = "",
 }: {
   className?: string;
 }) {
+  if (!LANGUAGE_SETTINGS_ENABLED) {
+    return null;
+  }
+
   const { language, setLanguage, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);

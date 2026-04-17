@@ -1,3 +1,4 @@
+import { SUPPORTED_LOCALES } from "@/lib/locales";
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -15,94 +16,46 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "moscow","rio-de-janeiro"
   ];
 
-  const cityUrls = popularCities.map((city) => ({
-    url: `${baseUrl}/weather/${city}`,
-    lastModified: new Date(),
-    changeFrequency: "daily" as const,
-    priority: 0.8,
-  }));
-
-  const staticPages = [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: "hourly" as const,
-      priority: 1,
-    },
-
-    {
-      url: `${baseUrl}/about`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
-    },
-
-    {
-      url: `${baseUrl}/rick-das`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    },
-
-    {
-      url: `${baseUrl}/contact`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.5,
-    },
-
-    {
-      url: `${baseUrl}/privacy`,
-      lastModified: new Date(),
-      changeFrequency: "yearly" as const,
-      priority: 0.3,
-    },
-
-    {
-      url: `${baseUrl}/terms`,
-      lastModified: new Date(),
-      changeFrequency: "yearly" as const,
-      priority: 0.3,
-    },
-
-    // Footer navigation sections
-    {
-      url: `${baseUrl}/#weather-radar`,
-      lastModified: new Date(),
-      changeFrequency: "hourly" as const,
-      priority: 0.7,
-    },
-
-    {
-      url: `${baseUrl}/#city-weather`,
-      lastModified: new Date(),
-      changeFrequency: "hourly" as const,
-      priority: 0.7,
-    },
-
-    {
-      url: `${baseUrl}/#weather-maps`,
-      lastModified: new Date(),
-      changeFrequency: "hourly" as const,
-      priority: 0.7,
-    },
+  const localizedStaticRoutes = [
+    { path: "", changeFrequency: "hourly" as const, priority: 1 },
+    { path: "/about", changeFrequency: "monthly" as const, priority: 0.6 },
+    { path: "/rick-das", changeFrequency: "monthly" as const, priority: 0.7 },
+    { path: "/contact", changeFrequency: "monthly" as const, priority: 0.5 },
+    { path: "/privacy", changeFrequency: "yearly" as const, priority: 0.3 },
+    { path: "/terms", changeFrequency: "yearly" as const, priority: 0.3 },
   ];
 
-  const forecastPages = [
-    {
-      url: `${baseUrl}/weather/today`,
-      lastModified: new Date(),
-      changeFrequency: "hourly" as const,
-      priority: 0.9,
-    },
-
-    {
-      url: `${baseUrl}/weather/tomorrow`,
-      lastModified: new Date(),
-      changeFrequency: "hourly" as const,
-      priority: 0.9,
-    },
+  const localizedForecastRoutes = [
+    { path: "/weather/today", changeFrequency: "hourly" as const, priority: 0.9 },
+    { path: "/weather/tomorrow", changeFrequency: "hourly" as const, priority: 0.9 },
   ];
+
+  const staticPages = SUPPORTED_LOCALES.flatMap((locale) =>
+    localizedStaticRoutes.map((route) => ({
+      url: `${baseUrl}/${locale}${route.path}`,
+      lastModified: new Date(),
+      changeFrequency: route.changeFrequency,
+      priority: route.priority,
+    }))
+  );
+
+  const forecastPages = SUPPORTED_LOCALES.flatMap((locale) =>
+    localizedForecastRoutes.map((route) => ({
+      url: `${baseUrl}/${locale}${route.path}`,
+      lastModified: new Date(),
+      changeFrequency: route.changeFrequency,
+      priority: route.priority,
+    }))
+  );
+
+  const cityUrls = SUPPORTED_LOCALES.flatMap((locale) =>
+    popularCities.map((city) => ({
+      url: `${baseUrl}/${locale}/weather/${city}`,
+      lastModified: new Date(),
+      changeFrequency: "daily" as const,
+      priority: 0.8,
+    }))
+  );
 
   return [...staticPages, ...forecastPages, ...cityUrls];
 }

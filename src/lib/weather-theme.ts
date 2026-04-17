@@ -1,13 +1,14 @@
+import { TranslationKey } from "@/lib/i18n";
 import {
-  Cloud,
-  CloudDrizzle,
-  CloudFog,
-  CloudLightning,
-  CloudRain,
-  CloudSnow,
-  Cloudy,
-  Moon,
-  Sun,
+    Cloud,
+    CloudDrizzle,
+    CloudFog,
+    CloudLightning,
+    CloudRain,
+    CloudSnow,
+    Cloudy,
+    Moon,
+    Sun,
 } from "lucide-react";
 
 export type WeatherTheme =
@@ -73,18 +74,35 @@ export function getWeatherIcon(
   return Sun; // fallback
 }
 
+export function getWeatherConditionKey(weatherCode: number): TranslationKey {
+  if (weatherCode === 0) return "weatherConditionClear";
+  if (weatherCode === 1) return "weatherConditionMainlyClear";
+  if (weatherCode === 2) return "weatherConditionPartlyCloudy";
+  if (weatherCode === 3) return "weatherConditionOvercast";
+  if (weatherCode === 45 || weatherCode === 48) return "weatherConditionFog";
+  if (weatherCode >= 51 && weatherCode <= 57) return "weatherConditionDrizzle";
+  if (weatherCode >= 61 && weatherCode <= 67) return "weatherConditionRain";
+  if (weatherCode >= 71 && weatherCode <= 77) return "weatherConditionSnow";
+  if (weatherCode >= 80 && weatherCode <= 82) return "weatherConditionRainShowers";
+  if (weatherCode >= 85 && weatherCode <= 86) return "weatherConditionSnow";
+  if (weatherCode >= 95 && weatherCode <= 99) return "weatherConditionThunderstorm";
+
+  return "weatherConditionUnknown";
+}
+
 export function getWeatherConditionText(weatherCode: number): string {
-  if (weatherCode === 0) return "Clear sky";
-  if (weatherCode === 1) return "Mainly clear";
-  if (weatherCode === 2) return "Partly cloudy";
-  if (weatherCode === 3) return "Overcast";
-  if (weatherCode === 45 || weatherCode === 48) return "Fog";
-  if (weatherCode >= 51 && weatherCode <= 57) return "Drizzle";
-  if (weatherCode >= 61 && weatherCode <= 67) return "Rain";
-  if (weatherCode >= 71 && weatherCode <= 77) return "Snow";
-  if (weatherCode >= 80 && weatherCode <= 82) return "Rain showers";
-  if (weatherCode >= 85 && weatherCode <= 86) return "Snow showers";
-  if (weatherCode >= 95 && weatherCode <= 99) return "Thunderstorm";
+  const key = getWeatherConditionKey(weatherCode);
+
+  if (key === "weatherConditionClear") return "Clear sky";
+  if (key === "weatherConditionMainlyClear") return "Mainly clear";
+  if (key === "weatherConditionPartlyCloudy") return "Partly cloudy";
+  if (key === "weatherConditionOvercast") return "Overcast";
+  if (key === "weatherConditionFog") return "Fog";
+  if (key === "weatherConditionDrizzle") return "Drizzle";
+  if (key === "weatherConditionRain") return "Rain";
+  if (key === "weatherConditionSnow") return "Snow";
+  if (key === "weatherConditionRainShowers") return "Rain showers";
+  if (key === "weatherConditionThunderstorm") return "Thunderstorm";
 
   return "Unknown";
 }

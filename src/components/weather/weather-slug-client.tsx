@@ -7,14 +7,15 @@ import { WeatherHero } from "@/components/weather/weather-hero";
 import { WeatherSkeleton } from "@/components/weather/weather-skeleton";
 import { useWeather } from "@/hooks/useWeather";
 import { resolveDayIndex } from "@/lib/day-slug";
+import { toLocaleTag } from "@/lib/i18n";
 import { extractSkyTimeData } from "@/lib/sky-time";
 import { getThemeClasses, getWeatherTheme } from "@/lib/weather-theme";
+import { Link } from "@/navigation";
 import { useSkyStore } from "@/store/useSkyStore";
 import { WeatherData } from "@/types/weather";
-import { format } from "date-fns";
 import { ArrowLeft } from "lucide-react";
+import type { Route } from "next";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type TouchEvent, Suspense, useEffect, useMemo, useRef } from "react";
 
@@ -57,7 +58,7 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
   const router = useRouter();
   const touchStartXRef = useRef<number | null>(null);
   const { setWeather: setSkyWeather, setTimezone, setTimeData } = useSkyStore();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const isDaySlug = checkIsDaySlug(slug);
 
@@ -154,10 +155,26 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
   const slugIndex = allSlugs.indexOf(slug);
   const prevSlug = slugIndex > 0 ? allSlugs[slugIndex - 1] : null;
   const nextSlug = slugIndex >= 0 && slugIndex < allSlugs.length - 1 ? allSlugs[slugIndex + 1] : null;
+  const dateHeadingFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat(toLocaleTag(language), {
+        weekday: "long",
+        month: "short",
+        day: "numeric",
+      }),
+    [language]
+  );
 
   const handleSwipe = (offsetX: number) => {
-    if (offsetX < -60 && nextSlug) router.push(`/weather/${nextSlug}`);
-    if (offsetX > 60 && prevSlug) router.push(`/weather/${prevSlug}`);
+    if (offsetX < -60 && nextSlug) {
+      const nextPath = `/${language}/weather/${nextSlug}` as Route;
+      router.push(nextPath);
+    }
+
+    if (offsetX > 60 && prevSlug) {
+      const prevPath = `/${language}/weather/${prevSlug}` as Route;
+      router.push(prevPath);
+    }
   };
 
   const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
@@ -205,7 +222,9 @@ export function WeatherSlugClient({ initialWeather, locationName, slug }: Weathe
               <LanguageSwitcher />
             </div>
             <h2 className="text-2xl font-bold">
-              {format(new Date(displayWeather.daily.time[actualDayIndex] + "T00:00:00"), "EEEE, MMM do")}
+              {dateHeadingFormatter.format(
+                new Date(displayWeather.daily.time[actualDayIndex] + "T00:00:00")
+              )}
             </h2>
             <p className="text-white/60">{t("weatherIn", { city: displayName })}</p>
           </div>

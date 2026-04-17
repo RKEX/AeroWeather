@@ -46,11 +46,12 @@ const fallbackTranslations = {
   polish: "Polish",
   dutch: "Dutch",
   appTagline: "Ultra-Premium Forecast",
+  appName: "AeroWeather",
+  home: "Home",
+  metaTitle: "AeroWeather - Ultra-Premium Forecast",
   back: "Back",
   backToHome: "Back to Home",
   homeFoundedBy: "Founded by",
-  homeLearnRickDasBn: "রিক দাস সম্পর্কে জানুন",
-  homeLearnRickDasHi: "रिक दास के बारे में जानें",
   searchPlaceholder: "Search for a city...",
   useCurrentLocation: "Use current location",
   currentLocation: "Current Location",
@@ -63,6 +64,17 @@ const fallbackTranslations = {
   humidity: "Humidity",
   wind: "Wind",
   visibility: "Visibility",
+  weatherConditionClear: "Clear sky",
+  weatherConditionMainlyClear: "Mainly clear",
+  weatherConditionPartlyCloudy: "Partly cloudy",
+  weatherConditionOvercast: "Overcast",
+  weatherConditionFog: "Fog",
+  weatherConditionDrizzle: "Drizzle",
+  weatherConditionRain: "Rain",
+  weatherConditionSnow: "Snow",
+  weatherConditionRainShowers: "Rain showers",
+  weatherConditionThunderstorm: "Thunderstorm",
+  weatherConditionUnknown: "Unknown",
   forecastWord: "Forecast",
   aqiTitle: "Air Quality Index",
   aqiBasedOnUs: "Based on US AQI standard",
@@ -158,6 +170,7 @@ const fallbackTranslations = {
   contactSendMessage: "Send Message",
   contactErrorGeneric: "Something went wrong.",
   contactErrorNetwork: "Failed to send message. Please check your connection.",
+  weatherLoadingError: "Failed to load weather data.",
   privacyTitle: "Privacy Policy",
   privacySubtitle: "Transparent data practices for the AeroWeather intelligence platform.",
   privacyIntroductionTitle: "Introduction",
@@ -216,15 +229,14 @@ const fallbackTranslations = {
   footerRickDasFounder: "Rick Das (Founder)",
   footerRightsReserved: "All rights reserved.",
   footerBuiltBy: "Built and maintained by",
-  footerLearnRickDasBn: "রিক দাস সম্পর্কে জানুন",
-  footerLearnRickDasHi: "रिक दास के बारे में जानें",
 } as const;
 
 export type TranslationKey = keyof typeof fallbackTranslations;
 
-type PartialTranslations = Partial<Record<TranslationKey, string>>;
+type CompleteTranslations = Record<TranslationKey, string>;
+type PartialTranslations = Partial<CompleteTranslations>;
 
-export const translations: Record<LanguageCode, PartialTranslations> = {
+const partialTranslations: Record<LanguageCode, PartialTranslations> = {
   en: fallbackTranslations,
   zh: {
     language: "语言",
@@ -742,6 +754,17 @@ export const translations: Record<LanguageCode, PartialTranslations> = {
     humidity: "আর্দ্রতা",
     wind: "বাতাস",
     visibility: "দৃশ্যমানতা",
+    weatherConditionClear: "পরিষ্কার আকাশ",
+    weatherConditionMainlyClear: "মূলত পরিষ্কার",
+    weatherConditionPartlyCloudy: "আংশিক মেঘলা",
+    weatherConditionOvercast: "মেঘাচ্ছন্ন",
+    weatherConditionFog: "কুয়াশা",
+    weatherConditionDrizzle: "গুঁড়ি গুঁড়ি বৃষ্টি",
+    weatherConditionRain: "বৃষ্টি",
+    weatherConditionSnow: "তুষারপাত",
+    weatherConditionRainShowers: "বিক্ষিপ্ত বৃষ্টি",
+    weatherConditionThunderstorm: "বজ্রঝড়",
+    weatherConditionUnknown: "অজানা",
     forecastWord: "পূর্বাভাস",
     aqiTitle: "বায়ুর মান সূচক",
     aqiBasedOnUs: "US AQI মানদণ্ড অনুযায়ী",
@@ -784,14 +807,28 @@ export const translations: Record<LanguageCode, PartialTranslations> = {
     insightClearWindow: "পরিষ্কার আকাশ",
     insightAiInsight: "AI ইনসাইট",
     aboutTitle: "AeroWeather সম্পর্কে",
+    aboutIntro:
+      "AeroWeather একটি আধুনিক আবহাওয়া ইন্টেলিজেন্স প্ল্যাটফর্ম, যা রিয়েল-টাইম পূর্বাভাস, ঘণ্টাভিত্তিক তথ্য, ৭ দিনের আউটলুক, AQI ভিজিবিলিটি এবং রাডার ইনসাইট দ্রুত ও ব্যবহারবান্ধব অভিজ্ঞতায় দেয়।",
     aboutMissionVision: "মিশন ও ভিশন",
     aboutMissionTitle: "মিশন",
+    aboutMissionDesc:
+      "গতি, স্পষ্টতা এবং বিশ্বাসযোগ্যতার সাথে সবার জন্য উচ্চমানের রিয়েল-টাইম আবহাওয়া তথ্য সহজলভ্য করা।",
     aboutVisionTitle: "ভিশন",
+    aboutVisionDesc:
+      "এমন একটি নতুন প্রজন্মের আবহাওয়া ইকোসিস্টেম তৈরি করা, যেখানে পূর্বাভাস, ভিজ্যুয়াল ইনসাইট এবং AI নির্দেশনা সব ডিভাইসে নিরবচ্ছিন্নভাবে কাজ করে।",
     aboutProducts: "আমাদের পণ্য",
+    aboutAeroWeatherDesc:
+      "আধুনিক API ও ভিজ্যুয়াল সিস্টেম ব্যবহার করে পারফরম্যান্স, স্মুথ UI এবং নির্ভুল পূর্বাভাস-কেন্দ্রিক রিয়েল-টাইম আবহাওয়া প্ল্যাটফর্ম।",
+    aboutPdfEditorDesc:
+      "গতি ও সরলতাকে গুরুত্ব দিয়ে তৈরি হালকা এবং আধুনিক PDF এডিটিং প্ল্যাটফর্ম, যা বিভিন্ন ডিভাইসে দক্ষ ডকুমেন্ট ওয়ার্কফ্লো সক্ষম করে।",
     aboutFounderTitle: "প্রতিষ্ঠাতা",
     aboutFoundedByRick: "Rick Das দ্বারা প্রতিষ্ঠিত",
     aboutLearnRick: "Rick Das সম্পর্কে আরও জানুন",
     aboutUpcomingProjects: "আসন্ন প্রকল্প",
+    aboutGameSaveSync1:
+      "Rick Das-এর GameSaveSync একটি পরবর্তী প্রজন্মের ক্লাউড সেভ সিঙ্ক্রোনাইজেশন সিস্টেম, যা বর্তমানে ডেভেলপমেন্টে রয়েছে।",
+    aboutGameSaveSync2:
+      "GameSaveSync তৈরি করা হচ্ছে যাতে খেলোয়াড়রা নির্ভরযোগ্য ক্লাউড ব্যাকআপ এবং দ্রুত রিস্টোর সহ একাধিক ডিভাইসে গেম প্রগ্রেস সিঙ্ক ও ম্যানেজ করতে পারে।",
     contactTitle: "যোগাযোগ করুন",
     contactSubtitle: "AeroWeather সম্পর্কে প্রশ্ন আছে? নিচে বার্তা পাঠান।",
     contactMessageSentTitle: "বার্তা পাঠানো হয়েছে!",
@@ -805,6 +842,41 @@ export const translations: Record<LanguageCode, PartialTranslations> = {
     contactMessagePlaceholder: "আপনার বার্তা লিখুন...",
     contactSending: "পাঠানো হচ্ছে...",
     contactSendMessage: "বার্তা পাঠান",
+    weatherLoadingError: "আবহাওয়ার তথ্য লোড করা যায়নি।",
+    privacyTitle: "গোপনীয়তা নীতি",
+    privacySubtitle: "AeroWeather ইন্টেলিজেন্স প্ল্যাটফর্মের জন্য স্বচ্ছ ডেটা নীতি।",
+    privacyIntroductionTitle: "ভূমিকা",
+    privacyIntroductionContent:
+      "AeroWeather ব্যবহারকারীর গোপনীয়তাকে সম্মান করে এবং অপ্রয়োজনীয় ব্যক্তিগত তথ্য সংগ্রহ করে না। আমাদের লক্ষ্য নিরাপত্তা অক্ষুণ্ণ রেখে নির্ভুল আবহাওয়া তথ্য প্রদান করা।",
+    privacyLocationTitle: "অবস্থান তথ্য",
+    privacyLocationContent:
+      "লোকেশন পারমিশন দিলে ওয়েবসাইট আপনার ডিভাইসের ভৌগোলিক অবস্থান শুধুমাত্র স্থানীয় আবহাওয়া দেখানোর জন্য ব্যবহার করতে পারে। এই তথ্য রিয়েল-টাইমে প্রক্রিয়া করা হয় এবং ট্র্যাকিংয়ের জন্য ব্যবহার হয় না।",
+    privacyStorageTitle: "ডেটা সংরক্ষণ",
+    privacyStorageContent:
+      "ব্যক্তিগত ব্যবহারকারীর তথ্য স্থায়ীভাবে সংরক্ষণ করা হয় না। আপনার সুবিধার জন্য আমরা অন-ডিভাইস প্রসেসিং এবং ব্রাউজারের লোকাল স্টোরেজকে অগ্রাধিকার দিই।",
+    privacyThirdPartyTitle: "থার্ড-পার্টি API",
+    privacyThirdPartyContent:
+      "আবহাওয়ার তথ্য Open-Meteo-এর মতো বাহ্যিক পরিষেবা থেকে আনা হয়। আমরা তথ্য সংগ্রহ করলেও আপনার ব্যক্তিগত পরিচয় এই পরিষেবাগুলোর সাথে শেয়ার করা হয় না।",
+    privacyQuestionsTitle: "গোপনীয়তা নিয়ে প্রশ্ন আছে?",
+    privacyQuestionsBody:
+      "আমাদের গোপনীয়তা নীতিমালা নিয়ে কোনো প্রশ্ন বা উদ্বেগ থাকলে সরাসরি যোগাযোগ করুন।",
+    termsTitle: "সেবার শর্তাবলী",
+    termsSubtitle: "AeroWeather ইন্টেলিজেন্স প্ল্যাটফর্ম ব্যবহারের নির্দেশিকা।",
+    termsIntroductionTitle: "ভূমিকা",
+    termsIntroductionContent:
+      "AeroWeather ব্যবহার করলে আপনি এই আইনগত শর্তাবলীতে সম্মত হচ্ছেন। আমাদের পূর্বাভাস, রাডার বা AI-চালিত পরিষেবা ব্যবহারের আগে অনুগ্রহ করে শর্তগুলো পড়ুন।",
+    termsDataDisclaimerTitle: "আবহাওয়া তথ্য সম্পর্কিত ঘোষণা",
+    termsDataDisclaimerContent:
+      "আবহাওয়ার তথ্য শুধুমাত্র তথ্যগত উদ্দেশ্যে প্রদান করা হয়। আমরা নির্ভুলতার চেষ্টা করি, তবে আবহাওয়াবিজ্ঞান স্বভাবতই সম্ভাবনাভিত্তিক।",
+    termsNoLiabilityTitle: "দায়মুক্তি",
+    termsNoLiabilityContent:
+      "প্ল্যাটফর্মের আবহাওয়া তথ্যের ভিত্তিতে নেওয়া সিদ্ধান্তের জন্য AeroWeather-এর নির্মাতা দায়ী নন। গুরুত্বপূর্ণ নিরাপত্তা সিদ্ধান্তের ক্ষেত্রে একাধিক উৎস যাচাই করুন।",
+    termsPlatformUsageTitle: "প্ল্যাটফর্ম ব্যবহার",
+    termsPlatformUsageContent:
+      "ব্যবহারকারীরা ওয়েবসাইট ব্যবহার করতে পারবেন, তবে প্ল্যাটফর্মের আর্কিটেকচার কপি, রিভার্স-ইঞ্জিনিয়ার বা অপব্যবহার করা যাবে না। সব মেধাস্বত্ব নির্মাতার।",
+    termsClarificationTitle: "এই শর্তাবলী নিয়ে ব্যাখ্যা চান?",
+    termsClarificationBody:
+      "আমরা আনন্দের সাথে আমাদের সেবার শর্তাবলী এবং তা আপনার অভিজ্ঞতায় কীভাবে প্রভাব ফেলে তা ব্যাখ্যা করব।",
     footerNavigation: "নেভিগেশন",
     footerPopularCities: "জনপ্রিয় শহর",
     footerCompany: "কোম্পানি",
@@ -838,6 +910,17 @@ export const translations: Record<LanguageCode, PartialTranslations> = {
     humidity: "आर्द्रता",
     wind: "हवा",
     visibility: "दृश्यता",
+    weatherConditionClear: "साफ आकाश",
+    weatherConditionMainlyClear: "अधिकतर साफ",
+    weatherConditionPartlyCloudy: "आंशिक बादल",
+    weatherConditionOvercast: "बदली",
+    weatherConditionFog: "कोहरा",
+    weatherConditionDrizzle: "बूंदाबांदी",
+    weatherConditionRain: "बारिश",
+    weatherConditionSnow: "बर्फ",
+    weatherConditionRainShowers: "बारिश की बौछारें",
+    weatherConditionThunderstorm: "आंधी-तूफान",
+    weatherConditionUnknown: "अज्ञात",
     forecastWord: "पूर्वानुमान",
     aqiTitle: "वायु गुणवत्ता सूचकांक",
     aqiBasedOnUs: "US AQI मानक पर आधारित",
@@ -880,14 +963,28 @@ export const translations: Record<LanguageCode, PartialTranslations> = {
     insightClearWindow: "साफ मौसम",
     insightAiInsight: "AI इनसाइट",
     aboutTitle: "AeroWeather के बारे में",
+    aboutIntro:
+      "AeroWeather एक आधुनिक मौसम इंटेलिजेंस प्लेटफॉर्म है, जो रियल-टाइम पूर्वानुमान, घंटेवार अपडेट, 7-दिन का आउटलुक, AQI विजिबिलिटी और रडार इनसाइट को तेज और उपयोगकर्ता-अनुकूल अनुभव के साथ प्रदान करता है।",
     aboutMissionVision: "मिशन और विज़न",
     aboutMissionTitle: "मिशन",
+    aboutMissionDesc:
+      "गति, स्पष्टता और भरोसे के साथ सभी के लिए उच्च-गुणवत्ता रियल-टाइम मौसम जानकारी सुलभ बनाना।",
     aboutVisionTitle: "विज़न",
+    aboutVisionDesc:
+      "ऐसा अगली पीढ़ी का मौसम प्रोडक्ट इकोसिस्टम बनाना, जिसमें पूर्वानुमान, विज़ुअल इनसाइट और AI मार्गदर्शन हर डिवाइस पर सहज महसूस हो।",
     aboutProducts: "हमारे उत्पाद",
+    aboutAeroWeatherDesc:
+      "आधुनिक API और विज़ुअल सिस्टम की मदद से प्रदर्शन, स्मूथ UI और सटीक पूर्वानुमान पर केंद्रित रियल-टाइम मौसम इंटेलिजेंस प्लेटफॉर्म।",
+    aboutPdfEditorDesc:
+      "गति और सरलता के लिए डिज़ाइन किया गया हल्का और आधुनिक PDF एडिटिंग प्लेटफॉर्म, जो विभिन्न डिवाइस पर कुशल डॉक्यूमेंट वर्कफ़्लो सक्षम करता है।",
     aboutFounderTitle: "संस्थापक",
     aboutFoundedByRick: "Rick Das द्वारा स्थापित",
     aboutLearnRick: "Rick Das के बारे में जानें",
     aboutUpcomingProjects: "आगामी प्रोजेक्ट्स",
+    aboutGameSaveSync1:
+      "Rick Das द्वारा GameSaveSync एक अगली पीढ़ी का क्लाउड सेव सिंक्रोनाइज़ेशन सिस्टम है, जो वर्तमान में विकासाधीन है।",
+    aboutGameSaveSync2:
+      "GameSaveSync इस तरह बनाया जा रहा है कि खिलाड़ी भरोसेमंद क्लाउड बैकअप और तेज़ रिस्टोर वर्कफ़्लो के साथ कई डिवाइस पर गेम प्रोग्रेस सिंक और मैनेज कर सकें।",
     contactTitle: "संपर्क करें",
     contactSubtitle: "AeroWeather के बारे में प्रश्न है? नीचे संदेश भेजें।",
     contactMessageSentTitle: "संदेश भेजा गया!",
@@ -901,6 +998,41 @@ export const translations: Record<LanguageCode, PartialTranslations> = {
     contactMessagePlaceholder: "अपना संदेश लिखें...",
     contactSending: "भेजा जा रहा है...",
     contactSendMessage: "संदेश भेजें",
+    weatherLoadingError: "मौसम डेटा लोड नहीं हो सका।",
+    privacyTitle: "गोपनीयता नीति",
+    privacySubtitle: "AeroWeather इंटेलिजेंस प्लेटफॉर्म के लिए पारदर्शी डेटा प्रथाएं।",
+    privacyIntroductionTitle: "परिचय",
+    privacyIntroductionContent:
+      "AeroWeather उपयोगकर्ता की गोपनीयता का सम्मान करता है और अनावश्यक व्यक्तिगत डेटा एकत्र नहीं करता। हमारा लक्ष्य आपकी डिजिटल सुरक्षा से समझौता किए बिना सटीक मौसम पूर्वानुमान देना है।",
+    privacyLocationTitle: "स्थान डेटा",
+    privacyLocationContent:
+      "यदि लोकेशन अनुमति दी जाती है, तो वेबसाइट आपके डिवाइस का भौगोलिक स्थान केवल स्थानीय मौसम दिखाने के लिए उपयोग कर सकती है। यह डेटा रियल-टाइम में प्रोसेस होता है और ट्रैकिंग के लिए उपयोग नहीं किया जाता।",
+    privacyStorageTitle: "डेटा संग्रहण",
+    privacyStorageContent:
+      "व्यक्तिगत उपयोगकर्ता डेटा स्थायी रूप से संग्रहित नहीं किया जाता। आपकी सुविधा के लिए हम ऑन-डिवाइस प्रोसेसिंग और ब्राउज़र लोकल स्टोरेज को प्राथमिकता देते हैं।",
+    privacyThirdPartyTitle: "थर्ड-पार्टी API",
+    privacyThirdPartyContent:
+      "मौसम डेटा Open-Meteo जैसी बाहरी सेवाओं से प्राप्त किया जाता है। हम इन स्रोतों से डेटा लेते हैं, लेकिन आपकी व्यक्तिगत पहचान इन प्रदाताओं के साथ साझा नहीं की जाती।",
+    privacyQuestionsTitle: "अपनी गोपनीयता से जुड़े प्रश्न हैं?",
+    privacyQuestionsBody:
+      "यदि हमारी गोपनीयता नीतियों को लेकर आपके पास कोई प्रश्न या चिंता हो, तो सीधे हमसे संपर्क करें।",
+    termsTitle: "सेवा की शर्तें",
+    termsSubtitle: "AeroWeather इंटेलिजेंस प्लेटफॉर्म के उपयोग के लिए दिशा-निर्देश।",
+    termsIntroductionTitle: "परिचय",
+    termsIntroductionContent:
+      "AeroWeather का उपयोग करके आप इन कानूनी शर्तों से सहमत होते हैं। हमारे पूर्वानुमान, रडार या AI-आधारित सेवाओं का उपयोग करने से पहले इन्हें ध्यान से पढ़ें।",
+    termsDataDisclaimerTitle: "मौसम डेटा अस्वीकरण",
+    termsDataDisclaimerContent:
+      "मौसम जानकारी केवल सूचनात्मक उद्देश्य के लिए है। हम उच्च गुणवत्ता वाले प्रदाताओं के माध्यम से सटीकता का प्रयास करते हैं, लेकिन मौसम विज्ञान स्वभाव से संभाव्य है।",
+    termsNoLiabilityTitle: "कोई दायित्व नहीं",
+    termsNoLiabilityContent:
+      "प्लेटफॉर्म पर उपलब्ध मौसम डेटा के आधार पर लिए गए निर्णयों के लिए AeroWeather का निर्माता जिम्मेदार नहीं है। महत्वपूर्ण सुरक्षा निर्णयों के लिए कई स्रोतों का उपयोग करें।",
+    termsPlatformUsageTitle: "प्लेटफॉर्म उपयोग",
+    termsPlatformUsageContent:
+      "उपयोगकर्ता वेबसाइट का स्वतंत्र रूप से उपयोग कर सकते हैं, लेकिन प्लेटफॉर्म आर्किटेक्चर की कॉपी, रिवर्स-इंजीनियरिंग या दुरुपयोग की अनुमति नहीं है। सभी बौद्धिक संपदा निर्माता की है।",
+    termsClarificationTitle: "इन शर्तों पर स्पष्टीकरण चाहिए?",
+    termsClarificationBody:
+      "हम सेवा की शर्तों को समझाने और आपके उपयोगकर्ता अनुभव पर उनके प्रभाव को स्पष्ट करने में खुशी महसूस करते हैं।",
     footerNavigation: "नेविगेशन",
     footerPopularCities: "लोकप्रिय शहर",
     footerCompany: "कंपनी",
@@ -934,6 +1066,17 @@ export const translations: Record<LanguageCode, PartialTranslations> = {
     humidity: "湿度",
     wind: "風速",
     visibility: "視界",
+    weatherConditionClear: "快晴",
+    weatherConditionMainlyClear: "おおむね晴れ",
+    weatherConditionPartlyCloudy: "晴れ時々くもり",
+    weatherConditionOvercast: "くもり",
+    weatherConditionFog: "霧",
+    weatherConditionDrizzle: "霧雨",
+    weatherConditionRain: "雨",
+    weatherConditionSnow: "雪",
+    weatherConditionRainShowers: "にわか雨",
+    weatherConditionThunderstorm: "雷雨",
+    weatherConditionUnknown: "不明",
     forecastWord: "予報",
     aqiTitle: "大気質指数",
     aqiBasedOnUs: "US AQI基準",
@@ -997,6 +1140,7 @@ export const translations: Record<LanguageCode, PartialTranslations> = {
     contactMessagePlaceholder: "メッセージを入力してください...",
     contactSending: "送信中...",
     contactSendMessage: "メッセージを送信",
+    weatherLoadingError: "天気データの読み込みに失敗しました。",
     footerNavigation: "ナビゲーション",
     footerPopularCities: "人気の都市",
     footerCompany: "会社",
@@ -1030,6 +1174,17 @@ export const translations: Record<LanguageCode, PartialTranslations> = {
     humidity: "습도",
     wind: "풍속",
     visibility: "가시거리",
+    weatherConditionClear: "맑음",
+    weatherConditionMainlyClear: "대체로 맑음",
+    weatherConditionPartlyCloudy: "부분적으로 흐림",
+    weatherConditionOvercast: "흐림",
+    weatherConditionFog: "안개",
+    weatherConditionDrizzle: "이슬비",
+    weatherConditionRain: "비",
+    weatherConditionSnow: "눈",
+    weatherConditionRainShowers: "소나기",
+    weatherConditionThunderstorm: "뇌우",
+    weatherConditionUnknown: "알 수 없음",
     forecastWord: "예보",
     aqiTitle: "대기질 지수",
     aqiBasedOnUs: "미국 AQI 기준",
@@ -1093,6 +1248,7 @@ export const translations: Record<LanguageCode, PartialTranslations> = {
     contactMessagePlaceholder: "메시지를 입력하세요...",
     contactSending: "전송 중...",
     contactSendMessage: "메시지 보내기",
+    weatherLoadingError: "날씨 데이터를 불러오지 못했습니다.",
     footerNavigation: "네비게이션",
     footerPopularCities: "인기 도시",
     footerCompany: "회사",
@@ -1104,6 +1260,19 @@ export const translations: Record<LanguageCode, PartialTranslations> = {
     footerBuiltBy: "개발 및 유지보수",
   },
 };
+
+export const translations: Record<LanguageCode, CompleteTranslations> =
+  Object.fromEntries(
+    (Object.entries(partialTranslations) as Array<[LanguageCode, PartialTranslations]>).map(
+      ([language, map]) => [
+        language,
+        {
+          ...fallbackTranslations,
+          ...map,
+        },
+      ]
+    )
+  ) as Record<LanguageCode, CompleteTranslations>;
 
 export function normalizeLanguage(input?: string | null): LanguageCode {
   const value = (input ?? "").toLowerCase();
@@ -1127,6 +1296,124 @@ export function normalizeLanguage(input?: string | null): LanguageCode {
   if (value.startsWith("ja")) return "ja";
   if (value.startsWith("ko")) return "ko";
   return "en";
+}
+
+const LANGUAGE_LOCALE_TAG_MAP: Record<LanguageCode, string> = {
+  en: "en-US",
+  zh: "zh-CN",
+  es: "es-ES",
+  ar: "ar",
+  pt: "pt-PT",
+  fr: "fr-FR",
+  de: "de-DE",
+  ru: "ru-RU",
+  it: "it-IT",
+  tr: "tr-TR",
+  vi: "vi-VN",
+  id: "id-ID",
+  ur: "ur-PK",
+  pl: "pl-PL",
+  nl: "nl-NL",
+  bn: "bn-BD",
+  hi: "hi-IN",
+  ja: "ja-JP",
+  ko: "ko-KR",
+};
+
+export function toLocaleTag(language: LanguageCode): string {
+  return LANGUAGE_LOCALE_TAG_MAP[language] ?? "en-US";
+}
+
+const COUNTRY_LANGUAGE_MAP: Record<string, LanguageCode> = {
+  CN: "zh",
+  HK: "zh",
+  MO: "zh",
+  TW: "zh",
+  SG: "zh",
+
+  ES: "es",
+  MX: "es",
+  AR: "es",
+  CO: "es",
+  CL: "es",
+  PE: "es",
+  VE: "es",
+  EC: "es",
+  BO: "es",
+  PY: "es",
+  UY: "es",
+  CR: "es",
+  GT: "es",
+  HN: "es",
+  NI: "es",
+  PA: "es",
+  SV: "es",
+  DO: "es",
+  PR: "es",
+  CU: "es",
+
+  SA: "ar",
+  AE: "ar",
+  QA: "ar",
+  KW: "ar",
+  BH: "ar",
+  OM: "ar",
+  EG: "ar",
+  JO: "ar",
+  LB: "ar",
+  IQ: "ar",
+  SY: "ar",
+  YE: "ar",
+  DZ: "ar",
+  MA: "ar",
+  TN: "ar",
+  LY: "ar",
+  SD: "ar",
+
+  BR: "pt",
+  PT: "pt",
+  AO: "pt",
+  MZ: "pt",
+
+  FR: "fr",
+  BE: "fr",
+  CH: "fr",
+  LU: "fr",
+  MC: "fr",
+  SN: "fr",
+  CI: "fr",
+  CM: "fr",
+
+  DE: "de",
+  AT: "de",
+  LI: "de",
+
+  RU: "ru",
+  BY: "ru",
+  KZ: "ru",
+  KG: "ru",
+
+  IT: "it",
+  SM: "it",
+  VA: "it",
+
+  TR: "tr",
+  VN: "vi",
+  ID: "id",
+  PK: "ur",
+  PL: "pl",
+  NL: "nl",
+  BD: "bn",
+  IN: "hi",
+  NP: "hi",
+  JP: "ja",
+  KR: "ko",
+};
+
+export function normalizeCountryToLanguage(countryCode?: string | null): LanguageCode | null {
+  const normalizedCountry = (countryCode ?? "").trim().toUpperCase();
+  if (!normalizedCountry) return null;
+  return COUNTRY_LANGUAGE_MAP[normalizedCountry] ?? null;
 }
 
 export function isLanguageCode(value: string): value is LanguageCode {

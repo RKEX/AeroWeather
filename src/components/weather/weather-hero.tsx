@@ -4,7 +4,7 @@ import { useLanguage } from "@/components/Providers/language-provider";
 import React from "react";
 
 import { GlassCard } from "@/components/ui/glass-card";
-import { getWeatherConditionText, getWeatherIcon } from "@/lib/weather-theme";
+import { getWeatherConditionKey, getWeatherIcon } from "@/lib/weather-theme";
 import {
     formatWindKmh,
     getCurrentWindKmh,
@@ -71,7 +71,7 @@ export const WeatherHero = memo(function WeatherHero({
       weatherCode,
       temperature,
       isDay,
-      conditionText: getWeatherConditionText(weatherCode),
+      conditionText: t(getWeatherConditionKey(weatherCode)),
       apparent,
       humidity,
       wind,

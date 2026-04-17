@@ -1,7 +1,12 @@
-import Link from "next/link";
+"use client";
+
+import { useLanguage } from "@/components/Providers/language-provider";
+import { Link } from "@/navigation";
 import ThemeToggleButton from "../ThemeToggleButton";
 
 const Header = () => {
+  const { t } = useLanguage();
+
   return (
     <header
       className="fixed right-0 left-0 border-b shadow"
@@ -11,12 +16,12 @@ const Header = () => {
           <h1
             className="text-2xl font-semibold"
             aria-label="App Name">
-            NSP App
+            {t("appName")}
           </h1>
         </Link>
 
         <nav className="flex items-center gap-4">
-          <Link href={"/"}>Home</Link>
+          <Link href={"/"}>{t("home")}</Link>
 
           <ThemeToggleButton />
         </nav>

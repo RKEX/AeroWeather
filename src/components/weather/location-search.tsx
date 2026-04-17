@@ -6,6 +6,7 @@ import { searchLocations } from "@/lib/geocode";
 import { prefetchWeather } from "@/lib/prefetch";
 import { LocationResult } from "@/types/weather";
 import { Loader2, MapPin, Navigation, Search } from "lucide-react";
+import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { type WheelEvent, useEffect, useRef, useState } from "react";
 
@@ -14,7 +15,7 @@ interface LocationSearchProps {
 }
 
 export function LocationSearch({ onSelect }: LocationSearchProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<LocationResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -71,9 +72,10 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
       );
     }
 
-    router.push(
-      `/weather/${location.name.toLowerCase().replace(/\s+/g, "-")}`
-    );
+    const weatherPath = `/${language}/weather/${location.name
+      .toLowerCase()
+      .replace(/\s+/g, "-")}` as Route;
+    router.push(weatherPath);
   };
 
   const handleCurrentLocation = () => {
@@ -170,18 +172,26 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
         </div>
 
         {/* CURRENT LOCATION */}
-        <button
-          onClick={handleCurrentLocation}
-          disabled={locating}
-          title={t("useCurrentLocation")}
-          className="flex h-11.5 w-11.5 shrink-0 items-center justify-center rounded-2xl border border-white/25 bg-white/15 text-white shadow-[0_10px_40px_rgba(0,0,0,0.45)] transition-colors hover:bg-white/25 disabled:opacity-50"
-        >
-          {locating ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
-          ) : (
-            <Navigation className="h-5 w-5" />
-          )}
-        </button>
+        <div className="group relative">
+          <button
+            onClick={handleCurrentLocation}
+            disabled={locating}
+            aria-label={t("useCurrentLocation")}
+            className="flex h-11.5 w-11.5 shrink-0 items-center justify-center rounded-2xl border border-white/25 bg-white/15 text-white shadow-[0_10px_40px_rgba(0,0,0,0.45)] transition-colors hover:bg-white/25 disabled:opacity-50"
+          >
+            {locating ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <Navigation className="h-5 w-5" />
+            )}
+          </button>
+
+          <span
+            className="pointer-events-none absolute top-full right-0 z-999 mt-2 whitespace-nowrap rounded-lg border border-white/20 bg-slate-900/88 px-2.5 py-1 text-[11px] text-white/85 shadow-[0_10px_30px_rgba(0,0,0,0.35)] opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+          >
+            {t("useCurrentLocation")}
+          </span>
+        </div>
       </div>
 
       {open && results.length > 0 && (

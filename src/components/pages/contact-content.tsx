@@ -2,6 +2,7 @@
 
 import { useLanguage } from "@/components/Providers/language-provider";
 import { GlassCard } from "@/components/ui/glass-card";
+import { Link } from "@/navigation";
 import {
     CheckCircle,
     Github,
@@ -11,7 +12,6 @@ import {
     Mail,
     Send,
 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 
 export default function ContactContent() {
@@ -175,7 +175,7 @@ export default function ContactContent() {
           <div className="flex flex-wrap justify-center gap-8">
             <ContactOption
               icon={Mail}
-              label="Email"
+              label={t("contactEmail")}
               value="rickd7587@gmail.com"
               href="mailto:rickd7587@gmail.com"
             />

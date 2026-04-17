@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import type { Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Pause, Play } from "lucide-react";
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 
 type RainViewerFrame = {
@@ -53,53 +53,6 @@ const MapReadyController = memo(function MapReadyController({
   return null;
 });
 
-const StaticRadarPreview = memo(function StaticRadarPreview({
-  lat,
-  lon,
-  isNight,
-  activeTimestamp,
-  useFrostedOverlay = false,
-}: {
-  lat: number;
-  lon: number;
-  isNight: boolean;
-  activeTimestamp: number | null;
-  useFrostedOverlay?: boolean;
-}) {
-  const { t } = useLanguage();
-  const staticMapUrl = useMemo(() => {
-    const center = `${lat.toFixed(4)},${lon.toFixed(4)}`;
-    return `https://staticmap.openstreetmap.de/staticmap.php?center=${center}&zoom=${RADAR_ZOOM}&size=1200x700&maptype=mapnik`;
-  }, [lat, lon]);
-
-  return (
-    <div className="relative h-full w-full">
-      {!useFrostedOverlay ? (
-        <div
-          className={`h-full w-full bg-cover bg-center ${isNight ? "bg-slate-900" : "bg-slate-300"}`}
-          style={{ backgroundImage: `url(${staticMapUrl})` }}
-          aria-hidden="true"
-        />
-      ) : (
-        <div
-          className="h-full w-full bg-transparent"
-          aria-hidden="true"
-        />
-      )}
-
-      {!useFrostedOverlay && (
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_24%,rgba(56,189,248,0.22),transparent_42%),radial-gradient(circle_at_78%_30%,rgba(59,130,246,0.2),transparent_44%),linear-gradient(to_bottom,rgba(2,6,23,0.14),rgba(2,6,23,0.52))]" />
-      )}
-
-      <div className="pointer-events-none absolute right-4 bottom-4 rounded-xl border border-white/15 bg-black/35 px-3 py-2 text-xs text-white/85 backdrop-blur-sm">
-        {activeTimestamp
-          ? `${t("radarSnapshotPrefix")} ${format(new Date(activeTimestamp * 1000), "h:mm a")}`
-          : t("radarStaticPreview")}
-      </div>
-    </div>
-  );
-});
-
 const RadarMapComponent = ({
   lat,
   lon,
@@ -115,15 +68,15 @@ const RadarMapComponent = ({
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isActive, setIsActive] = useState(false);
-  const [hasActivated, setHasActivated] = useState(false);
   const [isInView, setIsInView] = useState(true);
   const mapRef = useRef<LeafletMap | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
 
   const tileSize = quality === "ULTRA" ? 512 : 256;
   const activeTimestamp = timestamps[currentIndex] ?? null;
-  const shouldRunMapEngine = hasActivated && isActive && isInView;
-  const shouldRenderMapLayers = hasActivated && isInView;
+  const shouldRunMapEngine = isActive && isInView;
+  const shouldRenderBaseLayer = isInView;
+  const shouldRenderRadarLayer = shouldRunMapEngine;
 
   const handleMapReady = useCallback((map: LeafletMap) => {
     if (mapRef.current === map) return;
@@ -233,8 +186,21 @@ const RadarMapComponent = ({
   }, []);
 
   const handleActivate = () => {
-    setHasActivated(true);
     setIsActive(true);
+  };
+
+  const handlePlaybackToggle = () => {
+    if (!isActive) {
+      setIsActive(true);
+    }
+    setIsPlaying((previous) => !previous);
+  };
+
+  const handleTimelineChange = (nextIndex: number) => {
+    if (!isActive) {
+      setIsActive(true);
+    }
+    setCurrentIndex(nextIndex);
   };
 
   const handleLeave = () => {
@@ -242,11 +208,12 @@ const RadarMapComponent = ({
     setIsPlaying(false);
   };
 
-  const controlsDisabled = !shouldRunMapEngine || timestamps.length === 0;
+  const controlsDisabled = !isInView || timestamps.length === 0;
 
   return (
     <GlassCard
       ref={cardRef}
+      onMouseLeave={handleLeave}
       className="relative h-95 w-full overflow-hidden rounded-3xl md:h-110 lg:h-130 xl:h-143.25"
     >
       <div className="pointer-events-none absolute top-4 left-4 right-4 z-500 flex items-start justify-between gap-3">
@@ -260,79 +227,67 @@ const RadarMapComponent = ({
         </div>
 
         {!isActive && (
-          <div className="rounded-xl border border-white/15 bg-black/35 px-3 py-2 text-xs text-white/85 backdrop-blur-sm">
+          <div className="text-xs text-white/20">
             {isInView ? t("radarClickToInteract") : t("radarPausedOffscreen")}
           </div>
         )}
       </div>
 
-      <div
-        role="presentation"
-        onMouseLeave={handleLeave}
-        className="relative h-full w-full"
-      >
+      <div role="presentation" className="relative h-full w-full">
         <div
-          className={`absolute inset-0 z-20 transition-opacity duration-300 ${
-            isActive ? "pointer-events-none opacity-0" : "pointer-events-auto opacity-100"
+          className={`absolute inset-0 z-20 bg-transparent opacity-100 backdrop-blur-none ${
+            isActive ? "pointer-events-none" : "pointer-events-auto"
           }`}
         >
           <button
             type="button"
             onClick={handleActivate}
             onTouchStart={handleActivate}
-            className="h-full w-full cursor-pointer bg-transparent focus:outline-none"
+            className="h-full w-full cursor-pointer bg-transparent p-0 focus:outline-none"
             aria-label={t("radarActivateAria")}
-          >
-            <StaticRadarPreview
-              lat={lat}
-              lon={lon}
-              isNight={isNight}
-              activeTimestamp={activeTimestamp}
-              useFrostedOverlay={hasActivated}
-            />
-          </button>
+          />
         </div>
 
-        {hasActivated && (
-          <div
-            className={`absolute inset-0 z-10 transition-opacity duration-300 ${
-              isActive ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-100"
-            }`}
+        <div
+          className={`absolute inset-0 z-10 ${
+            isActive ? "pointer-events-auto" : "pointer-events-none"
+          }`}
+        >
+          <MapContainer
+            center={[lat, lon]}
+            zoom={RADAR_ZOOM}
+            scrollWheelZoom={false}
+            className="h-full w-full"
+            zoomControl
+            attributionControl={false}
+            preferCanvas
+            fadeAnimation={false}
+            zoomAnimation={false}
+            markerZoomAnimation={false}
           >
-            <MapContainer
-              center={[lat, lon]}
-              zoom={RADAR_ZOOM}
-              scrollWheelZoom={false}
-              className="h-full w-full"
-              zoomControl
-              attributionControl={false}
-              preferCanvas
-              fadeAnimation={false}
-              zoomAnimation={false}
-              markerZoomAnimation={false}
-            >
-              <MapReadyController onMapReady={handleMapReady} />
+            <MapReadyController onMapReady={handleMapReady} />
 
-              {shouldRenderMapLayers && (
-                <>
+            {shouldRenderBaseLayer && (
+              <>
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  updateWhenIdle
+                  updateWhenZooming={false}
+                  keepBuffer={1}
+                />
+                {shouldRenderRadarLayer && activeTimestamp && (
                   <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    url={`https://tilecache.rainviewer.com/v2/radar/${activeTimestamp}/${tileSize}/{z}/{x}/{y}/2/1_1.png`}
+                    opacity={0.6}
                     updateWhenIdle
-                    keepBuffer={1}
+                    updateWhenZooming={false}
+                    keepBuffer={0}
                   />
-                  {activeTimestamp && (
-                    <TileLayer
-                      url={`https://tilecache.rainviewer.com/v2/radar/${activeTimestamp}/${tileSize}/{z}/{x}/{y}/2/1_1.png`}
-                      opacity={0.6}
-                      updateWhenIdle
-                      keepBuffer={1}
-                    />
-                  )}
-                </>
-              )}
-            </MapContainer>
-          </div>
-        )}
+                )}
+              </>
+            )}
+          </MapContainer>
+        </div>
       </div>
 
       <div
@@ -342,8 +297,8 @@ const RadarMapComponent = ({
       >
         <button
           type="button"
-          onClick={() => setIsPlaying((prev) => !prev)}
-          disabled={!shouldRunMapEngine || timestamps.length <= 1}
+          onClick={handlePlaybackToggle}
+          disabled={controlsDisabled || timestamps.length <= 1}
           className="rounded-xl border border-white/20 bg-white/10 p-2 text-white hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isPlaying ? <Pause /> : <Play />}
@@ -353,7 +308,7 @@ const RadarMapComponent = ({
           min="0"
           max={Math.max(timestamps.length - 1, 0)}
           value={currentIndex}
-          onChange={(e) => setCurrentIndex(Number(e.target.value))}
+          onChange={(e) => handleTimelineChange(Number(e.target.value))}
           disabled={controlsDisabled}
           className="flex-1 accent-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
         />

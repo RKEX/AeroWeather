@@ -177,7 +177,7 @@ function ClientDashboard({
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-white drop-shadow-sm">
-                AeroWeather
+                {t("appName")}
               </h1>
               <p className="text-sm font-medium text-white/60">{t("appTagline")}</p>
             </div>

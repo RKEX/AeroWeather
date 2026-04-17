@@ -2,8 +2,8 @@
 
 import { useLanguage } from "@/components/Providers/language-provider";
 import { GlassCard } from "@/components/ui/glass-card";
+import { Link } from "@/navigation";
 import { AlertTriangle, FileText, LucideIcon, Mail, Scale, ShieldCheck } from "lucide-react";
-import Link from "next/link";
 
 export default function TermsContent() {
   const { t } = useLanguage();
