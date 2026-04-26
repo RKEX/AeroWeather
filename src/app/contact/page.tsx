@@ -1,5 +1,5 @@
 import ContactContent from "@/components/pages/contact-content";
-import { constructMetadata } from "@/config/metadata";
+import { generateMetadataFromConfig } from "@/config/seoconfig";
 import {
     getLocaleDictionary,
     resolveUiLanguageFromRequest,
@@ -11,14 +11,11 @@ type ContactPageProps = {
   searchParams?: Promise<SearchParamsRecord>;
 };
 
-export async function generateMetadata({
-  searchParams,
-}: ContactPageProps): Promise<Metadata> {
-  const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const language = await resolveUiLanguageFromRequest(resolvedSearchParams);
+export async function generateMetadata(): Promise<Metadata> {
+  const language = await resolveUiLanguageFromRequest();
   const dictionary = await getLocaleDictionary(language);
 
-  return constructMetadata({
+  return generateMetadataFromConfig({
     title: dictionary.contactTitle,
     description: dictionary.contactSubtitle,
     locale: language,

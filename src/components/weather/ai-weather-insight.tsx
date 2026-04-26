@@ -1,7 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/components/Providers/language-provider";
-import { GlassCard } from "@/components/ui/glass-card";
+import GlassCard from "@/components/ui/GlassCard";
 import {
     generateWeatherInsight,
     type InsightCategory,
@@ -165,7 +165,7 @@ export function AiWeatherInsight({ weather, dayIndex = -1 }: AiWeatherInsightPro
   const Icon = theme.icon;
 
   return (
-    <GlassCard className={`relative w-full overflow-hidden p-6 ${theme.glow}`}>
+    <GlassCard className={`relative flex h-full w-full flex-col justify-between overflow-hidden p-6 ${theme.glow}`}>
       {/* Gradient border accent (top edge) */}
       <div
         className={`pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r ${theme.border}`}

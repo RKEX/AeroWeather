@@ -1,5 +1,5 @@
 import RickDasContent from "@/components/pages/rick-das-content";
-import { constructMetadata } from "@/config/metadata";
+import { generateMetadataFromConfig } from "@/config/seoconfig";
 import { type SearchParamsRecord, resolveUiLanguageFromRequest } from "@/lib/route-locale";
 import { getRickDasCopy } from "@/locales/rick-das";
 import { Metadata } from "next";
@@ -17,37 +17,18 @@ const MULTILINGUAL_FOUNDER_KEYWORDS = [
   "里克·达斯",
 ];
 
-export async function generateMetadata({
-  searchParams,
-}: PageProps): Promise<Metadata> {
-  const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const language = await resolveUiLanguageFromRequest(resolvedSearchParams);
+export async function generateMetadata(): Promise<Metadata> {
+  const language = await resolveUiLanguageFromRequest();
   const copy = getRickDasCopy(language);
 
-  const founderBaseMetadata = constructMetadata({
+  return generateMetadataFromConfig({
     title: copy.metadata.title,
     description: copy.metadata.description,
     keywords: MULTILINGUAL_FOUNDER_KEYWORDS,
     locale: language,
     pathname: "/rick-das",
+    type: "website", // Or "profile" if I want to be specific, but seoconfig uses "website" or "article"
   });
-
-  return {
-    ...founderBaseMetadata,
-    openGraph: {
-      ...(founderBaseMetadata.openGraph ?? {}),
-      title: copy.metadata.title,
-      description: copy.metadata.openGraphDescription,
-      url: "https://www.aeroweather.app/rick-das",
-      type: "profile",
-    },
-    twitter: {
-      ...(founderBaseMetadata.twitter ?? {}),
-      card: "summary_large_image",
-      title: copy.metadata.title,
-      description: copy.metadata.twitterDescription,
-    },
-  };
 }
 
 export default function WhoIsRickDasPage() {

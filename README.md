@@ -83,6 +83,20 @@ bun install
 
 # ▶ Run Development Server
 
+Create a local environment file before starting:
+
+```bash
+cp .env.example .env.local
+```
+
+Set this value in `.env.local`:
+
+```bash
+OPENWEATHER_API_KEY=your_openweather_api_key_here
+```
+
+The Impact Intelligence Calendar uses OpenWeather One Call and Air Pollution APIs through a server route and requires this key.
+
 ```bash
 bun run dev
 ```

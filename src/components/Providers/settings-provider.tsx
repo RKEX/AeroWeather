@@ -38,12 +38,14 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const savedWind = localStorage.getItem("aeroweather_wind_unit") as WindUnit;
     const savedTheme = localStorage.getItem("aeroweather_theme") as ThemeMode;
 
-    if (savedTemp) setTempUnitState(savedTemp);
-    if (savedWind) setWindUnitState(savedWind);
-    if (savedTheme) {
-      setThemeState(savedTheme);
-      if (savedTheme === "dark") document.documentElement.classList.add("dark");
-    }
+    requestAnimationFrame(() => {
+      if (savedTemp) setTempUnitState(savedTemp);
+      if (savedWind) setWindUnitState(savedWind);
+      if (savedTheme) {
+        setThemeState(savedTheme);
+        if (savedTheme === "dark") document.documentElement.classList.add("dark");
+      }
+    });
   }, []);
 
   const setTempUnit = useCallback((unit: TempUnit) => {

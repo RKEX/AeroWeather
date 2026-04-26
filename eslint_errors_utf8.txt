@@ -1,0 +1,113 @@
+﻿
+C:\Users\RKEX\Downloads\AeroWeather\src\app\analytics\page.tsx
+  162:63  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\RKEX\Downloads\AeroWeather\src\components\blog\subscribe-form.tsx
+  115:21  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\RKEX\Downloads\AeroWeather\src\components\blog\table-of-contents.tsx
+  32:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\RKEX\Downloads\AeroWeather\src\components\blog\table-of-contents.tsx:32:5
+  30 |       };
+  31 |     });
+> 32 |     setToc(items);
+     |     ^^^^^^ Avoid calling setState() directly within an effect
+  33 |
+  34 |     const observer = new IntersectionObserver(
+  35 |       (entries) => {  react-hooks/set-state-in-effect
+
+C:\Users\RKEX\Downloads\AeroWeather\src\components\layout\root-client-layout.tsx
+  16:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\RKEX\Downloads\AeroWeather\src\components\layout\root-client-layout.tsx:16:5
+  14 |
+  15 |   useEffect(() => {
+> 16 |     setMounted(true);
+     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  17 |   }, []);
+  18 |
+  19 |   useEffect(() => {  react-hooks/set-state-in-effect
+
+C:\Users\RKEX\Downloads\AeroWeather\src\components\lenis-provider.tsx
+  16:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  17:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\RKEX\Downloads\AeroWeather\src\components\pages\contact-content.tsx
+  114:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  130:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  147:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\RKEX\Downloads\AeroWeather\src\components\ui\offline-status.tsx
+  18:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\RKEX\Downloads\AeroWeather\src\components\ui\offline-status.tsx:18:5
+  16 |
+  17 |     // Initial check
+> 18 |     setIsOffline(!navigator.onLine);
+     |     ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  19 |
+  20 |     return () => {
+  21 |       window.removeEventListener("online", handleOnline);  react-hooks/set-state-in-effect
+
+C:\Users\RKEX\Downloads\AeroWeather\src\components\weather\CardSkeletons.tsx
+  80:79  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\RKEX\Downloads\AeroWeather\src\components\weather\CardSkeletons.tsx:80:79
+  78 |       <div className="flex items-end gap-2 flex-1 pt-4">
+  79 |         {Array.from({ length: 12 }).map((_, i) => (
+> 80 |           <Skeleton key={i} className="flex-1 bg-white/5" style={{ height: `${Math.random() * 60 + 20}%` }} />
+     |                                                                               ^^^^^^^^^^^^^ Cannot call impure function
+  81 |         ))}
+  82 |       </div>
+  83 |     </SkeletonCard>  react-hooks/purity
+
+C:\Users\RKEX\Downloads\AeroWeather\src\components\weather\astro-panel.tsx
+  451:64  error  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+  468:30  error  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+  489:21  error  Component definition is missing display name  react/display-name
+  596:24  error  Component definition is missing display name  react/display-name
+  615:26  error  Component definition is missing display name  react/display-name
+  675:27  error  Component definition is missing display name  react/display-name
+  703:61  error  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+
+C:\Users\RKEX\Downloads\AeroWeather\src\components\weather\client-dashboard.tsx
+  244:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\RKEX\Downloads\AeroWeather\src\components\weather\client-dashboard.tsx:244:5
+  242 |
+  243 |   useEffect(() => {
+> 244 |     setMounted(true);
+      |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  245 |     const saved = getInitialLocation(initialLocation);
+  246 |     if (saved.name !== initialLocation.name) {
+  247 |       setActiveLocation(saved);  react-hooks/set-state-in-effect
+
+Ô£û 19 problems (19 errors, 0 warnings)
+

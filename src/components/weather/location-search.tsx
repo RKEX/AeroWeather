@@ -1,4 +1,5 @@
 "use client";
+import GlassCard from "@/components/ui/GlassCard";
 
 import { useLanguage } from "@/components/Providers/language-provider";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -159,35 +160,37 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
             )}
           </div>
 
-          <input
+          <GlassCard
+            as="input"
             type="text"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
             onFocus={() => {
               if (results.length > 0) setOpen(true);
             }}
             placeholder={t("searchPlaceholder")}
-            className="w-full rounded-2xl border border-white/25 bg-white/15 py-3 pl-11 pr-4 text-white shadow-[0_10px_40px_rgba(0,0,0,0.45)] placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
+            className="w-full py-3 pl-12 pr-4 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/30 shadow-none"
           />
         </div>
 
         {/* CURRENT LOCATION */}
         <div className="group relative">
-          <button
+          <GlassCard
+            as="button"
             onClick={handleCurrentLocation}
             disabled={locating}
             aria-label={t("useCurrentLocation")}
-            className="flex h-11.5 w-11.5 shrink-0 items-center justify-center rounded-2xl border border-white/25 bg-white/15 text-white shadow-[0_10px_40px_rgba(0,0,0,0.45)] transition-colors hover:bg-white/25 disabled:opacity-50"
+            className="flex h-11.5 w-11.5 shrink-0 items-center justify-center text-white transition-colors hover:bg-white/10 disabled:opacity-50"
           >
             {locating ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               <Navigation className="h-5 w-5" />
             )}
-          </button>
+          </GlassCard>
 
           <span
-            className="pointer-events-none absolute top-full right-0 z-999 mt-2 whitespace-nowrap rounded-lg border border-white/20 bg-slate-900/88 px-2.5 py-1 text-[11px] text-white/85 shadow-[0_10px_30px_rgba(0,0,0,0.35)] opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+            className="pointer-events-none absolute top-full right-0 z-999 mt-2 whitespace-nowrap rounded-lg border border-white/20 bg-slate-900/88 px-2.5 py-1 text-[11px] text-white/85 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
           >
             {t("useCurrentLocation")}
           </span>
@@ -195,11 +198,11 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
       </div>
 
       {open && results.length > 0 && (
-        <div className="absolute top-full left-0 right-0 z-999 mt-2 rounded-2xl border border-white/10 bg-[#030712] shadow-2xl">
+        <div className="absolute top-full left-0 right-0 z-999 mt-2 rounded-2xl border border-white/10 bg-[#030712]">
           <ul
             data-lenis-prevent
             onWheel={handleDropdownWheel}
-            className="glass-scroll flex max-h-60 flex-col overflow-y-auto p-2"
+            className="flex max-h-60 flex-col overflow-y-auto p-2 pr-2"
           >
             {results.map((loc) => (
               <li key={`${loc.id}-${loc.latitude}`}>

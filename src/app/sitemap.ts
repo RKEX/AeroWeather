@@ -1,4 +1,5 @@
 import { MetadataRoute } from "next";
+import { BLOG_POSTS } from "@/lib/blog-content";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://www.aeroweather.app";
@@ -19,9 +20,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "", changeFrequency: "hourly" as const, priority: 1 },
     { path: "/about", changeFrequency: "monthly" as const, priority: 0.6 },
     { path: "/rick-das", changeFrequency: "monthly" as const, priority: 0.7 },
+    { path: "/blog", changeFrequency: "daily" as const, priority: 0.9 },
     { path: "/contact", changeFrequency: "monthly" as const, priority: 0.5 },
     { path: "/privacy", changeFrequency: "yearly" as const, priority: 0.3 },
     { path: "/terms", changeFrequency: "yearly" as const, priority: 0.3 },
+    { path: "/analytics", changeFrequency: "weekly" as const, priority: 0.6 },
   ];
 
   const forecastRoutes = [
@@ -43,6 +46,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: route.priority,
   }));
 
+  const blogPostPages = BLOG_POSTS.map((post) => ({
+    url: `${baseUrl}/blog/${post.slug}`,
+    lastModified: new Date(post.date),
+    changeFrequency: "monthly" as const,
+    priority: 0.8,
+  }));
+
   const cityUrls = popularCities.map((city) => ({
     url: `${baseUrl}/weather/${city}`,
     lastModified: new Date(),
@@ -50,5 +60,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  return [...staticPages, ...forecastPages, ...cityUrls];
-}
+  return [...staticPages, ...forecastPages, ...blogPostPages, ...cityUrls];
+}

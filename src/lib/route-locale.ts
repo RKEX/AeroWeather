@@ -14,13 +14,11 @@ export function normalizeToUiLanguage(input?: string | null): UiLanguageCode {
   return normalizeSupportedLocale(input, DEFAULT_LOCALE);
 }
 
-export function resolveUiLanguage(_searchParams?: SearchParamsRecord): UiLanguageCode {
+export function resolveUiLanguage(): UiLanguageCode {
   return DEFAULT_LOCALE;
 }
 
-export async function resolveUiLanguageFromRequest(
-  _searchParams?: SearchParamsRecord
-): Promise<UiLanguageCode> {
+export async function resolveUiLanguageFromRequest(): Promise<UiLanguageCode> {
   return DEFAULT_LOCALE;
 }
 

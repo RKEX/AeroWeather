@@ -1,7 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/components/Providers/language-provider";
-import { GlassCard } from "@/components/ui/glass-card";
+import GlassCard from "@/components/ui/GlassCard";
 import { WeatherData } from "@/types/weather";
 import { memo, useEffect, useId, useState } from "react";
 
@@ -42,7 +42,6 @@ const SunArcComponent = ({
   // ✅ React useId — SSR-safe, always unique per instance
   const uid = useId().replace(/:/g, "");
   const gradId = `sunGrad-${uid}`;
-  const glowId = `sunGlow-${uid}`;
 
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -114,52 +113,46 @@ const SunArcComponent = ({
 
   return (
     <GlassCard className="p-6 w-full relative transition-all">
-      <h3 className="text-xl font-medium mb-2 drop-shadow-sm text-white">
+      <h3 className="text-xl font-bold mb-2 text-white/95">
         {t("sunTitle")}
       </h3>
 
+    <div className="mt-2 rounded-2xl overflow-hidden">
       <svg
         width="100%"
         viewBox={`0 0 ${VW} ${VH}`}
         overflow="visible"
         aria-hidden="true"
-        className="mt-2"
       >
         <defs>
-          {/* ✅ Unique gradient id — no conflict when multiple SunArc on page */}
           <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%"   stopColor="#facc15" />
-            <stop offset="100%" stopColor="#f59e0b" />
+            <stop offset="0%" stopColor="#facc15" />
+            <stop offset="100%" stopColor="#f97316" />
           </linearGradient>
-
-          {/* ✅ Unique glow filter id */}
-          <filter id={glowId} x="-80%" y="-80%" width="260%" height="260%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
         </defs>
 
         {/* ── Dashed background arc ── */}
         <path
           d={`M ${cx - r},${cy} A ${r},${r} 0 0,1 ${cx + r},${cy}`}
           fill="none"
-          stroke="rgba(255,255,255,0.10)"
+          stroke="rgba(255,255,255,0.08)"
           strokeWidth="1.5"
           strokeDasharray="4 4"
+          strokeLinecap="round"
         />
 
-        {/* ── Progress arc (yellow) ── */}
+        {/* ── Progress arc ── */}
         <path
           d={`M ${cx - r},${cy} A ${r},${r} 0 0,1 ${cx + r},${cy}`}
           fill="none"
           stroke={`url(#${gradId})`}
-          strokeWidth="2.5"
+          strokeWidth="4"
           strokeLinecap="round"
           strokeDasharray={arcLength}
           strokeDashoffset={arcLength - progress * arcLength}
+          style={{
+            filter: "drop-shadow(0 0 6px rgba(250, 204, 21, 0.4))",
+          }}
         />
 
         {/* ── Sun dot ── */}
@@ -168,8 +161,10 @@ const SunArcComponent = ({
             cx={sunX}
             cy={sunY}
             r="7"
-            fill="#facc15"
-            filter={`url(#${glowId})`}
+            fill={`url(#${gradId})`}
+            style={{
+              filter: "drop-shadow(0 0 10px rgba(250, 204, 21, 0.9))",
+            }}
           />
         )}
 
@@ -255,6 +250,7 @@ const SunArcComponent = ({
           strokeWidth="1"
         />
       </svg>
+    </div>
 
       {/* ── Status text ── */}
       <p className="text-center text-sm mt-1 font-medium tracking-wide text-white/60">

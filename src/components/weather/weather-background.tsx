@@ -145,8 +145,8 @@ function drawDrop(ctx: CanvasRenderingContext2D, d: Drop) {
 
 function drawFlake(ctx: CanvasRenderingContext2D, f: Flake) {
   ctx.save();
-  ctx.globalAlpha = 0.65;
-  ctx.fillStyle = "#dbeafe";
+  ctx.globalAlpha = 0.4;
+  ctx.fillStyle = "#ffffff";
   ctx.beginPath();
   ctx.arc(f.x, f.y, f.r, 0, Math.PI*2);
   ctx.fill();
@@ -197,8 +197,9 @@ export function WeatherBackground({ weatherCode = 0, timezone }: WeatherBackgrou
       const layer = i < cloudN / 3 ? "far" : i < (cloudN * 2) / 3 ? "mid" : "near";
       return mkCloud(W, H, layer);
     });
-    const drops:  Drop[]  = (condition === "rain" || condition === "storm") ? Array.from({ length: 180 }, () => mkDrop(W, H))  : [];
-    const flakes: Flake[] = condition === "snow"  ? Array.from({ length: 200 }, () => mkFlake(W, H)) : [];
+    const isMobile = W < 768;
+    const drops:  Drop[]  = (condition === "rain" || condition === "storm") ? Array.from({ length: isMobile ? 80 : 180 }, () => mkDrop(W, H))  : [];
+    const flakes: Flake[] = condition === "snow"  ? Array.from({ length: isMobile ? 50 : 100 }, () => mkFlake(W, H)) : [];
     const wisps:  Wisp[]  = condition === "fog"   ? Array.from({ length: 12  }, () => mkWisp(W, H))  : [];
 
     const moon = { x: W * 0.82, y: H * 0.15, r: 36 };

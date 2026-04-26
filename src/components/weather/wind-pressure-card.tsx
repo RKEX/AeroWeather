@@ -1,7 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/components/Providers/language-provider";
-import { GlassCard } from "@/components/ui/glass-card";
+import GlassCard from "@/components/ui/GlassCard";
 import { TranslationKey } from "@/lib/i18n";
 import { getCurrentWindKmh, roundWindKmh } from "@/lib/wind";
 import { WeatherData } from "@/types/weather";
@@ -13,7 +13,10 @@ function getWindDirection(deg: number): string {
   return dirs[Math.round(deg / 45) % 8] ?? "N";
 }
 
-function getBeaufortScale(speed: number): { level: number; labelKey: TranslationKey } {
+function getBeaufortScale(speed: number): {
+  level: number;
+  labelKey: TranslationKey;
+} {
   if (speed < 1) return { level: 0, labelKey: "beaufortCalm" };
   if (speed < 6) return { level: 1, labelKey: "beaufortLightAir" };
   if (speed < 12) return { level: 2, labelKey: "beaufortLightBreeze" };
@@ -29,12 +32,16 @@ function getBeaufortScale(speed: number): { level: number; labelKey: Translation
   return { level: 12, labelKey: "beaufortHurricane" };
 }
 
-function getPressureStatus(hpa: number): { labelKey: TranslationKey; color: string } {
-  if (hpa < 1000) return { labelKey: "pressureLow", color: "text-blue-400" };
-  if (hpa < 1013) return { labelKey: "pressureBelowNormal", color: "text-sky-300" };
-  if (hpa < 1020) return { labelKey: "pressureNormal", color: "text-green-400" };
-  if (hpa < 1030) return { labelKey: "pressureHigh", color: "text-orange-400" };
-  return { labelKey: "pressureVeryHigh", color: "text-red-400" };
+function getPressureStatus(hpa: number): {
+  labelKey: TranslationKey;
+  color: string;
+} {
+  if (hpa < 1000) return { labelKey: "pressureLow", color: "text-white/60" };
+  if (hpa < 1013)
+    return { labelKey: "pressureBelowNormal", color: "text-white/70" };
+  if (hpa < 1020) return { labelKey: "pressureNormal", color: "text-white/80" };
+  if (hpa < 1030) return { labelKey: "pressureHigh", color: "text-white/90" };
+  return { labelKey: "pressureVeryHigh", color: "text-white" };
 }
 
 interface WindPressureCardProps {
@@ -42,7 +49,10 @@ interface WindPressureCardProps {
   windSourceKmh?: number;
 }
 
-const WindPressureCardComponent = ({ weather, windSourceKmh }: WindPressureCardProps) => {
+const WindPressureCardComponent = ({
+  weather,
+  windSourceKmh,
+}: WindPressureCardProps) => {
   const { t } = useLanguage();
   const { current } = weather;
   const windSpeed = roundWindKmh(windSourceKmh ?? getCurrentWindKmh(weather));
@@ -65,8 +75,8 @@ const WindPressureCardComponent = ({ weather, windSourceKmh }: WindPressureCardP
   }, [windSpeed]);
 
   return (
-    <GlassCard className="p-6 w-full flex flex-col gap-5">
-      <h3 className="text-xl font-medium text-white drop-shadow-sm">
+    <GlassCard className="flex w-full flex-col gap-5 rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent p-6">
+      <h3 className="text-xl font-medium text-white">
         {t("windPressureTitle")}
       </h3>
 
@@ -85,8 +95,11 @@ const WindPressureCardComponent = ({ weather, windSourceKmh }: WindPressureCardP
               <span
                 key={d}
                 className="absolute text-[9px] font-bold text-white/30"
-                style={{ left: `${x}%`, top: `${y}%`, transform: "translate(-50%, -50%)" }}
-              >
+                style={{
+                  left: `${x}%`,
+                  top: `${y}%`,
+                  transform: "translate(-50%, -50%)",
+                }}>
                 {d}
               </span>
             );
@@ -94,21 +107,29 @@ const WindPressureCardComponent = ({ weather, windSourceKmh }: WindPressureCardP
           {/* Arrow */}
           <div
             className="absolute inset-0 flex items-center justify-center"
-            style={{ transform: `rotate(${compassAngle}deg)` }}
-          >
-            <Navigation className="h-7 w-7 text-blue-400 drop-shadow-[0_0_6px_rgba(96,165,250,0.6)]" />
+            style={{ transform: `rotate(${compassAngle}deg)` }}>
+            <Navigation className="h-7 w-7 text-white/70 drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]" />
           </div>
         </div>
 
         <div className="flex flex-col gap-0.5">
           <div className="flex items-end gap-1.5">
-            <span className="text-3xl font-light text-white">{windSpeed}</span>
-            <span className="mb-1 text-sm text-white/60">km/h</span>
+            <span className="text-3xl font-semibold text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.15)]">
+              {windSpeed}
+            </span>
+            <span className="mb-1 text-sm font-semibold text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.15)]">
+              km/h
+            </span>
           </div>
           <span className="text-xs text-white/50">
-            {t("fromDirection", { direction: dirLabel, level: t(beaufort.labelKey) })}
+            {t("fromDirection", {
+              direction: dirLabel,
+              level: t(beaufort.labelKey),
+            })}
           </span>
-          <span className="text-xs text-white/40">{t("gustsUpTo", { value: windGusts })}</span>
+          <span className="text-xs text-white/40">
+            {t("gustsUpTo", { value: windGusts })}
+          </span>
         </div>
       </div>
 
@@ -120,9 +141,9 @@ const WindPressureCardComponent = ({ weather, windSourceKmh }: WindPressureCardP
             {beaufort.level} / 12
           </span>
         </div>
-        <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+        <div className="h-2 w-full overflow-hidden rounded-full bg-white/5">
           <div
-            className="h-full rounded-full bg-linear-to-r from-blue-400 via-yellow-400 to-red-500 transition-all duration-700"
+            className="h-full rounded-full bg-gradient-to-r from-green-400 via-yellow-400 to-red-500 transition-all duration-700"
             style={{ width: `${(beaufort.level / 12) * 100}%` }}
           />
         </div>
@@ -138,13 +159,17 @@ const WindPressureCardComponent = ({ weather, windSourceKmh }: WindPressureCardP
         </div>
         <div className="flex flex-col gap-0.5">
           <div className="flex items-end gap-1.5">
-            <span className="text-2xl font-light text-white">{pressure}</span>
-            <span className="mb-0.5 text-sm text-white/60">hPa</span>
+            <span className="text-2xl font-semibold text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.15)]">
+              {pressure}
+            </span>
+            <span className="mb-0.5 text-sm font-semibold text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.15)]">
+              hPa
+            </span>
           </div>
           <span className={`text-xs font-medium ${pressureStatus.color}`}>
             {t(pressureStatus.labelKey)}
           </span>
-          <span className="text-xs text-white/40">
+          <span className="text-xs text-white/60">
             {t("surfacePressure", { value: surfacePressure })}
           </span>
         </div>
@@ -159,9 +184,9 @@ const WindPressureCardComponent = ({ weather, windSourceKmh }: WindPressureCardP
           <span>1030</span>
           <span>1050</span>
         </div>
-        <div className="relative h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+        <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-white/5">
           <div
-            className="h-full rounded-full bg-linear-to-r from-blue-400 via-green-400 to-orange-400 transition-all duration-700"
+            className="h-full rounded-full bg-white/40 transition-all duration-700"
             style={{
               width: `${Math.min(100, Math.max(0, ((pressure - 980) / (1050 - 980)) * 100))}%`,
             }}

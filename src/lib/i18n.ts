@@ -23,7 +23,6 @@ export const SUPPORTED_LANGUAGES = [
 export type LanguageCode = (typeof SUPPORTED_LANGUAGES)[number];
 
 export const LANGUAGE_STORAGE_KEY = "aeroweather_lang";
-
 const fallbackTranslations = {
   language: "Language",
   english: "English",
@@ -130,36 +129,30 @@ const fallbackTranslations = {
   insightColdTrend: "Cold Trend",
   insightClearWindow: "Clear Window",
   insightAiInsight: "AI Insight",
-  aboutTitle: "About AeroWeather",
-  aboutIntro:
-    "AeroWeather is a modern weather intelligence platform designed to deliver real-time forecasts, hourly predictions, 7-day outlooks, AQI visibility, and radar-based insights with a performance-first, user-friendly experience.",
-  aboutMissionVision: "Mission & Vision",
-  aboutMissionTitle: "Mission",
-  aboutMissionDesc:
-    "Make high-quality, real-time weather intelligence accessible to everyone with speed, clarity, and trust.",
-  aboutVisionTitle: "Vision",
-  aboutVisionDesc:
-    "Build a next-generation weather product ecosystem where forecasts, visual insights, and AI guidance feel seamless across every device.",
-  aboutProducts: "Our Products",
-  aboutAeroWeatherDesc:
-    "Real-time weather intelligence platform focused on performance, smooth UI, and accurate forecasting using modern APIs and visual systems.",
-  aboutPdfEditorDesc:
-    "A lightweight and modern PDF editing platform designed for speed and simplicity, enabling efficient document workflows across devices.",
-  aboutFounderTitle: "Founder",
-  aboutFoundedByRick: "Founded by Rick Das",
-  aboutLearnRick: "Learn more about Rick Das",
-  aboutUpcomingProjects: "Upcoming Projects",
-  aboutGameSaveSync1:
-    "GameSaveSync by Rick Das - a next-generation cloud save synchronization system currently under development.",
-  aboutGameSaveSync2:
-    "GameSaveSync is being built to help players sync and manage game progress across multiple devices with reliable cloud backups and fast restore workflows.",
-  contactTitle: "Get in Touch",
-  contactSubtitle:
-    "Have a question about AeroWeather or interested in working together? Send a message below.",
-  contactMessageSentTitle: "Message Sent!",
-  contactMessageSentBody:
-    "Thank you for reaching out. I'll get back to you as soon as possible.",
-  contactSendAnother: "Send another message",
+  aboutTitle: "Our Mission to Demystify the Global Atmosphere",
+  aboutIntro: "AeroWeather was born out of a simple realization: while weather data is abundant, true atmospheric intelligence is rare. In a world increasingly defined by climate variability, having access to precise, high-fidelity environmental signals is no longer a luxury—it is a necessity. We built this platform to bridge the gap between complex meteorological raw data and the practical, actionable insights you need to navigate your daily life efficiently and safely. Our philosophy is rooted in scientific precision, aesthetic clarity, and a performance-first engineering approach that respects your time and your digital bandwidth.",
+  aboutMissionVision: "The Foundations of Our Environmental Intelligence",
+  aboutMissionTitle: "Our Scientific Mission",
+  aboutMissionDesc: "AeroWeather is dedicated to consolidating the world's most reliable meteorological data streams into a unified, high-performance interface. We aim to empower individuals, travelers, and outdoor professionals by translating trillions of data points into a clear, living map of the atmosphere. By doing so, we help our users make safer, smarter, and faster decisions about their environment, whether they are planning a daily commute or a complex international journey.",
+  aboutVisionTitle: "The Future of Visualization",
+  aboutVisionDesc: "Our vision is to become the global standard for weather visualization. We believe that environmental data should be as beautiful as it is accurate. We are setting a new benchmark for how environmental intelligence is delivered across all digital touchpoints—from mobile dashboards and wearable technology to large-scale infrastructure displays. We envision a future where everyone has the tools to understand the invisible patterns of the air around them in real-time.",
+  aboutAiTitle: "Intelligent AI-Driven Insights",
+  aboutAiDesc: "Our platform doesn't just show numbers; it tells a narrative. Through advanced meteorological logic and pattern recognition, we translate humidity, pressure, and temperature into actionable human-readable insights. Instead of just seeing a 90% humidity reading, our engine explains how that moisture will affect your comfort, your health, and your outdoor activities. This layer of intelligence transforms a standard weather tool into a genuine partner in your daily planning.",
+  aboutRadarTitle: "High-Fidelity Precision Radar",
+  aboutRadarDesc: "Experience high-fidelity interactive radar systems that allow you to track precipitation, storm cells, and atmospheric shifts with millimetric accuracy across the globe. Our radar integration utilizes multi-layered data from satellite arrays and ground-level Doppler stations to provide a real-time visualization of where rain, snow, and storms are moving. This level of granular tracking is crucial for anyone whose safety and efficiency depend on being one step ahead of the weather.",
+  aboutKeyPillars: "Our Core Technology Pillars",
+  aboutDataSourcingTitle: "Elite Scientific Data Sourcing",
+  aboutDataSourcingDesc: "Precision starts with the source. AeroWeather leverages elite meteorological APIs like Open-Meteo, which are renowned for their scientific rigor and lack of commercial bias. We ingest data from major global models including the ECMWF (European Centre for Medium-Range Weather Forecasts) and the GFS (Global Forecast System), ensuring that our forecasts always represent the absolute state-of-the-art in numerical weather prediction.",
+  aboutPrivacyTitle: "Uncompromising Privacy by Architecture",
+  aboutPrivacyDesc: "We believe that your environmental data reflects your life—and that belongs to you. AeroWeather is engineered with a 'Privacy by Architecture' approach. This means we focus on a clean and distraction-free interface that prioritizes your experience. Your location data stays in your browser's local state, and we minimize server-side logging. This commitment to user privacy and performance sets us apart in an industry often defined by intrusive tracking.",
+  aboutFounderTitle: "The Visionary Behind the Logic",
+  aboutFoundedByRick: "AeroWeather is the brainchild of Rick Das, a full-stack developer and quantum computing researcher based in Kolkata, India. With a deep-seated background in high-performance computing and a passion for atmospheric science—recognized by international aerospace organizations like NASA and ISRO—Rick brings a unique scientific rigor to software engineering. His focus on creating 'zero-lag' digital experiences ensures that AeroWeather remains the fastest and most premium tool in its class.",
+  aboutLearnRick: "Explore Rick's full profile and research achievements",
+  contactTitle: "Contact Us",
+  contactSubtitle: "Whether you have a technical inquiry regarding our atmospheric data, feedback on our visual systems, or a proposal for a global collaboration, our communication channels are always open. We prioritize high-impact feedback from our users to continuously refine the AeroWeather experience.",
+  contactMessageSentTitle: "Inquiry Transmitted",
+  contactMessageSentBody: "We've received your message. Our team prioritizes high-impact feedback and will respond within 48-72 business hours.",
+  contactSendAnother: "Send another inquiry",
   contactName: "Name",
   contactEmail: "Email",
   contactMessage: "Message",
@@ -171,49 +164,44 @@ const fallbackTranslations = {
   contactErrorGeneric: "Something went wrong.",
   contactErrorNetwork: "Failed to send message. Please check your connection.",
   weatherLoadingError: "Failed to load weather data.",
-  privacyTitle: "Privacy Policy",
-  privacySubtitle: "Transparent data practices for the AeroWeather intelligence platform.",
-  privacyIntroductionTitle: "Introduction",
-  privacyIntroductionContent:
-    "AeroWeather respects user privacy and does not collect unnecessary personal data. Our goal is to provide accurate weather forecasts without compromising your digital security.",
-  privacyLocationTitle: "Location Data",
-  privacyLocationContent:
-    "If location permission is granted, the website may use your device's geographical location solely to show local weather forecasts. This data is processed in real-time and not used for tracking.",
-  privacyStorageTitle: "Data Storage",
-  privacyStorageContent:
-    "Personal user data is not permanently stored. We prioritize on-device processing and state persistence via local browser storage for your convenience.",
-  privacyThirdPartyTitle: "Third Party APIs",
-  privacyThirdPartyContent:
-    "Weather data is provided by external services such as Open-Meteo APIs. While we fetch data from these sources, your personal identity is not shared with these providers.",
-  privacyQuestionsTitle: "Questions about your privacy?",
-  privacyQuestionsBody:
-    "If you have any questions or concerns regarding our privacy practices, please contact us directly.",
-  termsTitle: "Terms of Service",
-  termsSubtitle: "Guidelines for using the AeroWeather intelligence platform.",
-  termsIntroductionTitle: "Introduction",
-  termsIntroductionContent:
-    "By using AeroWeather you agree to these legal terms. Please read them carefully before utilizing our forecasts, radar, or AI-powered services.",
-  termsDataDisclaimerTitle: "Weather Data Disclaimer",
-  termsDataDisclaimerContent:
-    "Weather information is provided for informational purposes only. We strive for accuracy through elite providers, but meteorology is inherently probabilistic.",
-  termsNoLiabilityTitle: "No Liability",
-  termsNoLiabilityContent:
-    "The creator of AeroWeather is not responsible for decisions made based on weather data provided by the platform. Please use multiple sources for critical safety decisions.",
-  termsPlatformUsageTitle: "Platform Usage",
-  termsPlatformUsageContent:
-    "Users may use the website freely but may not copy, reverse-engineer, or misuse the platform architecture. All intellectual property belongs to the creator.",
-  termsClarificationTitle: "Need clarification on these terms?",
-  termsClarificationBody:
-    "We're happy to explain our terms of service and how they affect your user experience.",
-  footerDescription:
-    "Ultra-Premium Weather Intelligence Platform providing real-time forecasts, interactive radar and AI weather insights for a global audience.",
+  privacyTitle: "Compliance and Data Integrity Framework",
+  privacySubtitle: "AeroWeather is built on a 'Privacy by Architecture' foundation. We believe your environmental data reflects your life—and that belongs to you.",
+  privacyIntroductionTitle: "Our Comprehensive Data Philosophy",
+  privacyIntroductionContent: "At AeroWeather, we fundamentally reject the practice of monetizing personal movement records or selling user profiles to third-party brokers. Our platform is engineered to function with minimal identifiers, prioritizing on-device processing over cloud-side logging. This policy outlines how we handle the essential signals required to deliver precise, real-time weather intelligence. We operate under the principle of data minimization, ensuring that we only collect what is strictly necessary to provide our services and protect our infrastructure from malicious activity.",
+  privacyLocationTitle: "Geographical Signal Handling and Precision",
+  privacyLocationContent: "When you grant location permissions, our system uses your approximate coordinates solely to query the nearest meteorological nodes within our distributed data network. This data is handled temporarily in your browser's persistent state (LocalStorage) and is never transmitted to our central servers for identity tracking or long-term behavioral profiling. We do not maintain a history of your past locations. If you decline permissions, you may still access global weather data by manually querying specific cities using our high-precision geocoding engine.",
+  privacyStorageTitle: "Client-Side Persistence and Cache Management",
+  privacyStorageContent: "We utilize modern browser storage technologies like LocalStorage and IndexedDB to cache your preferences, saved cities, and recent weather snapshots locally. This ensures the AeroWeather dashboard remains responsive during periods of intermittent connectivity and significantly reduces redundant API calls to our scientific partners. This data never leaves your device unless specifically requested by a feature you intentionally trigger. You can clear this data at any time through your browser's 'Clear Site Data' settings without impacting your primary access to the tool.",
+  privacyThirdPartyTitle: "Downstream Infrastructure and Analytics",
+  privacyThirdPartyContent: "Our intelligence is powered by elite scientific providers including Open-Meteo, RainViewer, and OpenStreetMap. While we fetch data relative to your geographical region, your personal IP address is proxied or obfuscated where possible to prevent third-party profiling. We also utilize lightweight, privacy-focused analytics (Vercel Analytics and Speed Insights) to monitor platform performance and identify technical bottlenecks. These tools are configured to be anonymous and do not track you across other websites. We encourage you to review the independent policies of these scientific data providers.",
+  privacyDataRightsTitle: "User Rights and Global Frameworks",
+  privacyDataRightsContent: "Regardless of your physical location, AeroWeather respects the principles established by the GDPR (General Data Protection Regulation) and the CCPA. You have the right to know what data is being processed, the right to request deletion of any locally stored preferences, and the right to use our core platform without providing any personally identifiable information. Because we do not use 'Account' systems in the traditional sense, your data is tied to your browser instance and remains fully under your control.",
+  privacyCookiesTitle: "Lightweight Cookie Disclosure",
+  privacyCookiesContent: "AeroWeather uses 'Functional Cookies' only. These are small files used to remember your theme choice (Light/Dark mode) and your language preference (Locale). We do not use 'Targeting Cookies' or 'Marketing Cookies.' Our goal is a pure, privacy-first intelligence experience where the interface adapts to your needs without monitoring your interests. By using our platform, you consent to these essential cookies that ensure the basic stability and personalization of the dashboard.",
+  privacyQuestionsTitle: "Governance and Legal Inquiries",
+  privacyQuestionsBody: "For specific questions regarding our data architecture, or to exercise your rights under global privacy frameworks, please use our contact portal or reach out to our legal compliance lead. We are dedicated to providing clear, transparent answers about our technology.",
+  termsTitle: "User Agreement and Intelligence Guidelines",
+  termsSubtitle: "By accessing the AeroWeather platform, you acknowledge the sophisticated nature of our intelligence systems and agree to the following operational parameters.",
+  termsIntroductionTitle: "Acceptance of Global Service Terms",
+  termsIntroductionContent: "The AeroWeather platform is a professional-grade weather intelligence and visualization tool. Use of this service, including all associated dashboards, radar systems, and AI-driven insights, signifies your full agreement to these terms. If you do not agree with our operational guidelines or privacy philosophy, please discontinue use immediately. These terms apply to all visitors, users, and others who access or use the Service across all geographical zones.",
+  termsDataDisclaimerTitle: "The Probabilistic Nature of Meteorology",
+  termsDataDisclaimerContent: "Meteorology is a science of probabilities, not certainties. While we utilize elite numerical models (ECMWF, GFS) and real-time telemetry from thousands of stations, all forecasts provided by AeroWeather should be used as one of several inputs for decision-making. We provide this data 'as-is' and do not provide life-safety critical specialized guidance for aviation, maritime, or high-risk industrial operations. Users are advised to cross-reference our intelligence with official government meteorological agency warnings during active severe weather events.",
+  termsNoLiabilityTitle: "Operational Liability and Indemnity",
+  termsNoLiabilityContent: "Rick Das and the AeroWeather contributors are not liable for any physical, logistical, financial, or reputational damages resulting from the interpretation or use of our atmospheric data. This includes, but is not limited to, losses due to weather-related travel delays, agricultural decisions, or property damage. Users are entirely responsible for exercising personal judgment and professional due diligence during extreme weather events. You agree to indemnify and hold AeroWeather harmless from any claims arising out of your use of the platform and its data outputs.",
+  termsPlatformUsageTitle: "Intellectual Governance and Systems Protection",
+  termsPlatformUsageContent: "The architecture, visual systems, UX logic, and proprietary logic engines powering AeroWeather are the exclusive intellectual property of Rick Das. Unauthorized reverse-engineering, systematic data scraping via automated bots, or systematic replication of our platform's unique interface design is strictly prohibited. You may not use the Service for any illegal or unauthorized purpose, nor may you, in the use of the Service, violate any laws in your jurisdiction.",
+  termsTerminationTitle: "Service Availability and Termination",
+  termsTerminationContent: "We reserve the right to modify or terminate the Service for any reason, without notice, at any time. We also reserve the right to refuse service to anyone for any reason at any time, particularly in cases of systematic API abuse or attempts to disrupt our infrastructure. We are committed to maintaining a high-performance environment for all legitimate users and will take necessary steps to protect our system resources.",
+  termsClarificationTitle: "Legal and Operational Clarification",
+  termsClarificationBody: "Need a deeper explanation of our user guidelines or how our data systems work? Our team is available to discuss how these terms protect both the platform's integrity and its global user base.",
+  footerDescription: "AeroWeather is an ultra-premium weather intelligence platform. We deliver zero-lag forecasts, high-fidelity interactive radar, and intelligent atmospheric summaries through a performance-driven architectural core.",
   footerDataPowered: "Weather data powered by Open-Meteo API",
   footerNavigation: "Navigation",
   footerPopularCities: "Popular Cities",
   footerCompany: "Company",
-  footer7DayForecast: "7 Day Forecast",
-  footerHourlyForecast: "Hourly Forecast",
-  footerWeatherRadar: "Weather Radar",
+      "footer7DayForecast": "7 Day Forecast",
+      "footerHourlyForecast": "Hourly Forecast",
+      "footerWeatherRadar": "Weather Radar",
   footerCityWeather: "City Weather",
   footerWeatherMaps: "Weather Maps",
   footerWeatherInKolkata: "Weather in Kolkata",
@@ -230,12 +218,9 @@ const fallbackTranslations = {
   footerRightsReserved: "All rights reserved.",
   footerBuiltBy: "Built and maintained by",
 } as const;
-
 export type TranslationKey = keyof typeof fallbackTranslations;
-
 type CompleteTranslations = Record<TranslationKey, string>;
 type PartialTranslations = Partial<CompleteTranslations>;
-
 const partialTranslations: Record<LanguageCode, PartialTranslations> = {
   en: fallbackTranslations,
   zh: {
@@ -807,8 +792,7 @@ const partialTranslations: Record<LanguageCode, PartialTranslations> = {
     insightClearWindow: "পরিষ্কার আকাশ",
     insightAiInsight: "AI ইনসাইট",
     aboutTitle: "AeroWeather সম্পর্কে",
-    aboutIntro:
-      "AeroWeather একটি আধুনিক আবহাওয়া ইন্টেলিজেন্স প্ল্যাটফর্ম, যা রিয়েল-টাইম পূর্বাভাস, ঘণ্টাভিত্তিক তথ্য, ৭ দিনের আউটলুক, AQI ভিজিবিলিটি এবং রাডার ইনসাইট দ্রুত ও ব্যবহারবান্ধব অভিজ্ঞতায় দেয়।",
+
     aboutMissionVision: "মিশন ও ভিশন",
     aboutMissionTitle: "মিশন",
     aboutMissionDesc:
@@ -816,19 +800,9 @@ const partialTranslations: Record<LanguageCode, PartialTranslations> = {
     aboutVisionTitle: "ভিশন",
     aboutVisionDesc:
       "এমন একটি নতুন প্রজন্মের আবহাওয়া ইকোসিস্টেম তৈরি করা, যেখানে পূর্বাভাস, ভিজ্যুয়াল ইনসাইট এবং AI নির্দেশনা সব ডিভাইসে নিরবচ্ছিন্নভাবে কাজ করে।",
-    aboutProducts: "আমাদের পণ্য",
-    aboutAeroWeatherDesc:
-      "আধুনিক API ও ভিজ্যুয়াল সিস্টেম ব্যবহার করে পারফরম্যান্স, স্মুথ UI এবং নির্ভুল পূর্বাভাস-কেন্দ্রিক রিয়েল-টাইম আবহাওয়া প্ল্যাটফর্ম।",
-    aboutPdfEditorDesc:
-      "গতি ও সরলতাকে গুরুত্ব দিয়ে তৈরি হালকা এবং আধুনিক PDF এডিটিং প্ল্যাটফর্ম, যা বিভিন্ন ডিভাইসে দক্ষ ডকুমেন্ট ওয়ার্কফ্লো সক্ষম করে।",
     aboutFounderTitle: "প্রতিষ্ঠাতা",
     aboutFoundedByRick: "Rick Das দ্বারা প্রতিষ্ঠিত",
     aboutLearnRick: "Rick Das সম্পর্কে আরও জানুন",
-    aboutUpcomingProjects: "আসন্ন প্রকল্প",
-    aboutGameSaveSync1:
-      "Rick Das-এর GameSaveSync একটি পরবর্তী প্রজন্মের ক্লাউড সেভ সিঙ্ক্রোনাইজেশন সিস্টেম, যা বর্তমানে ডেভেলপমেন্টে রয়েছে।",
-    aboutGameSaveSync2:
-      "GameSaveSync তৈরি করা হচ্ছে যাতে খেলোয়াড়রা নির্ভরযোগ্য ক্লাউড ব্যাকআপ এবং দ্রুত রিস্টোর সহ একাধিক ডিভাইসে গেম প্রগ্রেস সিঙ্ক ও ম্যানেজ করতে পারে।",
     contactTitle: "যোগাযোগ করুন",
     contactSubtitle: "AeroWeather সম্পর্কে প্রশ্ন আছে? নিচে বার্তা পাঠান।",
     contactMessageSentTitle: "বার্তা পাঠানো হয়েছে!",
@@ -846,8 +820,7 @@ const partialTranslations: Record<LanguageCode, PartialTranslations> = {
     privacyTitle: "গোপনীয়তা নীতি",
     privacySubtitle: "AeroWeather ইন্টেলিজেন্স প্ল্যাটফর্মের জন্য স্বচ্ছ ডেটা নীতি।",
     privacyIntroductionTitle: "ভূমিকা",
-    privacyIntroductionContent:
-      "AeroWeather ব্যবহারকারীর গোপনীয়তাকে সম্মান করে এবং অপ্রয়োজনীয় ব্যক্তিগত তথ্য সংগ্রহ করে না। আমাদের লক্ষ্য নিরাপত্তা অক্ষুণ্ণ রেখে নির্ভুল আবহাওয়া তথ্য প্রদান করা।",
+
     privacyLocationTitle: "অবস্থান তথ্য",
     privacyLocationContent:
       "লোকেশন পারমিশন দিলে ওয়েবসাইট আপনার ডিভাইসের ভৌগোলিক অবস্থান শুধুমাত্র স্থানীয় আবহাওয়া দেখানোর জন্য ব্যবহার করতে পারে। এই তথ্য রিয়েল-টাইমে প্রক্রিয়া করা হয় এবং ট্র্যাকিংয়ের জন্য ব্যবহার হয় না।",
@@ -863,14 +836,12 @@ const partialTranslations: Record<LanguageCode, PartialTranslations> = {
     termsTitle: "সেবার শর্তাবলী",
     termsSubtitle: "AeroWeather ইন্টেলিজেন্স প্ল্যাটফর্ম ব্যবহারের নির্দেশিকা।",
     termsIntroductionTitle: "ভূমিকা",
-    termsIntroductionContent:
-      "AeroWeather ব্যবহার করলে আপনি এই আইনগত শর্তাবলীতে সম্মত হচ্ছেন। আমাদের পূর্বাভাস, রাডার বা AI-চালিত পরিষেবা ব্যবহারের আগে অনুগ্রহ করে শর্তগুলো পড়ুন।",
+
     termsDataDisclaimerTitle: "আবহাওয়া তথ্য সম্পর্কিত ঘোষণা",
     termsDataDisclaimerContent:
       "আবহাওয়ার তথ্য শুধুমাত্র তথ্যগত উদ্দেশ্যে প্রদান করা হয়। আমরা নির্ভুলতার চেষ্টা করি, তবে আবহাওয়াবিজ্ঞান স্বভাবতই সম্ভাবনাভিত্তিক।",
     termsNoLiabilityTitle: "দায়মুক্তি",
-    termsNoLiabilityContent:
-      "প্ল্যাটফর্মের আবহাওয়া তথ্যের ভিত্তিতে নেওয়া সিদ্ধান্তের জন্য AeroWeather-এর নির্মাতা দায়ী নন। গুরুত্বপূর্ণ নিরাপত্তা সিদ্ধান্তের ক্ষেত্রে একাধিক উৎস যাচাই করুন।",
+
     termsPlatformUsageTitle: "প্ল্যাটফর্ম ব্যবহার",
     termsPlatformUsageContent:
       "ব্যবহারকারীরা ওয়েবসাইট ব্যবহার করতে পারবেন, তবে প্ল্যাটফর্মের আর্কিটেকচার কপি, রিভার্স-ইঞ্জিনিয়ার বা অপব্যবহার করা যাবে না। সব মেধাস্বত্ব নির্মাতার।",
@@ -963,8 +934,7 @@ const partialTranslations: Record<LanguageCode, PartialTranslations> = {
     insightClearWindow: "साफ मौसम",
     insightAiInsight: "AI इनसाइट",
     aboutTitle: "AeroWeather के बारे में",
-    aboutIntro:
-      "AeroWeather एक आधुनिक मौसम इंटेलिजेंस प्लेटफॉर्म है, जो रियल-टाइम पूर्वानुमान, घंटेवार अपडेट, 7-दिन का आउटलुक, AQI विजिबिलिटी और रडार इनसाइट को तेज और उपयोगकर्ता-अनुकूल अनुभव के साथ प्रदान करता है।",
+
     aboutMissionVision: "मिशन और विज़न",
     aboutMissionTitle: "मिशन",
     aboutMissionDesc:
@@ -972,19 +942,9 @@ const partialTranslations: Record<LanguageCode, PartialTranslations> = {
     aboutVisionTitle: "विज़न",
     aboutVisionDesc:
       "ऐसा अगली पीढ़ी का मौसम प्रोडक्ट इकोसिस्टम बनाना, जिसमें पूर्वानुमान, विज़ुअल इनसाइट और AI मार्गदर्शन हर डिवाइस पर सहज महसूस हो।",
-    aboutProducts: "हमारे उत्पाद",
-    aboutAeroWeatherDesc:
-      "आधुनिक API और विज़ुअल सिस्टम की मदद से प्रदर्शन, स्मूथ UI और सटीक पूर्वानुमान पर केंद्रित रियल-टाइम मौसम इंटेलिजेंस प्लेटफॉर्म।",
-    aboutPdfEditorDesc:
-      "गति और सरलता के लिए डिज़ाइन किया गया हल्का और आधुनिक PDF एडिटिंग प्लेटफॉर्म, जो विभिन्न डिवाइस पर कुशल डॉक्यूमेंट वर्कफ़्लो सक्षम करता है।",
     aboutFounderTitle: "संस्थापक",
     aboutFoundedByRick: "Rick Das द्वारा स्थापित",
     aboutLearnRick: "Rick Das के बारे में जानें",
-    aboutUpcomingProjects: "आगामी प्रोजेक्ट्स",
-    aboutGameSaveSync1:
-      "Rick Das द्वारा GameSaveSync एक अगली पीढ़ी का क्लाउड सेव सिंक्रोनाइज़ेशन सिस्टम है, जो वर्तमान में विकासाधीन है।",
-    aboutGameSaveSync2:
-      "GameSaveSync इस तरह बनाया जा रहा है कि खिलाड़ी भरोसेमंद क्लाउड बैकअप और तेज़ रिस्टोर वर्कफ़्लो के साथ कई डिवाइस पर गेम प्रोग्रेस सिंक और मैनेज कर सकें।",
     contactTitle: "संपर्क करें",
     contactSubtitle: "AeroWeather के बारे में प्रश्न है? नीचे संदेश भेजें।",
     contactMessageSentTitle: "संदेश भेजा गया!",
@@ -1002,8 +962,7 @@ const partialTranslations: Record<LanguageCode, PartialTranslations> = {
     privacyTitle: "गोपनीयता नीति",
     privacySubtitle: "AeroWeather इंटेलिजेंस प्लेटफॉर्म के लिए पारदर्शी डेटा प्रथाएं।",
     privacyIntroductionTitle: "परिचय",
-    privacyIntroductionContent:
-      "AeroWeather उपयोगकर्ता की गोपनीयता का सम्मान करता है और अनावश्यक व्यक्तिगत डेटा एकत्र नहीं करता। हमारा लक्ष्य आपकी डिजिटल सुरक्षा से समझौता किए बिना सटीक मौसम पूर्वानुमान देना है।",
+
     privacyLocationTitle: "स्थान डेटा",
     privacyLocationContent:
       "यदि लोकेशन अनुमति दी जाती है, तो वेबसाइट आपके डिवाइस का भौगोलिक स्थान केवल स्थानीय मौसम दिखाने के लिए उपयोग कर सकती है। यह डेटा रियल-टाइम में प्रोसेस होता है और ट्रैकिंग के लिए उपयोग नहीं किया जाता।",
@@ -1019,14 +978,12 @@ const partialTranslations: Record<LanguageCode, PartialTranslations> = {
     termsTitle: "सेवा की शर्तें",
     termsSubtitle: "AeroWeather इंटेलिजेंस प्लेटफॉर्म के उपयोग के लिए दिशा-निर्देश।",
     termsIntroductionTitle: "परिचय",
-    termsIntroductionContent:
-      "AeroWeather का उपयोग करके आप इन कानूनी शर्तों से सहमत होते हैं। हमारे पूर्वानुमान, रडार या AI-आधारित सेवाओं का उपयोग करने से पहले इन्हें ध्यान से पढ़ें।",
+
     termsDataDisclaimerTitle: "मौसम डेटा अस्वीकरण",
     termsDataDisclaimerContent:
       "मौसम जानकारी केवल सूचनात्मक उद्देश्य के लिए है। हम उच्च गुणवत्ता वाले प्रदाताओं के माध्यम से सटीकता का प्रयास करते हैं, लेकिन मौसम विज्ञान स्वभाव से संभाव्य है।",
     termsNoLiabilityTitle: "कोई दायित्व नहीं",
-    termsNoLiabilityContent:
-      "प्लेटफॉर्म पर उपलब्ध मौसम डेटा के आधार पर लिए गए निर्णयों के लिए AeroWeather का निर्माता जिम्मेदार नहीं है। महत्वपूर्ण सुरक्षा निर्णयों के लिए कई स्रोतों का उपयोग करें।",
+
     termsPlatformUsageTitle: "प्लेटफॉर्म उपयोग",
     termsPlatformUsageContent:
       "उपयोगकर्ता वेबसाइट का स्वतंत्र रूप से उपयोग कर सकते हैं, लेकिन प्लेटफॉर्म आर्किटेक्चर की कॉपी, रिवर्स-इंजीनियरिंग या दुरुपयोग की अनुमति नहीं है। सभी बौद्धिक संपदा निर्माता की है।",
@@ -1122,11 +1079,9 @@ const partialTranslations: Record<LanguageCode, PartialTranslations> = {
     aboutMissionVision: "ミッションとビジョン",
     aboutMissionTitle: "ミッション",
     aboutVisionTitle: "ビジョン",
-    aboutProducts: "製品",
     aboutFounderTitle: "創設者",
     aboutFoundedByRick: "Rick Das により創設",
     aboutLearnRick: "Rick Das について詳しく",
-    aboutUpcomingProjects: "今後のプロジェクト",
     contactTitle: "お問い合わせ",
     contactSubtitle: "AeroWeatherについて質問がありますか？下のフォームから送信してください。",
     contactMessageSentTitle: "送信完了",
@@ -1230,11 +1185,9 @@ const partialTranslations: Record<LanguageCode, PartialTranslations> = {
     aboutMissionVision: "미션 및 비전",
     aboutMissionTitle: "미션",
     aboutVisionTitle: "비전",
-    aboutProducts: "제품",
     aboutFounderTitle: "설립자",
     aboutFoundedByRick: "Rick Das가 설립",
     aboutLearnRick: "Rick Das 더 알아보기",
-    aboutUpcomingProjects: "예정 프로젝트",
     contactTitle: "문의하기",
     contactSubtitle: "AeroWeather에 대해 궁금한 점이 있나요? 아래로 메시지를 보내주세요.",
     contactMessageSentTitle: "메시지 전송 완료",
@@ -1260,7 +1213,6 @@ const partialTranslations: Record<LanguageCode, PartialTranslations> = {
     footerBuiltBy: "개발 및 유지보수",
   },
 };
-
 export const translations: Record<LanguageCode, CompleteTranslations> =
   Object.fromEntries(
     (Object.entries(partialTranslations) as Array<[LanguageCode, PartialTranslations]>).map(
@@ -1273,10 +1225,8 @@ export const translations: Record<LanguageCode, CompleteTranslations> =
       ]
     )
   ) as Record<LanguageCode, CompleteTranslations>;
-
 export function normalizeLanguage(input?: string | null): LanguageCode {
   const value = (input ?? "").toLowerCase();
-
   if (value.startsWith("zh")) return "zh";
   if (value.startsWith("es")) return "es";
   if (value.startsWith("ar")) return "ar";
@@ -1297,7 +1247,6 @@ export function normalizeLanguage(input?: string | null): LanguageCode {
   if (value.startsWith("ko")) return "ko";
   return "en";
 }
-
 const LANGUAGE_LOCALE_TAG_MAP: Record<LanguageCode, string> = {
   en: "en-US",
   zh: "zh-CN",
@@ -1319,18 +1268,15 @@ const LANGUAGE_LOCALE_TAG_MAP: Record<LanguageCode, string> = {
   ja: "ja-JP",
   ko: "ko-KR",
 };
-
 export function toLocaleTag(language: LanguageCode): string {
   return LANGUAGE_LOCALE_TAG_MAP[language] ?? "en-US";
 }
-
 const COUNTRY_LANGUAGE_MAP: Record<string, LanguageCode> = {
   CN: "zh",
   HK: "zh",
   MO: "zh",
   TW: "zh",
   SG: "zh",
-
   ES: "es",
   MX: "es",
   AR: "es",
@@ -1351,7 +1297,6 @@ const COUNTRY_LANGUAGE_MAP: Record<string, LanguageCode> = {
   DO: "es",
   PR: "es",
   CU: "es",
-
   SA: "ar",
   AE: "ar",
   QA: "ar",
@@ -1369,12 +1314,10 @@ const COUNTRY_LANGUAGE_MAP: Record<string, LanguageCode> = {
   TN: "ar",
   LY: "ar",
   SD: "ar",
-
   BR: "pt",
   PT: "pt",
   AO: "pt",
   MZ: "pt",
-
   FR: "fr",
   BE: "fr",
   CH: "fr",
@@ -1383,20 +1326,16 @@ const COUNTRY_LANGUAGE_MAP: Record<string, LanguageCode> = {
   SN: "fr",
   CI: "fr",
   CM: "fr",
-
   DE: "de",
   AT: "de",
   LI: "de",
-
   RU: "ru",
   BY: "ru",
   KZ: "ru",
   KG: "ru",
-
   IT: "it",
   SM: "it",
   VA: "it",
-
   TR: "tr",
   VN: "vi",
   ID: "id",
@@ -1409,13 +1348,11 @@ const COUNTRY_LANGUAGE_MAP: Record<string, LanguageCode> = {
   JP: "ja",
   KR: "ko",
 };
-
 export function normalizeCountryToLanguage(countryCode?: string | null): LanguageCode | null {
   const normalizedCountry = (countryCode ?? "").trim().toUpperCase();
   if (!normalizedCountry) return null;
   return COUNTRY_LANGUAGE_MAP[normalizedCountry] ?? null;
 }
-
 export function isLanguageCode(value: string): value is LanguageCode {
   return (SUPPORTED_LANGUAGES as readonly string[]).includes(value);
 }

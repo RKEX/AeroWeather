@@ -1,4 +1,8 @@
+import { CookieBanner } from "@/components/ui/CookieBanner";
 import { Footer } from "@/components/footer";
+import LenisProvider from "@/components/lenis-provider";
+import CustomScrollbar from "@/components/ui/custom-scrollbar";
+import { OfflineStatus } from "@/components/ui/offline-status";
 import LanguageRootLayout from "@/components/layout/language-root-layout";
 import { LanguageProvider } from "@/components/Providers/language-provider";
 import { PerformanceProvider } from "@/components/Providers/performance-provider";
@@ -19,10 +23,11 @@ import { NextIntlClientProvider } from "next-intl";
 import Script from "next/script";
 import { ReactNode } from "react";
 
-import { constructMetadata } from "@/config/metadata";
+import { generateMetadataFromConfig } from "@/config/seoconfig";
+import { ToastProvider } from "@/components/ui/premium-toast";
 import "./globals.css";
 
-export const metadata: Metadata = constructMetadata();
+export const metadata: Metadata = generateMetadataFromConfig();
 
 type RootLayoutProps = {
   children: ReactNode;
@@ -86,64 +91,69 @@ export default async function RootLayout({ children }: Readonly<RootLayoutProps>
           <SettingsProvider>
             <NextIntlClientProvider locale={locale} messages={messages}>
               <LanguageProvider>
-                <Script
-                  id="person-schema"
-                  type="application/ld+json"
-                  strategy="afterInteractive"
-                  dangerouslySetInnerHTML={{
-                    __html: JSON.stringify(localizedPersonSchema),
-                  }}
-                />
-                <Script
-                  id="organization-schema"
-                  type="application/ld+json"
-                  strategy="afterInteractive"
-                  dangerouslySetInnerHTML={{
-                    __html: JSON.stringify(localizedOrganizationSchema),
-                  }}
-                />
-                <Script
-                  id="website-schema"
-                  type="application/ld+json"
-                  strategy="afterInteractive"
-                  dangerouslySetInnerHTML={{
-                    __html: JSON.stringify(localizedWebsiteSchema),
-                  }}
-                />
+                <ToastProvider>
+                  <Script
+                    id="person-schema"
+                    type="application/ld+json"
+                    strategy="afterInteractive"
+                    dangerouslySetInnerHTML={{
+                      __html: JSON.stringify(localizedPersonSchema),
+                    }}
+                  />
+                  <Script
+                    id="organization-schema"
+                    type="application/ld+json"
+                    strategy="afterInteractive"
+                    dangerouslySetInnerHTML={{
+                      __html: JSON.stringify(localizedOrganizationSchema),
+                    }}
+                  />
+                  <Script
+                    id="website-schema"
+                    type="application/ld+json"
+                    strategy="afterInteractive"
+                    dangerouslySetInnerHTML={{
+                      __html: JSON.stringify(localizedWebsiteSchema),
+                    }}
+                  />
 
-                <LanguageRootLayout>
-                  <SkyBackground />
+                  <LanguageRootLayout>
+                    <SkyBackground />
 
-                  {/* Dark overlay — fixed to viewport */}
-                  <div className="pointer-events-none fixed inset-0 -z-40 overflow-hidden">
-                    <div className="h-full w-full bg-black/35" />
-                  </div>
+                    {/* Dark overlay — fixed to viewport */}
+                    <div className="pointer-events-none fixed inset-0 -z-40 overflow-hidden">
+                      <div className="h-full w-full bg-black/35" />
+                    </div>
 
-                  {/* Ambient glow blobs — fixed to viewport */}
-                  <div className="pointer-events-none fixed inset-0 -z-30 overflow-hidden">
-                    <div className="absolute top-1/4 left-1/4 h-[50vw] w-[50vw] rounded-full bg-white/10 opacity-40" />
-                    <div className="absolute right-1/4 bottom-1/4 h-[40vw] w-[40vw] rounded-full bg-white/5 opacity-30" />
-                  </div>
+                    {/* Ambient glow blobs — fixed to viewport */}
+                    <div className="pointer-events-none fixed inset-0 -z-30 overflow-hidden">
+                      <div className="absolute top-1/4 left-1/4 h-[50vw] w-[50vw] rounded-full bg-white/10 opacity-40" />
+                      <div className="absolute right-1/4 bottom-1/4 h-[40vw] w-[40vw] rounded-full bg-white/5 opacity-30" />
+                    </div>
 
-                  <div id="app-shell">
-                    <main className="relative z-10 min-h-screen max-w-full">
-                      {children}
-                      {isProd && <Analytics />}
-                      {isProd && <SpeedInsights />}
-                    </main>
+                    <div id="app-shell">
+                      <main className="relative z-10 min-h-screen max-w-full">
+                        <OfflineStatus />
+                        <LenisProvider>{children}</LenisProvider>
+                        {isProd && <Analytics />}
+                        {isProd && <SpeedInsights />}
+                      </main>
 
-                    <Footer />
-                  </div>
-                </LanguageRootLayout>
+                      <Footer />
+                      <CookieBanner />
+                    </div>
+                    <CustomScrollbar />
+                  </LanguageRootLayout>
 
-                <Script
-                  id="service-worker-register"
-                  strategy="lazyOnload"
-                  dangerouslySetInnerHTML={{
-                    __html:
-                      'if ("serviceWorker" in navigator) { window.addEventListener("load", function () { navigator.serviceWorker.register("/sw.js"); }); }',
-                  }}
-                />
+                  <Script
+                    id="service-worker-register"
+                    strategy="lazyOnload"
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        'if ("serviceWorker" in navigator) { window.addEventListener("load", function () { navigator.serviceWorker.register("/sw.js"); }); }',
+                    }}
+                  />
+                </ToastProvider>
               </LanguageProvider>
             </NextIntlClientProvider>
           </SettingsProvider>

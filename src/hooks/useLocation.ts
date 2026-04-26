@@ -17,7 +17,9 @@ export function useGeolocation() {
 
   useEffect(() => {
     if (!navigator.geolocation) {
-      setState(s => ({ ...s, error: 'Geolocation is not supported by your browser', loading: false }));
+      Promise.resolve().then(() => 
+        setState(s => ({ ...s, error: 'Geolocation is not supported by your browser', loading: false }))
+      );
       return;
     }
 

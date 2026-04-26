@@ -1,7 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/components/Providers/language-provider";
-import { GlassCard } from "@/components/ui/glass-card";
+import GlassCard from "@/components/ui/GlassCard";
 import { getDaySlug } from "@/lib/day-slug";
 import { toLocaleTag } from "@/lib/i18n";
 import { getWeatherIcon } from "@/lib/weather-theme";
@@ -30,7 +30,7 @@ export const DetailMetric = memo(({
   value: string | number;
 }) => {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 transition-all hover:bg-white/20 shadow-lg">
+    <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 transition-all hover:bg-white/10">
       {Icon && <Icon className="h-5 w-5 shrink-0 text-white/60" />}
       <div className="min-w-0">
         <p className="mb-0.5 truncate text-[10px] uppercase tracking-widest text-white/50">
@@ -85,10 +85,10 @@ const DailyForecastComponent = ({ weather }: DailyForecastProps) => {
         date,
         // ✅ allDates pass করো যাতে duplicate weekday detect হয়
         slug: getDaySlug(date, allDates),
-        maxTemp: Math.round(daily.temperature2mMax[globalIdx] ?? 0),
-        minTemp: Math.round(daily.temperature2mMin[globalIdx] ?? 0),
+        maxTemp: daily.temperature2mMax[globalIdx] !== undefined ? Math.round(daily.temperature2mMax[globalIdx]) : null,
+        minTemp: daily.temperature2mMin[globalIdx] !== undefined ? Math.round(daily.temperature2mMin[globalIdx]) : null,
         code: daily.weatherCode[globalIdx] ?? 0,
-        precipProb: daily.precipitationProbabilityMax[globalIdx] ?? 0,
+        precipProb: daily.precipitationProbabilityMax[globalIdx] ?? null,
         uvIndexMax: daily.uvIndexMax?.[globalIdx]
           ? Math.round(daily.uvIndexMax[globalIdx])
           : 0,
@@ -100,7 +100,7 @@ const DailyForecastComponent = ({ weather }: DailyForecastProps) => {
 
   return (
     <GlassCard className="flex w-full flex-col gap-3 p-6">
-      <h3 className={`mb-2 text-xl font-semibold tracking-tight drop-shadow-sm ${textPrimary}`}>
+      <h3 className={`mb-2 text-xl font-semibold tracking-tight ${textPrimary}`}>
         {t("sevenDayForecast")}
       </h3>
 
@@ -108,12 +108,12 @@ const DailyForecastComponent = ({ weather }: DailyForecastProps) => {
         {forecastDays.map((day, i) => {
           const Icon = getWeatherIcon(day.code, true);
           const label = i === 0 ? t("tomorrow") : dayLabelFormatter.format(day.date);
-          const itemBg = "bg-white/10 border-white/15 hover:bg-white/20";
+          const itemBg = "bg-white/5 border-white/10 hover:bg-white/10";
 
           return (
             <Link key={i} href={`/weather/${day.slug}`} className="outline-none">
               <div
-                className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 transition-all duration-150 hover:border-indigo-400/40 hover:translate-x-0.5 hover:scale-[1.01] hover:shadow-md hover:shadow-indigo-500/10 active:scale-[0.99] ${itemBg}`}
+                className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 transition-all duration-150 hover:translate-x-0.5 hover:scale-[1.01] active:scale-[0.99] ${itemBg}`}
               >
                 <span className={`w-28 shrink-0 text-sm font-medium ${textSecondary}`}>
                   {label}
@@ -121,7 +121,7 @@ const DailyForecastComponent = ({ weather }: DailyForecastProps) => {
 
                 <div className="flex flex-1 items-center justify-center gap-1.5">
                   <Icon className={`h-5 w-5 ${textPrimary}`} />
-                  {day.precipProb > 5 && (
+                  {day.precipProb !== null && day.precipProb > 5 && (
                     <span className="flex items-center gap-0.5 text-[10px] text-blue-500 font-bold">
                       <Droplets className="h-2.5 w-2.5" />
                       {day.precipProb}%
@@ -130,8 +130,12 @@ const DailyForecastComponent = ({ weather }: DailyForecastProps) => {
                 </div>
 
                 <div className="flex gap-2 font-semibold">
-                  <span className={tempColor(day.maxTemp)}>{day.maxTemp}°</span>
-                  <span className="text-slate-400">{day.minTemp}°</span>
+                  <span className={day.maxTemp !== null ? tempColor(day.maxTemp) : "text-white/40"}>
+                    {day.maxTemp !== null ? `${day.maxTemp}°` : "--"}
+                  </span>
+                  <span className="text-slate-400">
+                    {day.minTemp !== null ? `${day.minTemp}°` : "--"}
+                  </span>
                 </div>
 
                 <svg className="h-4 w-4 shrink-0 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">

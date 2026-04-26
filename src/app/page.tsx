@@ -1,6 +1,7 @@
 import { FounderSeoLinks } from "@/components/home/founder-seo-links";
+import { HomeContent } from "@/components/home/home-content";
 import ClientDashboard from "@/components/weather/client-dashboard";
-import { constructMetadata } from "@/config/metadata";
+import { generateMetadataFromConfig } from "@/config/seoconfig";
 import { createFallbackWeatherData } from "@/lib/fallback-weather";
 import {
     getLocaleDictionary,
@@ -13,14 +14,11 @@ type HomePageProps = {
   searchParams?: Promise<SearchParamsRecord>;
 };
 
-export async function generateMetadata({
-  searchParams,
-}: HomePageProps): Promise<Metadata> {
-  const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const language = await resolveUiLanguageFromRequest(resolvedSearchParams);
+export async function generateMetadata(): Promise<Metadata> {
+  const language = await resolveUiLanguageFromRequest();
   const dictionary = await getLocaleDictionary(language);
 
-  return constructMetadata({
+  return generateMetadataFromConfig({
     title: dictionary.appTagline,
     description: dictionary.footerDescription,
     locale: language,
@@ -42,6 +40,8 @@ export default async function Home() {
         initialWeather={initialWeather}
         initialLocation={{ lat: defaultLat, lon: defaultLon, name: "Kolkata" }}
       />
+
+      <HomeContent />
 
       <FounderSeoLinks />
     </>

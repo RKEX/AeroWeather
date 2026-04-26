@@ -225,7 +225,7 @@ export const defaultSEO = {
     "accurate weather site", "accurate weather forecast online",
     "reliable weather forecast", "reliable weather website",
     "top weather websites", "top weather apps",
-    "free weather forecast website", "no ads weather website",
+    "free weather forecast website", "minimal ads weather website",
     "weather app alternative", "weather.com alternative",
     "accuweather alternative", "weather channel alternative",
     "weather underground alternative", "windy alternative",

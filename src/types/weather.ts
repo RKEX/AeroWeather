@@ -9,9 +9,10 @@ export interface LocationResult {
 }
 
 export interface WeatherData {
-  timezone: string; // ✅ TOP LEVEL এ, current এর বাইরে
+  timezone: string;
   currentTime?: string;
   utcOffsetSeconds?: number;
+  isFallback?: boolean;
   current: {
     temperature2m: number;
     relativeHumidity2m: number;
@@ -48,6 +49,8 @@ export interface WeatherData {
     temperature2mMin: number[];
     sunrise: string[];
     sunset: string[];
+    moonrise: string[];
+    moonset: string[];
     uvIndexMax: number[];
     precipitationSum: number[];
     precipitationProbabilityMax: number[];
@@ -60,5 +63,19 @@ export interface WeatherData {
     nitrogenDioxide: number;
     sulphurDioxide: number;
     ozone: number;
+  };
+  moon?: {
+    moonrise: string | null;
+    moonset: string | null;
+    phase: number;
+    illumination: number;
+    phaseName: string;
+  };
+  dailyMoon?: {
+    moonrise: (string | null)[];
+    moonset: (string | null)[];
+    phase: number[];
+    illumination: number[];
+    phaseName: string[];
   };
 }

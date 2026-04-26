@@ -1,7 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/components/Providers/language-provider";
-import { GlassCard } from "@/components/ui/glass-card";
+import { GlassCard } from "@/components/ui/GlassCard";
 import { toLocaleTag } from "@/lib/i18n";
 import { getWeatherIcon } from "@/lib/weather-theme";
 import { WeatherData } from "@/types/weather";
@@ -10,7 +10,8 @@ import dynamic from "next/dynamic";
 import { memo, useMemo } from "react";
 
 const HourlyChart = dynamic(
-  () => import("@/components/weather/hourly-chart").then((mod) => mod.HourlyChart),
+  () =>
+    import("@/components/weather/hourly-chart").then((mod) => mod.HourlyChart),
   {
     ssr: false,
   },
@@ -34,7 +35,7 @@ const HourlyForecastComponent = ({
   const { t, language } = useLanguage();
   const hourFormatter = useMemo(
     () => new Intl.DateTimeFormat(toLocaleTag(language), { hour: "numeric" }),
-    [language]
+    [language],
   );
 
   const isForecast = dayIndex >= 0;
@@ -75,7 +76,7 @@ const HourlyForecastComponent = ({
       </h3>
 
       {/* Timeline cards */}
-      <div className="glass-scroll mb-6 flex gap-4 overflow-x-auto pb-4">
+      <div className="glass-scroll horizontal-scroll mb-6 flex gap-4 overflow-x-auto pb-4">
         {data.slice(0, 12).map((hour, i) => {
           const Icon = getWeatherIcon(hour.code, true);
           const itemBg =

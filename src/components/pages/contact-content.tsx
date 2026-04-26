@@ -1,7 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/components/Providers/language-provider";
-import { GlassCard } from "@/components/ui/glass-card";
+import GlassCard from "@/components/ui/GlassCard";
 import { Link } from "@/navigation";
 import {
     CheckCircle,
@@ -56,11 +56,13 @@ export default function ContactContent() {
   return (
     <main className="mx-auto min-h-screen max-w-4xl px-6 py-20">
       <div className="mb-8">
-        <Link
+        <GlassCard
+          as="a"
           href="/"
-          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/15">
+          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/15"
+        >
           ← {t("backToHome")}
-        </Link>
+        </GlassCard>
       </div>
 
       <div className="mb-12 text-center">
@@ -102,13 +104,14 @@ export default function ContactContent() {
                     <label className="ml-1 text-sm font-bold tracking-widest text-white/40 uppercase">
                       {t("contactName")}
                     </label>
-                    <input
+                    <GlassCard
+                      as="input"
                       required
                       type="text"
                       placeholder={t("contactNamePlaceholder")}
-                      className="w-full rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-white transition-all placeholder:text-white/20 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none"
+                      className="w-full px-6 py-4 text-white transition-all placeholder:text-white/20 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none shadow-none"
                       value={formData.name}
-                      onChange={(e) =>
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
                     />
@@ -117,13 +120,14 @@ export default function ContactContent() {
                     <label className="ml-1 text-sm font-bold tracking-widest text-white/40 uppercase">
                       {t("contactEmail")}
                     </label>
-                    <input
+                    <GlassCard
+                      as="input"
                       required
                       type="email"
                       placeholder={t("contactEmailPlaceholder")}
-                      className="w-full rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-white transition-all placeholder:text-white/20 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none"
+                      className="w-full px-6 py-4 text-white transition-all placeholder:text-white/20 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none shadow-none"
                       value={formData.email}
-                      onChange={(e) =>
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         setFormData({ ...formData, email: e.target.value })
                       }
                     />
@@ -133,13 +137,14 @@ export default function ContactContent() {
                   <label className="ml-1 text-sm font-bold tracking-widest text-white/40 uppercase">
                     {t("contactMessage")}
                   </label>
-                  <textarea
+                  <GlassCard
+                    as="textarea"
                     required
                     rows={6}
                     placeholder={t("contactMessagePlaceholder")}
-                    className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-white transition-all placeholder:text-white/20 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none"
+                    className="w-full resize-none px-6 py-4 text-white transition-all placeholder:text-white/20 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none shadow-none"
                     value={formData.message}
-                    onChange={(e) =>
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                       setFormData({ ...formData, message: e.target.value })
                     }
                   />
@@ -215,9 +220,9 @@ function ContactOption({
       target="_blank"
       rel="noopener noreferrer"
       className="group flex items-center gap-4">
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-4 transition-all group-hover:bg-white/10">
+      <GlassCard className="p-4 transition-all group-hover:bg-white/10 shadow-none">
         <Icon className="h-6 w-6 text-indigo-400" />
-      </div>
+      </GlassCard>
       <div>
         <h4 className="mb-1 text-xs leading-none font-bold tracking-widest text-white/40 uppercase">
           {label}

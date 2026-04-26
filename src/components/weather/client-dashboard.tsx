@@ -2,7 +2,21 @@
 
 import { useLanguage } from "@/components/Providers/language-provider";
 import { usePerformance } from "@/components/Providers/performance-provider";
-import { DailyForecastSkeleton, HourlyForecastSkeleton } from "@/components/weather/ForecastSkeleton";
+import GlassCard from "@/components/ui/GlassCard";
+import {
+  AiWeatherInsightSkeleton,
+  AirQualityMiniCardSkeleton,
+  AqiCardSkeleton,
+  AstroPanelSkeleton,
+  ImpactCalendarSkeleton,
+  RainTimelineCardSkeleton,
+  RealFeelCardSkeleton,
+  UVIndexCardSkeleton,
+} from "@/components/weather/CardSkeletons";
+import {
+  DailyForecastSkeleton,
+  HourlyForecastSkeleton,
+} from "@/components/weather/ForecastSkeleton";
 import { LocationSearch } from "@/components/weather/location-search";
 import { MapSkeleton } from "@/components/weather/MapSkeleton";
 import { WeatherHero } from "@/components/weather/weather-hero";
@@ -14,31 +28,99 @@ import { useSkyStore } from "@/store/useSkyStore";
 import { LocationResult, WeatherData } from "@/types/weather";
 import { Navigation } from "lucide-react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { memo, Suspense, useEffect, useState } from "react";
 
 const HourlyForecast = dynamic(
-  () => import("@/components/weather/hourly-forecast").then((mod) => mod.HourlyForecast),
-  { ssr: false, loading: () => <HourlyForecastSkeleton /> }
+  () =>
+    import("@/components/weather/hourly-forecast").then(
+      (mod) => mod.HourlyForecast,
+    ),
+  { ssr: false, loading: () => <HourlyForecastSkeleton /> },
 );
 const AiWeatherInsight = dynamic(
-  () => import("@/components/weather/ai-weather-insight").then((mod) => mod.AiWeatherInsight),
-  { ssr: false, loading: () => <div className="h-32 w-full rounded-3xl border border-white/10 bg-white/5" /> }
+  () =>
+    import("@/components/weather/ai-weather-insight").then(
+      (mod) => mod.AiWeatherInsight,
+    ),
+  {
+    ssr: false,
+    loading: () => <AiWeatherInsightSkeleton />,
+  },
 );
 const DailyForecast = dynamic(
-  () => import("@/components/weather/daily-forecast").then((mod) => mod.DailyForecast),
-  { ssr: false, loading: () => <DailyForecastSkeleton /> }
+  () =>
+    import("@/components/weather/daily-forecast").then(
+      (mod) => mod.DailyForecast,
+    ),
+  { ssr: false, loading: () => <DailyForecastSkeleton /> },
 );
 const AqiCard = dynamic(
   () => import("@/components/weather/aqi-card").then((mod) => mod.AqiCard),
-  { ssr: false, loading: () => <div className="h-64 w-full rounded-3xl border border-white/10 bg-white/5" /> }
+  {
+    ssr: false,
+    loading: () => <AqiCardSkeleton />,
+  },
 );
-const SunArc = dynamic(
-  () => import("@/components/weather/sun-arc").then((mod) => mod.SunArc),
-  { ssr: false, loading: () => <div className="h-48 w-full rounded-3xl border border-white/10 bg-white/5" /> }
+const AstroPanel = dynamic(
+  () =>
+    import("@/components/weather/astro-panel").then((mod) => mod.AstroPanel),
+  {
+    ssr: false,
+    loading: () => <AstroPanelSkeleton />,
+  },
+);
+const ImpactCalendar = dynamic(
+  () =>
+    import("@/components/weather/impact-calendar").then(
+      (mod) => mod.ImpactCalendar,
+    ),
+  {
+    ssr: false,
+    loading: () => <ImpactCalendarSkeleton />,
+  },
 );
 const RadarMap = dynamic(
   () => import("@/components/weather/radar-map").then((mod) => mod.RadarMap),
-  { ssr: false, loading: () => <MapSkeleton /> }
+  { ssr: false, loading: () => <MapSkeleton /> },
+);
+const AirQualityMiniCard = dynamic(
+  () =>
+    import("@/components/weather/air-quality-mini-card").then(
+      (mod) => mod.AirQualityMiniCard,
+    ),
+  {
+    ssr: false,
+    loading: () => <AirQualityMiniCardSkeleton />,
+  },
+);
+const RainTimelineCard = dynamic(
+  () =>
+    import("@/components/weather/rain-timeline-card").then(
+      (mod) => mod.RainTimelineCard,
+    ),
+  {
+    ssr: false,
+    loading: () => <RainTimelineCardSkeleton />,
+  },
+);
+const RealFeelCard = dynamic(
+  () =>
+    import("@/components/weather/real-feel-card").then(
+      (mod) => mod.RealFeelCard,
+    ),
+  {
+    ssr: false,
+    loading: () => <RealFeelCardSkeleton />,
+  },
+);
+const UVIndexCard = dynamic(
+  () =>
+    import("@/components/weather/uv-index-card").then((mod) => mod.UVIndexCard),
+  {
+    ssr: false,
+    loading: () => <UVIndexCardSkeleton />,
+  },
 );
 
 type IdleHandle = number;
@@ -49,24 +131,37 @@ function scheduleIdleTask(callback: () => void, timeout = 200): () => void {
   if (typeof window !== "undefined" && "requestIdleCallback" in window) {
     const id = (
       window as Window & {
-        requestIdleCallback: (cb: () => void, options?: { timeout: number }) => IdleHandle;
+        requestIdleCallback: (
+          cb: () => void,
+          options?: { timeout: number },
+        ) => IdleHandle;
         cancelIdleCallback: (cb: IdleHandle) => void;
       }
     ).requestIdleCallback(callback, { timeout });
     return () => {
-      (window as Window & { cancelIdleCallback: (cb: IdleHandle) => void }).cancelIdleCallback(id);
+      (
+        window as Window & { cancelIdleCallback: (cb: IdleHandle) => void }
+      ).cancelIdleCallback(id);
     };
   }
   const timer: Timer = setTimeout(callback, Math.min(timeout, 120));
   return () => clearTimeout(timer);
 }
 
-function getInitialLocation(fallback: { lat: number; lon: number; name: string }) {
+function getInitialLocation(fallback: {
+  lat: number;
+  lon: number;
+  name: string;
+}) {
   if (typeof window === "undefined") return fallback;
   try {
     const saved = localStorage.getItem("aeroweather_location");
     if (!saved) return fallback;
-    const parsed = JSON.parse(saved) as { lat?: number; lon?: number; name?: string };
+    const parsed = JSON.parse(saved) as {
+      lat?: number;
+      lon?: number;
+      name?: string;
+    };
     if (
       typeof parsed.lat === "number" &&
       typeof parsed.lon === "number" &&
@@ -79,7 +174,7 @@ function getInitialLocation(fallback: { lat: number; lon: number; name: string }
 }
 
 function codeToWeatherKind(
-  code: number
+  code: number,
 ): "clear" | "cloudy" | "rain" | "snow" | "fog" | "storm" {
   if (code === 0) return "clear";
   if (code <= 3) return "cloudy";
@@ -98,9 +193,8 @@ function ClientDashboard({
   initialWeather: WeatherData;
   initialLocation: { lat: number; lon: number; name: string };
 }) {
-  const [activeLocation, setActiveLocation] = useState(() =>
-    getInitialLocation(initialLocation)
-  );
+  const [activeLocation, setActiveLocation] = useState(initialLocation);
+
   const [priority2Ready, setPriority2Ready] = useState(false);
   const [priority3Ready, setPriority3Ready] = useState(false);
   const { tier } = usePerformance();
@@ -132,17 +226,25 @@ function ClientDashboard({
           timezone: weather.timezone,
           timeData: skyTimeData,
           savedAt: Date.now(),
-        })
+        }),
       );
     }
   }, [weather, setSkyWeather, setTimezone, setTimeData]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    localStorage.setItem("aeroweather_location", JSON.stringify(activeLocation));
+    localStorage.setItem(
+      "aeroweather_location",
+      JSON.stringify(activeLocation),
+    );
   }, [activeLocation]);
 
   useEffect(() => {
+    const saved = getInitialLocation(initialLocation);
+    if (saved.name !== initialLocation.name) {
+      requestAnimationFrame(() => setActiveLocation(saved));
+    }
+
     const cancelP2 = scheduleIdleTask(() => setPriority2Ready(true), 160);
     const cancelP3 = scheduleIdleTask(() => setPriority3Ready(true), 360);
     return () => {
@@ -152,7 +254,11 @@ function ClientDashboard({
   }, []);
 
   const handleLocationSelect = (loc: LocationResult) => {
-    setActiveLocation({ lat: loc.latitude, lon: loc.longitude, name: loc.name });
+    setActiveLocation({
+      lat: loc.latitude,
+      lon: loc.longitude,
+      name: loc.name,
+    });
   };
 
   const isNight = safeWeather.current.isDay === 0;
@@ -164,21 +270,29 @@ function ClientDashboard({
     <div
       className={`relative min-h-screen w-full overflow-x-clip transition-colors duration-1000 ${
         isLowEnd ? "performance-low" : ""
-      }`}
-    >
-      <main className="relative z-10 mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 md:py-10 gpu-accel">
-
+      }`}>
+      <main className="gpu-accel relative z-10 mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 md:py-10">
         {/* ── Header ── */}
         <header className="relative z-50 flex w-full flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="flex items-center gap-3">
-            <div className="rounded-2xl border border-white/15 bg-white/10 p-3 shadow-xl">
+            <GlassCard className="p-3 shadow-none">
               <Navigation className="h-6 w-6 text-white" />
-            </div>
+            </GlassCard>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-white drop-shadow-sm">
-                {t("appName")}
+              <h1 className="text-2xl font-bold tracking-tight text-white">
+                AeroWeather: Live Weather Forecast, AQI & Radar Maps
               </h1>
-              <p className="text-sm font-medium text-white/60">{t("appTagline")}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-medium text-white/60">
+                  {t("appTagline")}
+                </p>
+                <div className="h-1 w-1 rounded-full bg-white/10" />
+                <Link
+                  href="/blog"
+                  className="text-xs font-bold text-white/40 hover:text-white/60 hover:underline">
+                  Blog
+                </Link>
+              </div>
             </div>
           </div>
           <div className="flex w-full flex-col gap-2 sm:max-w-md lg:max-w-xl">
@@ -193,17 +307,10 @@ function ClientDashboard({
           </div>
         )}
 
-        {/* ── Main grid ── */}
-        {/*
-          Mobile  : single column, components stack in reading order
-          Desktop : left col (flex-1) + right sidebar (fixed 340px)
-          Right sidebar is sticky so it stays visible while scrolling left col
-        */}
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-6">
-
-          {/* ════ LEFT / MAIN COLUMN ════ */}
-          <div className="flex min-w-0 flex-1 flex-col gap-6">
-
+        {/* ── Main content area ── */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {/* ════ LEFT / MAIN SECTION (2/3 width) ════ */}
+          <div className="flex flex-col gap-6 lg:col-span-2">
             {/* 1. Hero */}
             <WeatherHero
               weather={safeWeather}
@@ -212,130 +319,125 @@ function ClientDashboard({
               windSourceKmh={windSourceKmh}
             />
 
-            {/* 2. AI Insight */}
-            {priority2Ready ? (
-              <Suspense
-                fallback={
-                  <div className="h-32 w-full rounded-3xl border border-white/10 bg-white/5" />
-                }
-              >
-                <AiWeatherInsight weather={safeWeather} />
-              </Suspense>
-            ) : (
-              <div className="h-32 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
-            )}
+            {/* 2. Weather Intelligence Analytics */}
+            <GlassCard className="p-6">
+              <h3 className="mb-2 text-xl font-bold text-white">
+                Weather Intelligence Index
+              </h3>
+              <p className="text-sm leading-relaxed text-white/70">
+                AeroWeather uses a groundbreaking framework to quantify
+                atmospheric impact on human life. Our index analyzes the complex
+                interplay of humidity, pressure, and UV radiation to provide
+                hyper-local insights for your health and travel.
+              </p>
+            </GlassCard>
 
             {/* 3. Hourly Forecast */}
-            {priority2Ready ? (
+            {priority2Ready ?
               <Suspense fallback={<HourlyForecastSkeleton />}>
                 <HourlyForecast weather={safeWeather} />
               </Suspense>
-            ) : (
-              <HourlyForecastSkeleton />
+            : <HourlyForecastSkeleton />}
+
+            {/* 4. 7-Day Forecast */}
+            {shouldRenderPriority3 ?
+              <Suspense fallback={<DailyForecastSkeleton />}>
+                <DailyForecast weather={safeWeather} />
+              </Suspense>
+            : <DailyForecastSkeleton />
+            }
+
+            {/* 5. Live Radar Map */}
+            <GlassCard className="h-[320px] overflow-hidden shadow-none md:h-[380px] lg:h-[420px]">
+              <RadarMap
+                lat={activeLocation.lat}
+                lon={activeLocation.lon}
+                isNight={isNight}
+              />
+            </GlassCard>
+
+            {/* 6. AQI Card */}
+            {shouldRenderPriority3 && (
+              <Suspense
+                fallback={<AqiCardSkeleton />}>
+                <AqiCard
+                  aqiData={safeWeather.airQuality}
+                  isNight={isNight}
+                />
+              </Suspense>
             )}
 
-            {/*
-              4. Mobile only — 7-Day + SunArc appear here so users don't
-                 have to scroll past the radar map to see the forecast.
-                 On lg+ these are hidden here and shown in the sidebar instead.
-            */}
-            <div className="flex flex-col gap-6 lg:hidden">
-              {shouldRenderPriority3 ? (
-                <>
-                  <Suspense fallback={<DailyForecastSkeleton />}>
-                    <DailyForecast weather={safeWeather} />
-                  </Suspense>
-                  <Suspense
-                    fallback={
-                      <div className="h-48 w-full rounded-3xl border border-white/10 bg-white/5" />
-                    }
-                  >
-                    <SunArc weather={safeWeather} timezone={safeWeather.timezone} />
-                  </Suspense>
-                </>
-              ) : (
-                <>
-                  <div className="h-105 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
-                  <div className="h-48 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
-                </>
-              )}
-            </div>
-
-            {/* 5. Live Radar */}
-            <RadarMap
-              lat={activeLocation.lat}
-              lon={activeLocation.lon}
-              isNight={isNight}
-            />
-
-            {/* 6. Mobile only — AQI + Wind after radar */}
-            <div className="flex flex-col gap-6 lg:hidden">
-              {shouldRenderPriority3 ? (
-                <>
-                  <Suspense
-                    fallback={
-                      <div className="h-64 w-full rounded-3xl border border-white/10 bg-white/5" />
-                    }
-                  >
-                    <AqiCard aqiData={safeWeather.airQuality} isNight={isNight} />
-                  </Suspense>
-                  <WindPressureCard weather={safeWeather} windSourceKmh={windSourceKmh} />
-                </>
-              ) : (
-                <>
-                  <div className="h-64 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
-                  <div className="h-64 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
-                </>
-              )}
-            </div>
+            {/* ── Mobile-only: Extra insight cards (below main content) ── */}
+            {shouldRenderPriority3 && (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:hidden">
+                <AirQualityMiniCard aqiData={safeWeather.airQuality} />
+                <RealFeelCard weather={safeWeather} />
+                <UVIndexCard weather={safeWeather} />
+              </div>
+            )}
           </div>
 
-          {/* ════ RIGHT / SIDEBAR — desktop only ════ */}
-          {/*
-            w-[340px] fixed width keeps sidebar from squishing.
-            sticky top-6 means it stays visible as you scroll.
-            hidden on mobile — content is reordered in LEFT column above.
-          */}
-          <aside className="hidden w-85 shrink-0 flex-col gap-6 lg:sticky lg:top-6 lg:flex">
-            {shouldRenderPriority3 ? (
+          {/* ════ RIGHT / SIDEBAR SECTION (1/3 width) ════ */}
+          <aside className="flex h-fit flex-col gap-6 lg:col-span-1">
+            {shouldRenderPriority3 ?
               <>
-                {/* 7-Day Forecast */}
-                <Suspense fallback={<DailyForecastSkeleton />}>
-                  <DailyForecast weather={safeWeather} />
-                </Suspense>
-
-                {/* Sun Arc */}
+                {/* 1. Astro Intelligence Panel */}
                 <Suspense
-                  fallback={
-                    <div className="h-48 w-full rounded-3xl border border-white/10 bg-white/5" />
-                  }
-                >
-                  <SunArc weather={safeWeather} timezone={safeWeather.timezone} />
+                  fallback={<AstroPanelSkeleton />}>
+                  <AstroPanel
+                    weather={safeWeather}
+                    timezone={safeWeather.timezone}
+                    lat={activeLocation.lat}
+                    lon={activeLocation.lon}
+                  />
                 </Suspense>
 
-                {/* AQI */}
                 <Suspense
-                  fallback={
-                    <div className="h-64 w-full rounded-3xl border border-white/10 bg-white/5" />
-                  }
-                >
-                  <AqiCard aqiData={safeWeather.airQuality} isNight={isNight} />
+                  fallback={<ImpactCalendarSkeleton />}>
+                  <ImpactCalendar
+                    lat={activeLocation.lat}
+                    lon={activeLocation.lon}
+                  />
                 </Suspense>
 
-                {/* Wind & Pressure */}
-                <WindPressureCard weather={safeWeather} windSourceKmh={windSourceKmh} />
+                {/* 3. Wind & Pressure */}
+                <WindPressureCard
+                  weather={safeWeather}
+                  windSourceKmh={windSourceKmh}
+                />
+
+                {/* 4. Rain Forecast */}
+                <RainTimelineCard weather={safeWeather} />
+
+                {/* 5. AI Insight */}
+                <Suspense
+                  fallback={<AiWeatherInsightSkeleton />}>
+                  <AiWeatherInsight weather={safeWeather} />
+                </Suspense>
+
+                {/* ── Tablet: 2-col grid for extra insight cards ── */}
+                <div className="hidden md:grid md:grid-cols-2 md:gap-4 lg:hidden">
+                  <AirQualityMiniCard aqiData={safeWeather.airQuality} />
+                  <RealFeelCard weather={safeWeather} />
+                  <UVIndexCard weather={safeWeather} />
+                </div>
               </>
-            ) : (
-              <>
-                <div className="h-105 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
-                <div className="h-48 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
-                <div className="h-64 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
-                <div className="h-64 w-full animate-pulse rounded-3xl border border-white/10 bg-white/10" />
+            : <>
+                <AstroPanelSkeleton />
+                <ImpactCalendarSkeleton />
+                <AiWeatherInsightSkeleton />
               </>
-            )}
+            }
           </aside>
-
         </div>
+
+        {/* ✅ AdSense Content Boost: Professional Meteorological Data Block */}
+        <GlassCard className="mt-8 p-8 md:p-12 text-center">
+          <h2 className="mb-6 text-3xl font-bold text-white">Advanced Atmospheric Intelligence Platform</h2>
+          <p className="mx-auto max-w-4xl text-lg leading-relaxed text-white/70">
+            AeroWeather is more than just a forecast tool; it is a comprehensive environmental intelligence ecosystem. Our platform utilizes elite scientific data sources to provide high-resolution insights into the global atmosphere. By monitoring <strong>barometric pressure systems</strong>, <strong>humidity gradients</strong>, and <strong>particulate matter concentrations</strong>, we deliver a multi-dimensional view of the weather that affects your daily life. Whether you are tracking the arrival of the <strong>monsoon</strong> in South Asia or monitoring a <strong>heatwave</strong> in Western Europe, our interactive radar and AI-powered comfort summaries ensure you have the most precise information available. We believe that professional-grade meteorological data should be beautiful, accessible, and actionable for everyone.
+          </p>
+        </GlassCard>
       </main>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/components/Providers/language-provider";
-import { GlassCard } from "@/components/ui/glass-card";
+import GlassCard from "@/components/ui/GlassCard";
 import { Link } from "@/navigation";
 import { Database, LucideIcon, Mail, MapPin, Share2, Shield } from "lucide-react";
 
@@ -12,12 +12,13 @@ export default function PrivacyContent() {
   return (
     <main className="max-w-4xl mx-auto px-6 py-20">
       <div className="mb-8">
-        <Link
+        <GlassCard
+          as="a"
           href="/"
-          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/15"
+          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/15"
         >
           ← {t("backToHome")}
-        </Link>
+        </GlassCard>
       </div>
 
       <div className="text-center mb-16">
@@ -46,6 +47,16 @@ export default function PrivacyContent() {
           title={t("privacyThirdPartyTitle")}
           content={t("privacyThirdPartyContent")}
         />
+        <PrivacySection
+          icon={Shield}
+          title={t("privacyDataRightsTitle")}
+          content={t("privacyDataRightsContent")}
+        />
+        <PrivacySection
+          icon={Database}
+          title={t("privacyCookiesTitle")}
+          content={t("privacyCookiesContent")}
+        />
 
         <GlassCard className="p-8 text-center mt-8">
           <h2 className="text-xl font-bold text-white mb-4">{t("privacyQuestionsTitle")}</h2>
@@ -67,9 +78,9 @@ function PrivacySection({ icon: Icon, title, content }: { icon: LucideIcon; titl
   return (
     <GlassCard className="p-6 md:p-8">
       <div className="flex gap-6">
-        <div className="shrink-0 w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+        <GlassCard className="shrink-0 w-12 h-12 flex items-center justify-center shadow-none">
           <Icon className="w-6 h-6 text-indigo-400" />
-        </div>
+        </GlassCard>
         <div>
           <h2 className="text-xl font-bold text-white mb-2">{title}</h2>
           <p className="text-white/60 leading-relaxed">{content}</p>

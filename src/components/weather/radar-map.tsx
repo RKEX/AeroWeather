@@ -2,7 +2,7 @@
 
 import { useLanguage } from "@/components/Providers/language-provider";
 import { usePerformance } from "@/components/Providers/performance-provider";
-import { GlassCard } from "@/components/ui/glass-card";
+import GlassCard from "@/components/ui/GlassCard";
 import { format } from "date-fns";
 import type { Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -214,17 +214,17 @@ const RadarMapComponent = ({
     <GlassCard
       ref={cardRef}
       onMouseLeave={handleLeave}
-      className="relative h-95 w-full overflow-hidden rounded-3xl md:h-110 lg:h-130 xl:h-143.25"
+      className="relative h-95 w-full overflow-hidden rounded-2xl md:h-110 lg:h-130 xl:h-143.25"
     >
       <div className="pointer-events-none absolute top-4 left-4 right-4 z-500 flex items-start justify-between gap-3">
-        <div className="rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-white backdrop-blur-sm">
+        <GlassCard className="bg-black/20 px-3 py-2 text-white">
           <h3 className="text-base font-semibold md:text-lg">{t("radarLive")}</h3>
           <p className="text-xs text-white/80 md:text-sm">
             {activeTimestamp
               ? format(new Date(activeTimestamp * 1000), "h:mm a")
               : t("radarLoading")}
           </p>
-        </div>
+        </GlassCard>
 
         {!isActive && (
           <div className="text-xs text-white/20">
@@ -290,16 +290,16 @@ const RadarMapComponent = ({
         </div>
       </div>
 
-      <div
-        className={`absolute bottom-4 left-4 right-4 z-500 flex items-center gap-3 rounded-2xl border border-white/15 px-3 py-2 backdrop-blur-sm ${
-          isNight ? "bg-black/35" : "bg-white/25"
+      <GlassCard
+        className={`absolute bottom-4 left-4 right-4 z-500 flex items-center gap-3 px-3 py-2 ${
+          isNight ? "bg-black/35" : "bg-white/10"
         }`}
       >
         <button
           type="button"
           onClick={handlePlaybackToggle}
           disabled={controlsDisabled || timestamps.length <= 1}
-          className="rounded-xl border border-white/20 bg-white/10 p-2 text-white hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-xl border border-white/10 bg-white/5 p-2 text-white hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isPlaying ? <Pause /> : <Play />}
         </button>
@@ -312,7 +312,7 @@ const RadarMapComponent = ({
           disabled={controlsDisabled}
           className="flex-1 accent-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
         />
-      </div>
+      </GlassCard>
     </GlassCard>
   );
 };
