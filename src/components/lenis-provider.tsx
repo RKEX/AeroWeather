@@ -21,6 +21,9 @@ export default function LenisProvider({ children }: LenisProviderProps) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
+    // Expose globally for CustomScrollbar
+    (window as any).lenis = lenis;
+
     function raf(time: number) {
       lenis?.raf(time);
       requestAnimationFrame(raf);
@@ -30,6 +33,7 @@ export default function LenisProvider({ children }: LenisProviderProps) {
 
     return () => {
       lenis?.destroy();
+      delete (window as any).lenis;
     };
   }, []);
 

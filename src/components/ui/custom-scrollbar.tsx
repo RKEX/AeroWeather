@@ -1,6 +1,6 @@
 "use client";
 
-import Lenis from "@studio-freight/lenis";
+
 import { useEffect, useState } from "react";
 
 export default function CustomScrollbar() {
@@ -8,37 +8,40 @@ export default function CustomScrollbar() {
   const [thumbHeight, setThumbHeight] = useState(20);
 
   useEffect(() => {
-    const lenis = new Lenis({
-      smooth: true,
-      gestureOrientation: "vertical",
-      touchMultiplier: 1.2,
-      wrapper: window, // 🔥 VERY IMPORTANT
-      content: document.documentElement,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    let lenisInstance: any = null;
 
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
+    const handleLenisScroll = ({ scroll, limit }: { scroll: number; limit: number }) => {
+      const percent = limit > 0 ? scroll / limit : 0;
+      setScroll(percent);
+    };
 
-    requestAnimationFrame(raf);
+    const handleResize = () => {
+      const heightPercent =
+        (window.innerHeight / document.documentElement.scrollHeight) * 100;
+      setThumbHeight(Math.max(heightPercent, 8));
+    };
 
-    lenis.on(
-      "scroll",
-      ({ scroll, limit }: { scroll: number; limit: number }) => {
-        const percent = limit > 0 ? scroll / limit : 0;
-        setScroll(percent);
+    const attachListener = () => {
+      lenisInstance.on("scroll", handleLenisScroll);
+      window.addEventListener("resize", handleResize);
+      handleResize(); // Initial calculation
+    };
 
-        const heightPercent =
-          (window.innerHeight / document.documentElement.scrollHeight) * 100;
-
-        setThumbHeight(Math.max(heightPercent, 8));
-      },
-    );
+    // Poll until LenisProvider exposes window.lenis
+    const checkLenis = setInterval(() => {
+      if ((window as any).lenis) {
+        lenisInstance = (window as any).lenis;
+        clearInterval(checkLenis);
+        attachListener();
+      }
+    }, 50);
 
     return () => {
-      lenis.destroy();
+      clearInterval(checkLenis);
+      if (lenisInstance) {
+        lenisInstance.off("scroll", handleLenisScroll);
+      }
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
