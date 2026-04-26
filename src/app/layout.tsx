@@ -132,7 +132,7 @@ export default async function RootLayout({ children }: Readonly<RootLayoutProps>
                     </div>
 
                     <div id="app-shell">
-                      <main className="relative z-10 min-h-screen max-w-full">
+                      <main className="main-container relative z-10 min-h-screen max-w-full">
                         <OfflineStatus />
                         <LenisProvider>{children}</LenisProvider>
                         {isProd && <Analytics />}

@@ -58,7 +58,7 @@ export const AqiCardSkeleton = memo(function AqiCardSkeleton() {
 
 export const AstroPanelSkeleton = memo(function AstroPanelSkeleton() {
   return (
-    <SkeletonCard className="relative w-full p-5 h-[520px] flex flex-col">
+    <SkeletonCard className="relative w-full p-5 flex flex-col">
       {/* Header & Tabs Skeleton */}
       <div className="flex-none flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-2">
@@ -138,20 +138,7 @@ export const ImpactCalendarSkeleton = memo(function ImpactCalendarSkeleton() {
   );
 });
 
-export const AirQualityMiniCardSkeleton = memo(function AirQualityMiniCardSkeleton() {
-  return (
-    <SkeletonCard className="w-full p-6 h-full flex flex-col justify-between gap-4">
-      <div className="space-y-2">
-        <Skeleton className="h-6 w-32 bg-white/5" />
-        <Skeleton className="h-3 w-full bg-white/5" />
-      </div>
-      <div className="flex justify-between items-end">
-        <Skeleton className="h-12 w-20 bg-white/5" />
-        <Skeleton className="h-8 w-24 rounded-full bg-white/5" />
-      </div>
-    </SkeletonCard>
-  );
-});
+
 
 export const RainTimelineCardSkeleton = memo(function RainTimelineCardSkeleton() {
   return (
@@ -176,31 +163,9 @@ export const RainTimelineCardSkeleton = memo(function RainTimelineCardSkeleton()
   );
 });
 
-export const RealFeelCardSkeleton = memo(function RealFeelCardSkeleton() {
-  return (
-    <SkeletonCard className="w-full p-6 h-full flex flex-col justify-between">
-      <div className="space-y-2">
-        <Skeleton className="h-6 w-32 bg-white/5" />
-        <Skeleton className="h-3 w-full bg-white/5" />
-      </div>
-      <Skeleton className="h-16 w-32 bg-white/5" />
-      <Skeleton className="h-4 w-full bg-white/5" />
-    </SkeletonCard>
-  );
-});
 
-export const UVIndexCardSkeleton = memo(function UVIndexCardSkeleton() {
-  return (
-    <SkeletonCard className="w-full p-6 h-full flex flex-col justify-between">
-      <div className="space-y-2">
-        <Skeleton className="h-6 w-32 bg-white/5" />
-        <Skeleton className="h-3 w-full bg-white/5" />
-      </div>
-      <Skeleton className="h-16 w-32 bg-white/5" />
-      <Skeleton className="h-4 w-full bg-white/5" />
-    </SkeletonCard>
-  );
-});
+
+
 
 export const WindPressureCardSkeleton = memo(function WindPressureCardSkeleton() {
   return (

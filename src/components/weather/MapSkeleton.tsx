@@ -6,7 +6,7 @@ import { memo } from "react";
 
 export const MapSkeleton = memo(function MapSkeleton() {
   return (
-    <SkeletonCard className="relative h-[320px] md:h-[380px] lg:h-[420px] w-full overflow-hidden shadow-none">
+    <SkeletonCard className="relative min-h-[380px] md:min-h-[440px] lg:min-h-[520px] w-full overflow-hidden shadow-none">
       {/* Background Skeleton Base */}
       <Skeleton className="h-full w-full bg-white/5" />
 

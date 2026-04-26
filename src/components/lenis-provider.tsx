@@ -1,8 +1,8 @@
 // src/components/lenis-provider.tsx
-'use client';
+"use client";
 
-import Lenis from '@studio-freight/lenis';
-import { useEffect, ReactNode } from 'react';
+import Lenis from "@studio-freight/lenis";
+import { ReactNode, useEffect } from "react";
 
 interface LenisProviderProps {
   children: ReactNode;
@@ -10,16 +10,7 @@ interface LenisProviderProps {
 
 export default function LenisProvider({ children }: LenisProviderProps) {
   useEffect(() => {
-    // 1. Detect device
-    const isTouchDevice = 
-      typeof window !== "undefined" &&
-      ("ontouchstart" in window || navigator.maxTouchPoints > 0);
-
-    // 2. Initialize ONLY for non-touch
-    if (isTouchDevice) {
-      document.documentElement.classList.add("no-lenis");
-      return;
-    }
+    // 2. Initialize for all devices
 
     const lenis = new Lenis({
       lerp: 0.08,
@@ -27,6 +18,7 @@ export default function LenisProvider({ children }: LenisProviderProps) {
       infinite: false,
       gestureOrientation: "vertical",
       normalizeWheel: true,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     function raf(time: number) {

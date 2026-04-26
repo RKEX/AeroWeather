@@ -4,14 +4,11 @@ import { useLanguage } from "@/components/Providers/language-provider";
 import { usePerformance } from "@/components/Providers/performance-provider";
 import GlassCard from "@/components/ui/GlassCard";
 import {
-  AirQualityMiniCardSkeleton,
   AiWeatherInsightSkeleton,
   AqiCardSkeleton,
   AstroPanelSkeleton,
   ImpactCalendarSkeleton,
   RainTimelineCardSkeleton,
-  RealFeelCardSkeleton,
-  UVIndexCardSkeleton,
 } from "@/components/weather/CardSkeletons";
 import {
   DailyForecastSkeleton,
@@ -84,16 +81,6 @@ const RadarMap = dynamic(
   () => import("@/components/weather/radar-map").then((mod) => mod.RadarMap),
   { ssr: false, loading: () => <MapSkeleton /> },
 );
-const AirQualityMiniCard = dynamic(
-  () =>
-    import("@/components/weather/air-quality-mini-card").then(
-      (mod) => mod.AirQualityMiniCard,
-    ),
-  {
-    ssr: false,
-    loading: () => <AirQualityMiniCardSkeleton />,
-  },
-);
 const RainTimelineCard = dynamic(
   () =>
     import("@/components/weather/rain-timeline-card").then(
@@ -102,24 +89,6 @@ const RainTimelineCard = dynamic(
   {
     ssr: false,
     loading: () => <RainTimelineCardSkeleton />,
-  },
-);
-const RealFeelCard = dynamic(
-  () =>
-    import("@/components/weather/real-feel-card").then(
-      (mod) => mod.RealFeelCard,
-    ),
-  {
-    ssr: false,
-    loading: () => <RealFeelCardSkeleton />,
-  },
-);
-const UVIndexCard = dynamic(
-  () =>
-    import("@/components/weather/uv-index-card").then((mod) => mod.UVIndexCard),
-  {
-    ssr: false,
-    loading: () => <UVIndexCardSkeleton />,
   },
 );
 
@@ -279,7 +248,7 @@ function ClientDashboard({
               <Navigation className="h-6 w-6 text-white" />
             </GlassCard>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-white">
+              <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl">
                 AeroWeather: Live Weather Forecast, AQI & Radar Maps
               </h1>
               <div className="flex items-center gap-2">
@@ -347,13 +316,11 @@ function ClientDashboard({
             : <DailyForecastSkeleton />}
 
             {/* 5. Live Radar Map */}
-            <GlassCard className="h-[320px] overflow-hidden shadow-none md:h-[380px] lg:h-[420px]">
-              <RadarMap
-                lat={activeLocation.lat}
-                lon={activeLocation.lon}
-                isNight={isNight}
-              />
-            </GlassCard>
+            <RadarMap
+              lat={activeLocation.lat}
+              lon={activeLocation.lon}
+              isNight={isNight}
+            />
 
             {/* 6. AQI Card */}
             {shouldRenderPriority3 && (
@@ -363,15 +330,6 @@ function ClientDashboard({
                   isNight={isNight}
                 />
               </Suspense>
-            )}
-
-            {/* ── Mobile-only: Extra insight cards (below main content) ── */}
-            {shouldRenderPriority3 && (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:hidden">
-                <AirQualityMiniCard aqiData={safeWeather.airQuality} />
-                <RealFeelCard weather={safeWeather} />
-                <UVIndexCard weather={safeWeather} />
-              </div>
             )}
           </div>
 
@@ -409,13 +367,6 @@ function ClientDashboard({
                 <Suspense fallback={<AiWeatherInsightSkeleton />}>
                   <AiWeatherInsight weather={safeWeather} />
                 </Suspense>
-
-                {/* ── Tablet: 2-col grid for extra insight cards ── */}
-                <div className="hidden md:grid md:grid-cols-2 md:gap-4 lg:hidden">
-                  <AirQualityMiniCard aqiData={safeWeather.airQuality} />
-                  <RealFeelCard weather={safeWeather} />
-                  <UVIndexCard weather={safeWeather} />
-                </div>
               </>
             : <>
                 <AstroPanelSkeleton />

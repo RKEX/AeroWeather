@@ -80,7 +80,7 @@ export const AqiCard = memo(({ aqiData }: AqiCardProps) => {
   const status = getAqiStatus(aqiData.usAqi);
 
   return (
-    <GlassCard className="w-full px-6 py-18 transition-all">
+    <GlassCard className="w-full px-6 py-8 transition-all">
       <div className="mb-6 flex items-start justify-between">
         <div>
           <h3

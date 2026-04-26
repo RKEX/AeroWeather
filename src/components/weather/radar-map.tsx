@@ -214,7 +214,7 @@ const RadarMapComponent = ({
     <GlassCard
       ref={cardRef}
       onMouseLeave={handleLeave}
-      className="relative h-95 w-full overflow-hidden rounded-2xl md:h-110 lg:h-130 xl:h-143.25"
+      className="relative min-h-[380px] flex flex-col w-full overflow-hidden rounded-2xl md:min-h-[440px] lg:min-h-[520px]"
     >
       <div className="pointer-events-none absolute top-4 left-4 right-4 z-500 flex items-start justify-between gap-3">
         <GlassCard className="bg-black/20 px-3 py-2 text-white">
@@ -233,7 +233,7 @@ const RadarMapComponent = ({
         )}
       </div>
 
-      <div role="presentation" className="relative h-full w-full">
+      <div role="presentation" className="relative flex-1 w-full">
         <div
           className={`absolute inset-0 z-20 bg-transparent opacity-100 backdrop-blur-none ${
             isActive ? "pointer-events-none" : "pointer-events-auto"
@@ -242,7 +242,6 @@ const RadarMapComponent = ({
           <button
             type="button"
             onClick={handleActivate}
-            onTouchStart={handleActivate}
             className="h-full w-full cursor-pointer bg-transparent p-0 focus:outline-none"
             aria-label={t("radarActivateAria")}
           />
@@ -257,7 +256,7 @@ const RadarMapComponent = ({
             center={[lat, lon]}
             zoom={RADAR_ZOOM}
             scrollWheelZoom={false}
-            className="h-full w-full"
+            className="h-full w-full min-h-[380px]"
             zoomControl
             attributionControl={false}
             preferCanvas

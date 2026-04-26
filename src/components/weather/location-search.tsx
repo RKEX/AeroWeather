@@ -135,12 +135,6 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
     );
   };
 
-  const handleDropdownWheel = (event: WheelEvent<HTMLUListElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    event.currentTarget.scrollTop += event.deltaY;
-  };
-
   return (
     <div
       className="relative z-50 mx-auto w-full max-w-md"
@@ -199,11 +193,7 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
 
       {open && results.length > 0 && (
         <div className="absolute top-full left-0 right-0 z-999 mt-2 rounded-2xl border border-white/10 bg-[#030712]">
-          <ul
-            data-lenis-prevent
-            onWheel={handleDropdownWheel}
-            className="flex max-h-60 flex-col overflow-y-auto p-2 pr-2"
-          >
+          <ul className="flex flex-col p-2 pr-2">
             {results.map((loc) => (
               <li key={`${loc.id}-${loc.latitude}`}>
                 <button

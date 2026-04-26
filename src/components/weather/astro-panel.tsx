@@ -3,7 +3,7 @@
 import { useLanguage } from "@/components/Providers/language-provider";
 import GlassCard from "@/components/ui/GlassCard";
 import { WeatherData } from "@/types/weather";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { 
   Moon, 
   Sun, 
@@ -191,7 +191,7 @@ export const AstroPanel = memo(function AstroPanel({
   }, [now, sunriseStr, sunsetStr, timezone, t]);
 
   return (
-    <GlassCard className="relative w-full p-5 transition-all h-[520px] flex flex-col">
+    <GlassCard className="relative w-full p-5 transition-all flex flex-col">
       {/* FIXED HEADER & TABS */}
       <div className="flex-none flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -220,16 +220,18 @@ export const AstroPanel = memo(function AstroPanel({
       </div>
 
       {/* CONTENT AREA */}
-      <div className="astro-scroll flex-1 relative min-h-0 overflow-y-auto overscroll-contain pr-1 scroll-smooth">
-        <AnimatePresence mode="wait">
-          {activeTab === "SUN" && sunData && (
-            <motion.div
-              key="sun-tab"
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-              className="h-full flex flex-col items-center"
-            >
+      <div className="flex-1 grid grid-cols-1 grid-rows-1 relative w-full min-h-0">
+        
+        {/* SUN TAB (Always rendered to dictate natural height) */}
+        <motion.div
+          className="col-start-1 row-start-1 h-full flex flex-col items-center"
+          initial={false}
+          animate={{ opacity: activeTab === "SUN" ? 1 : 0, zIndex: activeTab === "SUN" ? 10 : 0 }}
+          style={{ pointerEvents: activeTab === "SUN" ? "auto" : "none" }}
+          aria-hidden={activeTab !== "SUN"}
+        >
+          {sunData && (
+            <>
               <SunVisualization progress={sunData.progress} uid={uid} />
               
               <div className="grid grid-cols-2 gap-12 mt-4 w-full max-w-sm">
@@ -266,181 +268,179 @@ export const AstroPanel = memo(function AstroPanel({
                   </div>
                 )}
               </div>
-            </motion.div>
+            </>
           )}
+        </motion.div>
 
-          {activeTab === "MOON" && (
-            <motion.div
-              key="moon-tab"
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-              className="h-full flex flex-col items-center"
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <MoonPhaseSmall phase={astro.moonPhase} />
-                <div className="text-left">
-                  <h4 className="text-sm font-black text-white/95 leading-none mb-1">{astro.moonName}</h4>
-                  <div className="flex items-center gap-2">
-                    <p className="text-[9px] font-semibold text-white/40">{astro.moonIllum}% Illumination</p>
-                    <div className="h-1 w-1 rounded-full bg-white/10" />
-                    <p className="text-[9px] font-black uppercase tracking-widest text-white/60">{astro.moonStatus}</p>
-                  </div>
-                </div>
+        {/* MOON TAB (Always rendered to dictate natural height) */}
+        <motion.div
+          className="col-start-1 row-start-1 h-full flex flex-col items-center"
+          initial={false}
+          animate={{ opacity: activeTab === "MOON" ? 1 : 0, zIndex: activeTab === "MOON" ? 10 : 0 }}
+          style={{ pointerEvents: activeTab === "MOON" ? "auto" : "none" }}
+          aria-hidden={activeTab !== "MOON"}
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <MoonPhaseSmall phase={astro.moonPhase} />
+            <div className="text-left">
+              <h4 className="text-sm font-black text-white/95 leading-none mb-1">{astro.moonName}</h4>
+              <div className="flex items-center gap-2">
+                <p className="text-[9px] font-semibold text-white/40">{astro.moonIllum}% Illumination</p>
+                <div className="h-1 w-1 rounded-full bg-white/10" />
+                <p className="text-[9px] font-black uppercase tracking-widest text-white/60">{astro.moonStatus}</p>
               </div>
+            </div>
+          </div>
 
-              {/* Moon Path Arc Visualization (MAIN) */}
-              <MoonPathArc 
-                rise={astro.moonRise} 
-                set={astro.moonSet} 
-                now={now} 
-                illum={astro.moonIllum}
-                uid={uid} 
-              />
+          <MoonPathArc 
+            rise={astro.moonRise} 
+            set={astro.moonSet} 
+            now={now} 
+            illum={astro.moonIllum}
+            uid={uid} 
+          />
 
-              <div className="grid grid-cols-2 gap-3 mb-2 w-full max-w-sm">
-                <div className="text-center bg-white/5 rounded-xl py-2 border border-white/5">
-                  <p className="text-[8px] uppercase font-bold tracking-widest text-white/30 mb-0.5">Moonrise</p>
-                  <p className="text-sm font-bold text-white/95 leading-tight">
-                    {astro.moonRise ? astro.moonRise.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Not visible"}
-                  </p>
-                </div>
-                <div className="text-center bg-white/5 rounded-xl py-2 border border-white/5">
-                  <p className="text-[8px] uppercase font-bold tracking-widest text-white/30 mb-0.5">Moonset</p>
-                  <p className="text-sm font-bold text-white/95 leading-tight">
-                    {astro.moonSet ? astro.moonSet.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Not visible"}
-                  </p>
-                </div>
-              </div>
+          <div className="grid grid-cols-2 gap-3 mb-2 w-full max-w-sm">
+            <div className="text-center bg-white/5 rounded-xl py-2 border border-white/5">
+              <p className="text-[8px] uppercase font-bold tracking-widest text-white/30 mb-0.5">Moonrise</p>
+              <p className="text-sm font-bold text-white/95 leading-tight">
+                {astro.moonRise ? astro.moonRise.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Not visible"}
+              </p>
+            </div>
+            <div className="text-center bg-white/5 rounded-xl py-2 border border-white/5">
+              <p className="text-[8px] uppercase font-bold tracking-widest text-white/30 mb-0.5">Moonset</p>
+              <p className="text-sm font-bold text-white/95 leading-tight">
+                {astro.moonSet ? astro.moonSet.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Not visible"}
+              </p>
+            </div>
+          </div>
 
-              {/* Lunar Events (Next 30 Days) */}
-              <div className="w-full border-t border-white/5 pt-3 space-y-2">
-                <h4 className="text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1 flex items-center gap-2">
-                  <Moon className="w-2 h-2" />
-                  Lunar Calendar
-                </h4>
-                
-                <div className="grid grid-cols-2 gap-3">
-                    {astro.nextFullMoon && (
-                        <MiniPhaseCard 
-                            label="Full Moon (Purnima)" 
-                            date={astro.nextFullMoon.date} 
-                        />
-                    )}
-                    {astro.nextNewMoon && (
-                        <MiniPhaseCard 
-                            label="New Moon (Amavasya)" 
-                            date={astro.nextNewMoon.date} 
-                        />
-                    )}
-                </div>
-
-                {astro.lunarEvent ? (
-                  <EventCard 
-                    type="LUNAR"
-                    title="Lunar Eclipse"
-                    date={astro.lunarEvent.peak.date}
-                    icon={Moon}
-                    details={[
-                        { label: "Type", value: "Partial" },
-                        { label: "Peak", value: astro.lunarEvent.peak.date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) }
-                    ]}
-                  />
-                ) : (
-                  <div className="bg-white/5 rounded-lg p-2 border border-white/5">
-                     <p className="text-[10px] text-white/40 text-center italic">No lunar eclipse in next 30d</p>
-                  </div>
+          <div className="w-full border-t border-white/5 pt-3 space-y-2">
+            <h4 className="text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1 flex items-center gap-2">
+              <Moon className="w-2 h-2" />
+              Lunar Calendar
+            </h4>
+            
+            <div className="grid grid-cols-2 gap-3">
+                {astro.nextFullMoon && (
+                    <MiniPhaseCard 
+                        label="Full Moon (Purnima)" 
+                        date={astro.nextFullMoon.date} 
+                    />
                 )}
+                {astro.nextNewMoon && (
+                    <MiniPhaseCard 
+                        label="New Moon (Amavasya)" 
+                        date={astro.nextNewMoon.date} 
+                    />
+                )}
+            </div>
+
+            {astro.lunarEvent ? (
+              <EventCard 
+                type="LUNAR"
+                title="Lunar Eclipse"
+                date={astro.lunarEvent.peak.date}
+                icon={Moon}
+                details={[
+                    { label: "Type", value: "Partial" },
+                    { label: "Peak", value: astro.lunarEvent.peak.date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) }
+                ]}
+              />
+            ) : (
+              <div className="bg-white/5 rounded-lg p-2 border border-white/5">
+                 <p className="text-[10px] text-white/40 text-center italic">No lunar eclipse in next 30d</p>
               </div>
-            </motion.div>
-          )}
+            )}
+          </div>
+        </motion.div>
 
-          {activeTab === "ASTRO" && (
-            <motion.div
-              key="astro-tab"
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-              className="h-full pr-1"
-              onWheel={(e) => e.stopPropagation()}
-            >
-              <div className="grid grid-cols-1 gap-4 w-full">
-                {/* STARGAZING SCORE */}
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-5 relative overflow-hidden">
-                  <div className="absolute right-0 top-0 p-4 opacity-5">
-                    <Telescope className="w-20 h-20 text-white" />
-                  </div>
-                   <div className="flex items-center justify-between mb-4">
-                     <div className="flex items-center gap-2">
-                       <div className="p-2 rounded-xl bg-white/10 text-white/60">
-                          <Sparkles className="w-4 h-4" />
-                       </div>
-                       <h4 className="font-bold text-white tracking-wide">Stargazing Score</h4>
-                     </div>
-                     <span className="text-3xl font-black text-white/90">{astro.stargazingScore}<span className="text-sm font-normal text-white/40">/100</span></span>
-                  </div>
-                  <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden mb-3">
-                     <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${astro.stargazingScore}%` }}
-                        transition={{ duration: 1, ease: "easeOut" }}
-                         className="h-full bg-white/40"
-                     />
-                  </div>
-                  <p className="text-xs text-white/50 leading-relaxed font-medium">
-                    {astro.stargazingScore > 75 
-                      ? "Peak atmospheric transparency. Ideal for deep-space photography and planetary viewing." 
-                      : astro.stargazingScore > 40
-                          ? "Moderate sky clarity. Fainter stars may be obscured by atmospheric moisture."
-                          : "Low visibility. Significant interference from cloud cover or light pollution."}
-                  </p>
+        {/* ASTRO TAB (Absolute to match Grid height, internally scrolls) */}
+        <motion.div
+          className="col-start-1 row-start-1 absolute inset-0 z-20"
+          initial={false}
+          animate={{ opacity: activeTab === "ASTRO" ? 1 : 0 }}
+          style={{ pointerEvents: activeTab === "ASTRO" ? "auto" : "none" }}
+          aria-hidden={activeTab !== "ASTRO"}
+        >
+          {/* Inner scroll area using the custom class */}
+          <div className="h-full w-full scroll-area pr-2 pb-2" data-lenis-prevent>
+            <div className="grid grid-cols-1 gap-4 w-full">
+              {/* STARGAZING SCORE */}
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-5 relative overflow-hidden">
+                <div className="absolute right-0 top-0 p-4 opacity-5">
+                  <Telescope className="w-20 h-20 text-white" />
                 </div>
+                 <div className="flex items-center justify-between mb-4">
+                   <div className="flex items-center gap-2">
+                     <div className="p-2 rounded-xl bg-white/10 text-white/60">
+                        <Sparkles className="w-4 h-4" />
+                     </div>
+                     <h4 className="font-bold text-white tracking-wide">Stargazing Score</h4>
+                   </div>
+                   <span className="text-3xl font-black text-white/90">{astro.stargazingScore}<span className="text-sm font-normal text-white/40">/100</span></span>
+                </div>
+                <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden mb-3">
+                   <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${astro.stargazingScore}%` }}
+                      transition={{ duration: 1, ease: "easeOut" }}
+                       className="h-full bg-white/40"
+                   />
+                </div>
+                <p className="text-xs text-white/50 leading-relaxed font-medium">
+                  {astro.stargazingScore > 75 
+                    ? "Peak atmospheric transparency. Ideal for deep-space photography and planetary viewing." 
+                    : astro.stargazingScore > 40
+                        ? "Moderate sky clarity. Fainter stars may be obscured by atmospheric moisture."
+                        : "Low visibility. Significant interference from cloud cover or light pollution."}
+                </p>
+              </div>
 
-                 {/* Best Stargazing Dates */}
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                   <h4 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4 flex items-center gap-2">
-                      <Telescope className="w-3 h-3" />
-                      Best Viewing Windows (30 Days)
-                   </h4>
-                   <div className="space-y-2">
-                      {astro.stargazingDates.map((d, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 group hover:bg-white/10 transition-colors">
-                               <div className="flex items-center gap-3">
-                                  <div className="h-2 w-2 rounded-full bg-white/40" />
-                                  <p className="text-sm font-bold text-white/90">
-                                      {d.date.toLocaleDateString([], { month: 'short', day: 'numeric', weekday: 'short' })}
-                                  </p>
-                              </div>
-                              <span className="text-[10px] bg-white/10 text-white/60 px-2 py-0.5 rounded-full font-black uppercase">
-                                  {d.reason}
-                              </span>
-                          </div>
-                      ))}
+               {/* Best Stargazing Dates */}
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                 <h4 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <Telescope className="w-3 h-3" />
+                    Best Viewing Windows (30 Days)
+                 </h4>
+                 <div className="space-y-2">
+                    {astro.stargazingDates.map((d, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 group hover:bg-white/10 transition-colors">
+                             <div className="flex items-center gap-3">
+                                <div className="h-2 w-2 rounded-full bg-white/40" />
+                                <p className="text-sm font-bold text-white/90">
+                                    {d.date.toLocaleDateString([], { month: 'short', day: 'numeric', weekday: 'short' })}
+                                </p>
+                            </div>
+                            <span className="text-[10px] bg-white/10 text-white/60 px-2 py-0.5 rounded-full font-black uppercase">
+                                {d.reason}
+                            </span>
+                        </div>
+                    ))}
+                 </div>
+              </div>
+
+              {/* LUNAR INSIGHT */}
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                <div className="flex items-start gap-4">
+                   <div className="mt-1 p-2 rounded-xl bg-white/5 text-white/80">
+                      <Info className="w-4 h-4" />
+                   </div>
+                   <div>
+                      <h4 className="font-bold text-white mb-2">Lunar Intelligence</h4>
+                      <p className="text-sm text-white/60 leading-relaxed italic font-medium">
+                        {astro.isAmavasya 
+                          ? "Today marks Amavasya, a period of total lunar darkness. Ideal for spiritual grounding and night sky photography."
+                          : astro.isPurnima 
+                            ? "Tonight is Purnima. Atmospheric energy is at its peak. Expect high tidal influence and brilliant natural night illumination."
+                            : `The current ${astro.moonName} phase presents a stable atmospheric envelope. ${astro.moonIllum > 60 ? "Moonlight will be prominent." : "Subtle moon presence."}`}
+                      </p>
                    </div>
                 </div>
-
-                {/* LUNAR INSIGHT */}
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                  <div className="flex items-start gap-4">
-                     <div className="mt-1 p-2 rounded-xl bg-white/5 text-white/80">
-                        <Info className="w-4 h-4" />
-                     </div>
-                     <div>
-                        <h4 className="font-bold text-white mb-2">Lunar Intelligence</h4>
-                        <p className="text-sm text-white/60 leading-relaxed italic font-medium">
-                          {astro.isAmavasya 
-                            ? "Today marks Amavasya, a period of total lunar darkness. Ideal for spiritual grounding and night sky photography."
-                            : astro.isPurnima 
-                              ? "Tonight is Purnima. Atmospheric energy is at its peak. Expect high tidal influence and brilliant natural night illumination."
-                              : `The current ${astro.moonName} phase presents a stable atmospheric envelope. ${astro.moonIllum > 60 ? "Moonlight will be prominent." : "Subtle moon presence."}`}
-                        </p>
-                     </div>
-                  </div>
-                </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </GlassCard>
   );

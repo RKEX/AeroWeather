@@ -4,13 +4,10 @@ import { useLanguage } from "@/components/Providers/language-provider";
 import GlassCard from "@/components/ui/GlassCard";
 import {
   AiWeatherInsightSkeleton,
-  AirQualityMiniCardSkeleton,
   AqiCardSkeleton,
   AstroPanelSkeleton,
   ImpactCalendarSkeleton,
   RainTimelineCardSkeleton,
-  RealFeelCardSkeleton,
-  UVIndexCardSkeleton,
 } from "@/components/weather/CardSkeletons";
 import {
   DailyForecastSkeleton,
@@ -23,15 +20,19 @@ import { useWeather } from "@/hooks/useWeather";
 import { resolveDayIndex } from "@/lib/day-slug";
 import { toLocaleTag } from "@/lib/i18n";
 import { extractSkyTimeData } from "@/lib/sky-time";
-import { getCurrentWindKmh } from "@/lib/wind";
 import { getThemeClasses, getWeatherTheme } from "@/lib/weather-theme";
+import { getCurrentWindKmh } from "@/lib/wind";
 import { Link } from "@/navigation";
 import { useSkyStore } from "@/store/useSkyStore";
 import { WeatherData } from "@/types/weather";
-import { AlertCircle, ArrowLeft, Navigation, Radio, Satellite, Activity } from "lucide-react";
-import type { Route } from "next";
+import {
+  Activity,
+  AlertCircle,
+  ArrowLeft,
+  Radio,
+  Satellite,
+} from "lucide-react";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
 import { Suspense, useEffect, useMemo } from "react";
 
 const AiWeatherInsight = dynamic(
@@ -78,25 +79,7 @@ const RainTimelineCard = dynamic(
     ),
   { ssr: false, loading: () => <RainTimelineCardSkeleton /> },
 );
-const AirQualityMiniCard = dynamic(
-  () =>
-    import("@/components/weather/air-quality-mini-card").then(
-      (mod) => mod.AirQualityMiniCard,
-    ),
-  { ssr: false, loading: () => <AirQualityMiniCardSkeleton /> },
-);
-const RealFeelCard = dynamic(
-  () =>
-    import("@/components/weather/real-feel-card").then(
-      (mod) => mod.RealFeelCard,
-    ),
-  { ssr: false, loading: () => <RealFeelCardSkeleton /> },
-);
-const UVIndexCard = dynamic(
-  () =>
-    import("@/components/weather/uv-index-card").then((mod) => mod.UVIndexCard),
-  { ssr: false, loading: () => <UVIndexCardSkeleton /> },
-);
+
 const RadarMap = dynamic(
   () => import("@/components/weather/radar-map").then((mod) => mod.RadarMap),
   { ssr: false, loading: () => <MapSkeleton /> },
@@ -177,8 +160,10 @@ export function WeatherSlugClient({
   const fetchLon = isDaySlug && clientLocation ? clientLocation.lon : null;
   const { weather: clientWeather } = useWeather(fetchLat, fetchLon);
 
-  const displayWeather = isDaySlug ? (clientWeather ?? initialWeather) : initialWeather;
-  const displayName = isDaySlug ? (clientLocation?.name ?? locationName) : locationName;
+  const displayWeather =
+    isDaySlug ? (clientWeather ?? initialWeather) : initialWeather;
+  const displayName =
+    isDaySlug ? (clientLocation?.name ?? locationName) : locationName;
   const impactLat = isDaySlug && clientLocation ? clientLocation.lat : lat;
   const impactLon = isDaySlug && clientLocation ? clientLocation.lon : lon;
 
@@ -209,7 +194,7 @@ export function WeatherSlugClient({
   const themeClasses = getThemeClasses(themeCode);
   const isNight = displayWeather.current.isDay === 0;
   const windSourceKmh = getCurrentWindKmh(displayWeather);
-  
+
   const isToday = useMemo(() => {
     const todayStr = new Date().toISOString().split("T")[0];
     const pageDateStr = displayWeather.daily.time[actualDayIndex];
@@ -223,7 +208,9 @@ export function WeatherSlugClient({
         {/* ── Header ── */}
         <header className="relative z-50 flex w-full flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="flex items-center gap-3">
-            <Link href="/" className="group">
+            <Link
+              href="/"
+              className="group">
               <GlassCard className="p-3 shadow-none transition-transform group-hover:scale-105">
                 <ArrowLeft className="h-6 w-6 text-white" />
               </GlassCard>
@@ -235,7 +222,9 @@ export function WeatherSlugClient({
               <div className="flex items-center gap-2">
                 <p className="text-sm font-medium text-white/60">
                   {dateHeadingFormatter.format(
-                    new Date(displayWeather.daily.time[actualDayIndex] + "T00:00:00"),
+                    new Date(
+                      displayWeather.daily.time[actualDayIndex] + "T00:00:00",
+                    ),
                   )}
                 </p>
                 <div className="h-1 w-1 rounded-full bg-white/10" />
@@ -296,25 +285,29 @@ export function WeatherSlugClient({
             </Suspense>
 
             {/* 5. Live Radar Map */}
-            <GlassCard className="h-[320px] overflow-hidden shadow-none md:h-[380px] lg:h-[420px]">
-              {isToday ?
-                <RadarMap
-                  lat={impactLat}
-                  lon={impactLon}
-                  isNight={isNight}
-                />
-              : <div className="relative flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-white/[0.02] to-transparent p-8 text-center">
+            {isToday ? (
+              <RadarMap
+                lat={impactLat}
+                lon={impactLon}
+                isNight={isNight}
+              />
+            ) : (
+              <GlassCard className="relative flex flex-col min-h-[380px] w-full overflow-hidden rounded-2xl md:min-h-[440px] lg:min-h-[520px]">
+                <div className="relative flex flex-1 h-full w-full flex-col items-center justify-center bg-gradient-to-br from-white/[0.02] to-transparent p-8 text-center">
                   {/* Subtle Background Signal Waveform */}
                   <div className="absolute inset-0 flex items-center justify-center opacity-[0.03]">
                     <div className="h-64 w-64 animate-ping rounded-full border border-white" />
-                    <div className="absolute h-48 w-48 animate-pulse rounded-full border border-white" style={{ animationDuration: '3s' }} />
+                    <div
+                      className="absolute h-48 w-48 animate-pulse rounded-full border border-white"
+                      style={{ animationDuration: "3s" }}
+                    />
                   </div>
 
                   <div className="relative z-10 flex flex-col items-center gap-6">
                     <div className="flex h-20 w-20 items-center justify-center rounded-3xl border border-white/10 bg-white/5 shadow-2xl">
-                      <Radio className="h-10 w-10 text-white/30 animate-pulse" />
+                      <Radio className="h-10 w-10 animate-pulse text-white/30" />
                     </div>
-                    
+
                     <div className="max-w-md space-y-3">
                       <div className="flex items-center justify-center gap-2">
                         <Activity className="h-4 w-4 text-white/20" />
@@ -322,14 +315,18 @@ export function WeatherSlugClient({
                           Atmospheric Signal Monitoring
                         </h4>
                       </div>
-                      
+
                       <p className="text-sm leading-relaxed text-white/40">
-                        Live Doppler radar and satellite feeds are synchronized to real-time atmospheric conditions. Forecasting models are currently processing future meteorological shifts.
+                        Live Doppler radar and satellite feeds are synchronized
+                        to real-time atmospheric conditions. Forecasting models
+                        are currently processing future meteorological shifts.
                       </p>
-                      
-                      <div className="inline-flex items-center gap-2 rounded-full border border-white/5 bg-white/5 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white/20">
+
+                      <div className="inline-flex items-center gap-2 rounded-full border border-white/5 bg-white/5 px-4 py-1.5 text-[10px] font-bold tracking-widest text-white/20 uppercase">
                         <Satellite className="h-3 w-3" />
-                        <span>Real-time signals active on current day only</span>
+                        <span>
+                          Real-time signals active on current day only
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -338,8 +335,8 @@ export function WeatherSlugClient({
                   <div className="absolute top-4 right-4 h-2 w-2 rounded-full bg-white/5" />
                   <div className="absolute bottom-4 left-4 h-2 w-2 rounded-full bg-white/5" />
                 </div>
-              }
-            </GlassCard>
+              </GlassCard>
+            )}
 
             {/* 6. AQI Card */}
             <Suspense fallback={<AqiCardSkeleton />}>
@@ -349,12 +346,6 @@ export function WeatherSlugClient({
               />
             </Suspense>
 
-            {/* ── Mobile-only: Extra insight cards (below main content) ── */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:hidden">
-              <AirQualityMiniCard aqiData={displayWeather.airQuality} />
-              <RealFeelCard weather={displayWeather} />
-              <UVIndexCard weather={displayWeather} />
-            </div>
           </div>
 
           {/* ════ RIGHT / SIDEBAR SECTION (1/3 width) ════ */}
@@ -394,12 +385,6 @@ export function WeatherSlugClient({
               />
             </Suspense>
 
-            {/* ── Tablet: 2-col grid for extra insight cards ── */}
-            <div className="hidden md:grid md:grid-cols-2 md:gap-4 lg:hidden">
-              <AirQualityMiniCard aqiData={displayWeather.airQuality} />
-              <RealFeelCard weather={displayWeather} />
-              <UVIndexCard weather={displayWeather} />
-            </div>
           </aside>
         </div>
 

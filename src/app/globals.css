@@ -132,6 +132,7 @@ body {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  overscroll-behavior: auto !important;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
 }
@@ -435,9 +436,9 @@ body {
     scroll-snap-align: start;
   }
 
-  /* remove accidental scroll glow (mobile fix) */
+  /* remove accidental scroll glow (mobile fix) - overscroll-contain removed to prevent scroll trapping */
   .horizontal-scroll {
-    overscroll-behavior-x: contain;
+    overscroll-behavior-x: auto;
   }
 }
 /* ================= FIX HORIZONTAL SCROLLBAR ================= */
@@ -453,40 +454,97 @@ body {
   display: none;
 }
 
-/* ===== Astro Card Custom Scrollbar ===== */
-
-.astro-scroll {
+.scroll-area {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: auto;
+  touch-action: pan-y;
+  /* Firefox Support */
   scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
 }
 
-.astro-scroll:hover {
-  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+/* Webkit Scrollbar */
+.scroll-area::-webkit-scrollbar {
+  width: 6px;
 }
 
-/* Chrome / Edge — track */
-.astro-scroll::-webkit-scrollbar {
-  width: 5px;
-}
-
-.astro-scroll::-webkit-scrollbar-track {
+.scroll-area::-webkit-scrollbar-track {
   background: transparent;
 }
 
-/* Chrome / Edge — thumb (hidden by default) */
-.astro-scroll::-webkit-scrollbar-thumb {
-  background: transparent;
+.scroll-area::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
   border-radius: 999px;
-  transition: background 0.3s ease;
+  backdrop-filter: blur(6px);
 }
 
-/* Show on container hover */
-.astro-scroll:hover::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.18);
+.scroll-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.45);
 }
 
-/* Brighter on thumb hover */
-.astro-scroll:hover::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.4);
-  box-shadow: 0 0 6px rgba(255, 255, 255, 0.15);
+/* Hide scrollbar until hover (Desktop only) */
+@media (hover: hover) {
+  .scroll-area::-webkit-scrollbar-thumb {
+    background: transparent;
+  }
+  .scroll-area:hover::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+  }
+  .scroll-area:hover::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.45);
+  }
 }
+
+/* Mobile adjustments (Targeted to <= 768px) */
+@media (max-width: 768px) {
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: block !important;
+    width: 4px;
+  }
+  
+  html::-webkit-scrollbar-track,
+  body::-webkit-scrollbar-track {
+    background: transparent;
+    margin-block: 6px;
+  }
+  
+  html::-webkit-scrollbar-thumb,
+  body::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+  }
+
+  .main-container {
+    padding-right: 6px;
+  }
+
+  .scroll-area {
+    padding-right: 6px;
+    box-sizing: content-box;
+    scrollbar-width: thin;
+  }
+
+  .scroll-area::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .scroll-area::-webkit-scrollbar-track {
+    background: transparent;
+    margin-block: 6px;
+  }
+
+  .scroll-area::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+  }
+}
+
+@media (max-width: 768px) {
+  html, body {
+    scrollbar-width: thin !important;
+  }
+}
+
+
