@@ -268,10 +268,10 @@ function ClientDashboard({
 
   return (
     <div
-      className={`relative min-h-screen w-full overflow-x-clip transition-colors duration-1000 ${
+      className={`main-container relative min-h-screen w-full max-w-full transition-colors duration-1000 overflow-visible ${
         isLowEnd ? "performance-low" : ""
       }`}>
-      <main className="gpu-accel relative z-10 mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 md:py-10">
+      <main className="gpu-accel relative z-10 mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 md:py-10 overflow-visible touch-pan-y">
         {/* ── Header ── */}
         <header className="relative z-50 flex w-full flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="flex items-center gap-3">

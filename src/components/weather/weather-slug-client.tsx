@@ -25,7 +25,7 @@ import { AlertCircle, ArrowLeft } from "lucide-react";
 import type { Route } from "next";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { type TouchEvent, Suspense, useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import GlassCard from "../ui/GlassCard";
 
 const AiWeatherInsight = dynamic(
@@ -103,15 +103,11 @@ export function WeatherSlugClient({
   lat,
   lon,
 }: WeatherSlugClientProps) {
-  const router = useRouter();
-  const touchStartXRef = useRef<number | null>(null);
   const { setWeather: setSkyWeather, setTimezone, setTimeData } = useSkyStore();
   const { t, language } = useLanguage();
 
   const isDaySlug = checkIsDaySlug(slug);
 
-  // ✅ Day slug হলে localStorage থেকে user এর saved location পড়ো
-  // City slug হলে null — server data ব্যবহার হবে
   const clientLocation = useMemo<{
     lat: number;
     lon: number;
@@ -142,16 +138,10 @@ export function WeatherSlugClient({
     return DEFAULT_LOCATION;
   }, [isDaySlug]);
 
-  // ✅ Day slug হলে client location দিয়ে weather fetch করো
-  // City slug হলে fetch করার দরকার নেই — server data আছে
   const fetchLat = isDaySlug && clientLocation ? clientLocation.lat : null;
   const fetchLon = isDaySlug && clientLocation ? clientLocation.lon : null;
   const { weather: clientWeather, loading } = useWeather(fetchLat, fetchLon);
 
-  // ✅ কোন data দেখাবে:
-  // Day slug + client weather ready → client weather (correct user location)
-  // Day slug + loading → skeleton
-  // City slug → server initialWeather (correct city from URL)
   const displayWeather =
     isDaySlug ? (clientWeather ?? initialWeather) : initialWeather;
   const displayName =
@@ -164,7 +154,6 @@ export function WeatherSlugClient({
 
   useEffect(() => {
     if (isDaySlug) {
-      // Wait for actual client-location weather on day routes to avoid showing stale/default sky.
       if (!clientWeather) {
         setTimezone("");
         setTimeData(null);
@@ -197,23 +186,6 @@ export function WeatherSlugClient({
     setTimezone,
   ]);
 
-  // Swipe navigation
-  const allSlugs = displayWeather.daily.time.map((t) => {
-    const d = new Date(t + "T00:00:00");
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const diff = Math.round((d.getTime() - today.getTime()) / 86400000);
-    if (diff === 0) return "today";
-    if (diff === 1) return "tomorrow";
-    return d.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
-  });
-
-  const slugIndex = allSlugs.indexOf(slug);
-  const prevSlug = slugIndex > 0 ? allSlugs[slugIndex - 1] : null;
-  const nextSlug =
-    slugIndex >= 0 && slugIndex < allSlugs.length - 1 ?
-      allSlugs[slugIndex + 1]
-    : null;
   const dateHeadingFormatter = useMemo(
     () =>
       new Intl.DateTimeFormat(toLocaleTag(language), {
@@ -224,41 +196,16 @@ export function WeatherSlugClient({
     [language],
   );
 
-  const handleSwipe = (offsetX: number) => {
-    if (offsetX < -60 && nextSlug) {
-      const nextPath = `/weather/${nextSlug}` as Route;
-      router.push(nextPath);
-    }
-
-    if (offsetX > 60 && prevSlug) {
-      const prevPath = `/weather/${prevSlug}` as Route;
-      router.push(prevPath);
-    }
-  };
-
-  const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
-    touchStartXRef.current = event.touches[0]?.clientX ?? null;
-  };
-
-  const handleTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
-    const start = touchStartXRef.current;
-    if (start === null) return;
-    const end = event.changedTouches[0]?.clientX ?? start;
-    handleSwipe(end - start);
-    touchStartXRef.current = null;
-  };
-
   const themeCode = getWeatherTheme(
     displayWeather.daily.weatherCode[actualDayIndex],
     1,
   );
   const themeClasses = getThemeClasses(themeCode);
 
-  // ✅ Day slug এ client location পেয়েছি কিন্তু weather এখনো আসেনি → skeleton
   if (isDaySlug && clientLocation && loading && !clientWeather) {
     return (
-      <main className="relative min-h-screen max-w-full overflow-x-clip bg-slate-950 px-4 py-8 md:py-12">
-        <div className="mx-auto max-w-7xl">
+      <main className="main-container relative min-h-screen w-full max-w-full bg-slate-950 px-4 py-8 md:py-12">
+        <div className="mx-auto max-w-7xl overflow-visible">
           <WeatherSkeleton />
         </div>
       </main>
@@ -267,12 +214,12 @@ export function WeatherSlugClient({
 
   return (
     <main
-      className={`relative min-h-screen max-w-full overflow-x-clip text-white transition-colors duration-1000 ${themeClasses}`}>
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+      className={`main-container relative min-h-screen w-full max-w-full text-white transition-colors duration-1000 overflow-visible ${themeClasses}`}>
+      <div className="pointer-events-none fixed inset-0">
         <div className="absolute top-1/4 left-1/4 h-[50vw] w-[50vw] rounded-full bg-white/5 opacity-40" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 md:py-12">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 md:py-12 overflow-visible">
         {displayWeather.isFallback && (
           <div className="mb-6 flex items-center gap-3 rounded-2xl border border-orange-500/20 bg-orange-500/10 p-4 text-orange-200">
             <AlertCircle className="h-5 w-5" />
@@ -285,44 +232,41 @@ export function WeatherSlugClient({
             </div>
           </div>
         )}
-        <div className="mb-6 flex items-center justify-between">
+        
+        <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/10">
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-medium text-white/80 transition-all hover:bg-white/10 hover:translate-x-[-2px]">
             <ArrowLeft className="h-4 w-4" />
             {t("backToHome")}
           </Link>
-          <div className="text-right">
-            <h2 className="text-xl font-bold text-white/50">
+          <div className="text-left sm:text-right">
+            <h2 className="text-lg font-bold tracking-tight text-white/40 uppercase">
               {dateHeadingFormatter.format(
                 new Date(
                   displayWeather.daily.time[actualDayIndex] + "T00:00:00",
                 ),
               )}
             </h2>
-            <h1 className="text-2xl font-bold text-white">
+            <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
               {displayName} Weather Forecast & AQI – Live Radar
             </h1>
             <Link
               href="/blog"
-              className="text-xs font-medium text-indigo-400/60 hover:text-indigo-400 hover:underline">
+              className="text-xs font-bold text-indigo-400/80 hover:text-indigo-400 hover:underline transition-colors">
               View Atmospheric Insights & Blog
             </Link>
           </div>
-        </div>
+        </header>
 
-        <div
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-          className="grid grid-cols-1 gap-6 select-none lg:grid-cols-3">
-          <div className="flex flex-col gap-6 lg:col-span-2">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 overflow-visible touch-pan-y">
+          <div className="flex flex-col gap-6 lg:col-span-2 overflow-visible">
             <WeatherHero
               weather={displayWeather}
               locationName={displayName}
               dayIndex={actualDayIndex}
             />
 
-            {/* ✅ AdSense Content Boost: City Description */}
             <CityWeatherDescription city={displayName} />
 
             <Suspense fallback={<HourlyForecastSkeleton />}>
@@ -332,12 +276,12 @@ export function WeatherSlugClient({
               />
             </Suspense>
 
-            {/* ✅ User Value Signal Section */}
-            <GlassCard className="p-8">
-              <h3 className="mb-4 text-xl font-bold text-white">
+            <GlassCard className="w-full rounded-2xl p-6 backdrop-blur-xl bg-white/5 border border-white/10 shadow-2xl">
+              <h3 className="mb-4 text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
                 How to Use This Weather Intelligence
               </h3>
-              <p className="leading-relaxed text-white/70">
+              <p className="leading-relaxed text-white/70 text-sm md:text-base">
                 Our ultra-premium weather dashboard is designed to provide
                 actionable insights. The <strong>AQI index</strong> tells you
                 when it is safe for outdoor activities, while the{" "}
@@ -356,7 +300,7 @@ export function WeatherSlugClient({
             </Suspense>
           </div>
 
-          <div className="flex flex-col gap-6 lg:col-span-1">
+          <aside className="flex flex-col gap-6 lg:col-span-1 overflow-visible">
             <Suspense fallback={<AstroPanelSkeleton />}>
               <AstroPanel
                 weather={displayWeather}
@@ -378,7 +322,7 @@ export function WeatherSlugClient({
                 dayIndex={actualDayIndex}
               />
             </Suspense>
-          </div>
+          </aside>
         </div>
       </div>
     </main>

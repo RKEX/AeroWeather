@@ -104,7 +104,7 @@ const DailyForecastComponent = ({ weather }: DailyForecastProps) => {
         {t("sevenDayForecast")}
       </h3>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 touch-pan-y">
         {forecastDays.map((day, i) => {
           const Icon = getWeatherIcon(day.code, true);
           const label = i === 0 ? t("tomorrow") : dayLabelFormatter.format(day.date);

@@ -201,7 +201,7 @@ export default function SkyBackground() {
   }, [pathname, setTimeData, setTimezone, setWeather, timeData, timezone]);
 
   return (
-    <div className="pointer-events-none fixed inset-0 -z-50 h-dvh w-screen">
+    <div className="pointer-events-none fixed inset-0 -z-50 h-dvh w-full max-w-full">
       <div
         className={`sky-fallback sky-layer-gpu absolute inset-0 transition-opacity duration-500 ${
           showEngine ? "opacity-0" : "opacity-100"
