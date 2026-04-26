@@ -4,8 +4,8 @@ import { useLanguage } from "@/components/Providers/language-provider";
 import { usePerformance } from "@/components/Providers/performance-provider";
 import GlassCard from "@/components/ui/GlassCard";
 import {
-  AiWeatherInsightSkeleton,
   AirQualityMiniCardSkeleton,
+  AiWeatherInsightSkeleton,
   AqiCardSkeleton,
   AstroPanelSkeleton,
   ImpactCalendarSkeleton,
@@ -268,10 +268,10 @@ function ClientDashboard({
 
   return (
     <div
-      className={`main-container relative min-h-screen w-full max-w-full transition-colors duration-1000 overflow-visible ${
+      className={`main-container relative min-h-screen w-full max-w-full overflow-visible transition-colors duration-1000 ${
         isLowEnd ? "performance-low" : ""
       }`}>
-      <main className="gpu-accel relative z-10 mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 md:py-10 overflow-visible touch-pan-y">
+      <main className="gpu-accel relative z-10 mx-auto flex max-w-7xl touch-pan-y flex-col gap-6 overflow-visible px-4 py-6 md:py-10">
         {/* ── Header ── */}
         <header className="relative z-50 flex w-full flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="flex items-center gap-3">
@@ -344,8 +344,7 @@ function ClientDashboard({
               <Suspense fallback={<DailyForecastSkeleton />}>
                 <DailyForecast weather={safeWeather} />
               </Suspense>
-            : <DailyForecastSkeleton />
-            }
+            : <DailyForecastSkeleton />}
 
             {/* 5. Live Radar Map */}
             <GlassCard className="h-[320px] overflow-hidden shadow-none md:h-[380px] lg:h-[420px]">
@@ -358,8 +357,7 @@ function ClientDashboard({
 
             {/* 6. AQI Card */}
             {shouldRenderPriority3 && (
-              <Suspense
-                fallback={<AqiCardSkeleton />}>
+              <Suspense fallback={<AqiCardSkeleton />}>
                 <AqiCard
                   aqiData={safeWeather.airQuality}
                   isNight={isNight}
@@ -382,8 +380,7 @@ function ClientDashboard({
             {shouldRenderPriority3 ?
               <>
                 {/* 1. Astro Intelligence Panel */}
-                <Suspense
-                  fallback={<AstroPanelSkeleton />}>
+                <Suspense fallback={<AstroPanelSkeleton />}>
                   <AstroPanel
                     weather={safeWeather}
                     timezone={safeWeather.timezone}
@@ -392,8 +389,7 @@ function ClientDashboard({
                   />
                 </Suspense>
 
-                <Suspense
-                  fallback={<ImpactCalendarSkeleton />}>
+                <Suspense fallback={<ImpactCalendarSkeleton />}>
                   <ImpactCalendar
                     lat={activeLocation.lat}
                     lon={activeLocation.lon}
@@ -410,8 +406,7 @@ function ClientDashboard({
                 <RainTimelineCard weather={safeWeather} />
 
                 {/* 5. AI Insight */}
-                <Suspense
-                  fallback={<AiWeatherInsightSkeleton />}>
+                <Suspense fallback={<AiWeatherInsightSkeleton />}>
                   <AiWeatherInsight weather={safeWeather} />
                 </Suspense>
 
@@ -432,10 +427,25 @@ function ClientDashboard({
         </div>
 
         {/* ✅ AdSense Content Boost: Professional Meteorological Data Block */}
-        <GlassCard className="mt-8 p-8 md:p-12 text-center">
-          <h2 className="mb-6 text-3xl font-bold text-white">Advanced Atmospheric Intelligence Platform</h2>
+        <GlassCard className="mt-8 p-8 text-center md:p-12">
+          <h2 className="mb-6 text-3xl font-bold text-white">
+            Advanced Atmospheric Intelligence Platform
+          </h2>
           <p className="mx-auto max-w-4xl text-lg leading-relaxed text-white/70">
-            AeroWeather is more than just a forecast tool; it is a comprehensive environmental intelligence ecosystem. Our platform utilizes elite scientific data sources to provide high-resolution insights into the global atmosphere. By monitoring <strong>barometric pressure systems</strong>, <strong>humidity gradients</strong>, and <strong>particulate matter concentrations</strong>, we deliver a multi-dimensional view of the weather that affects your daily life. Whether you are tracking the arrival of the <strong>monsoon</strong> in South Asia or monitoring a <strong>heatwave</strong> in Western Europe, our interactive radar and AI-powered comfort summaries ensure you have the most precise information available. We believe that professional-grade meteorological data should be beautiful, accessible, and actionable for everyone.
+            AeroWeather is more than just a forecast tool; it is a comprehensive
+            environmental intelligence ecosystem. Our platform utilizes elite
+            scientific data sources to provide high-resolution insights into the
+            global atmosphere. By monitoring{" "}
+            <strong>barometric pressure systems</strong>,{" "}
+            <strong>humidity gradients</strong>, and{" "}
+            <strong>particulate matter concentrations</strong>, we deliver a
+            multi-dimensional view of the weather that affects your daily life.
+            Whether you are tracking the arrival of the <strong>monsoon</strong>{" "}
+            in South Asia or monitoring a <strong>heatwave</strong> in Western
+            Europe, our interactive radar and AI-powered comfort summaries
+            ensure you have the most precise information available. We believe
+            that professional-grade meteorological data should be beautiful,
+            accessible, and actionable for everyone.
           </p>
         </GlassCard>
       </main>

@@ -171,9 +171,17 @@ body::-webkit-scrollbar {
 /* ===== Premium Animated Effects ===== */
 
 @keyframes rain-line {
-  0% { transform: translateY(-100%); opacity: 0; }
-  50% { opacity: 0.5; }
-  100% { transform: translateY(100%); opacity: 0; }
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
 }
 
 .animate-rain-line {
