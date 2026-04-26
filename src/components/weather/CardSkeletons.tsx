@@ -140,6 +140,54 @@ export const ImpactCalendarSkeleton = memo(function ImpactCalendarSkeleton() {
 
 
 
+export const LoveCalendarSkeleton = memo(function LoveCalendarSkeleton() {
+  return (
+    <SkeletonCard className="w-full p-6 overflow-hidden flex flex-col">
+      <div className="flex flex-col gap-4 mb-6">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-7 w-40 bg-white/5" />
+          <Skeleton className="h-5 w-24 bg-white/5" />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-8 w-28 rounded-lg bg-white/5" />
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-7 gap-2 mb-6">
+        {Array.from({ length: 7 }).map((_, i) => (
+          <Skeleton key={i} className="h-4 w-full bg-white/5" />
+        ))}
+        {Array.from({ length: 30 }).map((_, i) => (
+          <Skeleton key={i} className="h-8 w-full rounded-md bg-white/5" />
+        ))}
+      </div>
+
+      <Skeleton className="h-8 w-full rounded-xl bg-white/5 mb-4" />
+
+      <div className="bg-white/5 rounded-2xl p-4 border border-white/5 space-y-4">
+        <div className="flex justify-between items-start">
+          <div className="space-y-2">
+            <Skeleton className="h-3 w-12 bg-white/5" />
+            <Skeleton className="h-6 w-32 bg-white/5" />
+          </div>
+          <Skeleton className="h-5 w-16 rounded-full bg-white/5" />
+        </div>
+        <Skeleton className="h-8 w-full rounded-xl bg-white/5" />
+        <div className="space-y-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-9 w-full rounded-lg bg-white/5" />
+          ))}
+        </div>
+        <Skeleton className="h-16 w-full rounded-xl bg-white/5" />
+      </div>
+    </SkeletonCard>
+  );
+});
+
+
+
 export const RainTimelineCardSkeleton = memo(function RainTimelineCardSkeleton() {
   return (
     <SkeletonCard className="relative flex h-full w-full flex-col overflow-hidden p-6">

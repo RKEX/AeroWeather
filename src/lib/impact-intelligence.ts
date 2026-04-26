@@ -2,6 +2,8 @@ export type TravelStatus = "GOOD" | "POOR";
 export type OutdoorStatus = "IDEAL" | "FAIR" | "POOR";
 export type AirQualityStatus = "GOOD" | "POOR";
 export type RiskStatus = "HIGH" | "LOW";
+export type LoveLabel = "Excellent" | "Good" | "Neutral" | "Low";
+export type MindLabel = "Peak" | "Good" | "Moderate" | "Low";
 
 export interface ImpactDay {
   date: string;
@@ -11,6 +13,23 @@ export interface ImpactDay {
   airQuality: AirQualityStatus;
   pests: RiskStatus;
   allergies: RiskStatus;
+  // Love & Dating fields
+  romanceScore: number;
+  emotionalStability: number;
+  communicationLevel: number;
+  attractionEnergy: number;
+  loveLabel: LoveLabel;
+  loveInsight: string;
+  loveTags: string[];
+  loveAudience: "singles" | "couples" | "married";
+  // Meditation & Mind fields
+  focusLevel: number;
+  stressIndex: number;
+  mentalClarity: number;
+  relaxationScore: number;
+  mindLabel: MindLabel;
+  mindInsight: string;
+  mindTags: string[];
 }
 
 export interface ImpactInputDay {
@@ -85,7 +104,250 @@ export function calculateRiskStatus(day: ImpactInputDay): RiskStatus {
   return "LOW";
 }
 
+// ─── Love & Dating Weather Logic ─────────────────────────────────────────────
+// Rain  → cozy / emotional bonding
+// Clear → social / outgoing / dating friendly
+// Heat  → irritability / low patience
+// Wind  → instability / mood swings
+
+function calcRomanceScore(day: ImpactInputDay): number {
+  let score = 72;
+  if (day.precipitationProbability > 50) score += 10;
+  else if (day.precipitationProbability < 15) score += 6;
+  if (day.tempMax > 38) score -= 18;
+  else if (day.tempMax > 34) score -= 10;
+  if (day.tempMax >= 18 && day.tempMax <= 28) score += 12;
+  if (day.windMax > 30) score -= 14;
+  else if (day.windMax > 20) score -= 6;
+  if (day.humidityMax > 80) score -= 8;
+  score *= 1 + jitterPercent(`romance:${day.date}`, 0.06);
+  return clamp(Math.round(score), 0, 100);
+}
+
+function calcEmotionalStability(day: ImpactInputDay): number {
+  let score = 75;
+  if (day.windMax > 25) score -= 16;
+  else if (day.windMax > 15) score -= 6;
+  if (day.precipitationProbability > 40) score += 5;
+  if (day.tempMax > 36) score -= 14;
+  if (day.tempMax >= 20 && day.tempMax <= 30 && day.humidityMax < 70) score += 10;
+  score *= 1 + jitterPercent(`emotional:${day.date}`, 0.07);
+  return clamp(Math.round(score), 0, 100);
+}
+
+function calcCommunicationLevel(day: ImpactInputDay): number {
+  let score = 70;
+  if (day.precipitationProbability < 20) score += 12;
+  if (day.tempMax >= 22 && day.tempMax <= 30) score += 8;
+  if (day.humidityMax > 80) score -= 10;
+  if (day.windMax > 25) score -= 12;
+  score *= 1 + jitterPercent(`comms:${day.date}`, 0.06);
+  return clamp(Math.round(score), 0, 100);
+}
+
+function calcAttractionEnergy(day: ImpactInputDay): number {
+  let score = 68;
+  if (day.precipitationProbability < 15) score += 14;
+  if (day.tempMax >= 20 && day.tempMax <= 28 && day.windMax < 15) score += 10;
+  if (day.tempMax > 35) score -= 15;
+  if (day.precipitationProbability > 60) score += 6;
+  if (day.humidityMax > 85) score -= 8;
+  score *= 1 + jitterPercent(`attract:${day.date}`, 0.07);
+  return clamp(Math.round(score), 0, 100);
+}
+
+function getLoveLabel(romanceScore: number): LoveLabel {
+  if (romanceScore >= 80) return "Excellent";
+  if (romanceScore >= 60) return "Good";
+  if (romanceScore >= 40) return "Neutral";
+  return "Low";
+}
+
+const LOVE_INSIGHTS: Record<"high" | "mid" | "low", string[]> = {
+  high: [
+    "Today is a great day to express your feelings openly.",
+    "Strong emotional clarity—ideal for meaningful conversations.",
+    "High attraction window. Your confidence peaks today.",
+    "Perfect conditions for sparking a deep connection.",
+    "The atmosphere supports warmth and emotional resonance.",
+  ],
+  mid: [
+    "A calm, grounded day. Quality over quantity in interactions.",
+    "Moderate bonding energy. Presence matters most today.",
+    "Steady emotional currents—good for meaningful chats.",
+    "The atmosphere supports quiet confidence and authenticity.",
+  ],
+  low: [
+    "Avoid misunderstandings—communication may feel tense.",
+    "Low social energy—recharge and invest in self-care.",
+    "The atmosphere stirs restlessness. Be patient.",
+    "Take today for self-reflection. Inner clarity comes first.",
+  ],
+};
+
+function pickLoveInsight(romanceScore: number, date: string): string {
+  const tier = romanceScore >= 75 ? "high" : romanceScore >= 50 ? "mid" : "low";
+  const pool = LOVE_INSIGHTS[tier];
+  const idx = Math.floor(hashToUnit(`insight:${date}`) * pool.length);
+  return pool[idx % pool.length];
+}
+
+function pickLoveAudience(date: string): "singles" | "couples" | "married" {
+  const v = hashToUnit(`audience:${date}`);
+  if (v < 0.33) return "singles";
+  if (v < 0.66) return "couples";
+  return "married";
+}
+
+function generateLoveTags(romance: number, emotional: number, comms: number, attraction: number): string[] {
+  const tags: string[] = [];
+  if (romance >= 80) tags.push("Perfect for Date Night");
+  if (emotional >= 80 && comms >= 75) tags.push("High Chemistry");
+  if (emotional >= 70 && comms >= 70) tags.push("Low Conflict Risk");
+  if (attraction >= 80) tags.push("High Attraction Window");
+  if (romance < 45) tags.push("Avoid Arguments");
+  if (emotional >= 85) tags.push("Emotional Clarity");
+  return tags.slice(0, 3);
+}
+
+// ─── Meditation & Mind Weather Logic ─────────────────────────────────────────
+// Rain  → calm, reflective → high meditation & calmness
+// Clear → high focus, mental clarity
+// Heat  → low patience, high stress
+// Wind  → unstable focus, scattered mind
+
+function calcFocusLevel(day: ImpactInputDay): number {
+  let score = 72;
+  // Clear sky → sharp focus
+  if (day.precipitationProbability < 20) score += 14;
+  // Comfortable temp → sustained concentration
+  if (day.tempMax >= 18 && day.tempMax <= 26) score += 10;
+  // Heat → mental fatigue
+  if (day.tempMax > 35) score -= 18;
+  else if (day.tempMax > 32) score -= 8;
+  // Wind → scattered attention
+  if (day.windMax > 25) score -= 14;
+  else if (day.windMax > 15) score -= 5;
+  // High humidity → sluggishness
+  if (day.humidityMax > 80) score -= 8;
+  score *= 1 + jitterPercent(`focus:${day.date}`, 0.06);
+  return clamp(Math.round(score), 0, 100);
+}
+
+function calcStressIndex(day: ImpactInputDay): number {
+  // Higher = MORE stress (inverted: bad)
+  let score = 30;
+  // Heat → high stress
+  if (day.tempMax > 36) score += 25;
+  else if (day.tempMax > 32) score += 12;
+  // Wind → agitation
+  if (day.windMax > 25) score += 15;
+  else if (day.windMax > 18) score += 6;
+  // High humidity → discomfort stress
+  if (day.humidityMax > 80) score += 10;
+  // Rain → calming (reduces stress)
+  if (day.precipitationProbability > 40) score -= 8;
+  // Pleasant conditions → low stress
+  if (day.tempMax >= 18 && day.tempMax <= 26 && day.windMax < 12) score -= 12;
+  score *= 1 + jitterPercent(`stress:${day.date}`, 0.06);
+  return clamp(Math.round(score), 0, 100);
+}
+
+function calcMentalClarity(day: ImpactInputDay): number {
+  let score = 70;
+  // Clear sky → clear mind
+  if (day.precipitationProbability < 15) score += 12;
+  // Moderate temp → peak clarity
+  if (day.tempMax >= 18 && day.tempMax <= 28) score += 10;
+  // Extreme heat → mental fog
+  if (day.tempMax > 35) score -= 16;
+  // Wind → mental noise
+  if (day.windMax > 25) score -= 12;
+  // Moderate humidity ok, high = sluggish
+  if (day.humidityMax > 82) score -= 8;
+  // Light rain can boost clarity (white noise)
+  if (day.precipitationProbability >= 30 && day.precipitationProbability <= 60) score += 6;
+  score *= 1 + jitterPercent(`clarity:${day.date}`, 0.07);
+  return clamp(Math.round(score), 0, 100);
+}
+
+function calcRelaxationScore(day: ImpactInputDay): number {
+  let score = 68;
+  // Rain → deeply calming, cozy
+  if (day.precipitationProbability > 50) score += 14;
+  else if (day.precipitationProbability > 30) score += 8;
+  // Comfortable temp → ease
+  if (day.tempMax >= 20 && day.tempMax <= 28) score += 10;
+  // Heat → restlessness
+  if (day.tempMax > 35) score -= 14;
+  // Low wind → peaceful
+  if (day.windMax < 10) score += 8;
+  else if (day.windMax > 25) score -= 10;
+  // Moderate humidity comfort
+  if (day.humidityMax > 85) score -= 6;
+  score *= 1 + jitterPercent(`relax:${day.date}`, 0.07);
+  return clamp(Math.round(score), 0, 100);
+}
+
+function getMindLabel(focus: number, clarity: number): MindLabel {
+  const avg = (focus + clarity) / 2;
+  if (avg >= 80) return "Peak";
+  if (avg >= 60) return "Good";
+  if (avg >= 40) return "Moderate";
+  return "Low";
+}
+
+const MIND_INSIGHTS: Record<"high" | "mid" | "low", string[]> = {
+  high: [
+    "Great day for deep focus and productivity.",
+    "Mental clarity is exceptionally high—tackle complex tasks.",
+    "Calm environment supports mindfulness and creativity.",
+    "Peak cognitive conditions. Ideal for strategic thinking.",
+    "Your mind is sharp today. Make the most of it.",
+  ],
+  mid: [
+    "Moderate focus available. Break tasks into smaller chunks.",
+    "Decent mental conditions—mindful breathing can amplify clarity.",
+    "A balanced day. Light meditation could boost your state.",
+    "Steady mental energy. Good for routine work and reflection.",
+  ],
+  low: [
+    "High stress signals detected—consider meditation or rest.",
+    "Mental clarity may be low. Avoid major decisions if possible.",
+    "The atmosphere may feel heavy—gentle stretching can help.",
+    "Focus may waver today. Prioritize self-care and recovery.",
+  ],
+};
+
+function pickMindInsight(focus: number, clarity: number, date: string): string {
+  const avg = (focus + clarity) / 2;
+  const tier = avg >= 70 ? "high" : avg >= 45 ? "mid" : "low";
+  const pool = MIND_INSIGHTS[tier];
+  const idx = Math.floor(hashToUnit(`mind:${date}`) * pool.length);
+  return pool[idx % pool.length];
+}
+
+function generateMindTags(focus: number, stress: number, clarity: number, relaxation: number): string[] {
+  const tags: string[] = [];
+  if (focus >= 80) tags.push("Peak Focus");
+  if (clarity >= 80) tags.push("Crystal Clear");
+  if (stress <= 25) tags.push("Low Stress Day");
+  if (relaxation >= 80) tags.push("Deep Calm");
+  if (stress >= 65) tags.push("High Stress Alert");
+  if (focus >= 70 && clarity >= 70) tags.push("Productivity Window");
+  return tags.slice(0, 3);
+}
+
 export function calculateImpactDay(day: ImpactInputDay): ImpactDay {
+  const romanceScore = calcRomanceScore(day);
+  const emotionalStability = calcEmotionalStability(day);
+  const communicationLevel = calcCommunicationLevel(day);
+  const attractionEnergy = calcAttractionEnergy(day);
+  const focusLevel = calcFocusLevel(day);
+  const stressIndex = calcStressIndex(day);
+  const mentalClarity = calcMentalClarity(day);
+  const relaxationScore = calcRelaxationScore(day);
+
   return {
     date: day.date,
     health: calculateHealthScore(day),
@@ -94,6 +356,21 @@ export function calculateImpactDay(day: ImpactInputDay): ImpactDay {
     airQuality: calculateAirQualityStatus(day),
     pests: calculateRiskStatus(day),
     allergies: calculateRiskStatus(day),
+    romanceScore,
+    emotionalStability,
+    communicationLevel,
+    attractionEnergy,
+    loveLabel: getLoveLabel(romanceScore),
+    loveInsight: pickLoveInsight(romanceScore, day.date),
+    loveTags: generateLoveTags(romanceScore, emotionalStability, communicationLevel, attractionEnergy),
+    loveAudience: pickLoveAudience(day.date),
+    focusLevel,
+    stressIndex,
+    mentalClarity,
+    relaxationScore,
+    mindLabel: getMindLabel(focusLevel, mentalClarity),
+    mindInsight: pickMindInsight(focusLevel, mentalClarity, day.date),
+    mindTags: generateMindTags(focusLevel, stressIndex, mentalClarity, relaxationScore),
   };
 }
 
