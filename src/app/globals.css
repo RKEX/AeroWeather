@@ -126,12 +126,12 @@ html {
 
 html,
 body {
-  overscroll-behavior: none;
+  overflow-y: auto !important;
+  touch-action: pan-y !important;
   -webkit-font-smoothing: antialiased;
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
-  overflow-y: auto;
   scrollbar-width: none; /* Firefox */
 }
 
@@ -148,8 +148,6 @@ body::-webkit-scrollbar {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
 }
 
 #app-shell > * {

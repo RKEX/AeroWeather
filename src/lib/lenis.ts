@@ -2,29 +2,18 @@ import Lenis from "@studio-freight/lenis";
 
 let lenis: Lenis | null = null;
 
+/**
+ * @deprecated Use LenisProvider for conditional initialization.
+ * This is kept for backward compatibility and singleton access.
+ */
 export function initLenis() {
-  // ✅ prevent multiple instances
-  if (lenis) return lenis;
-
-  lenis = new Lenis({
-    smooth: true,
-    lerp: 0.08,
-    wheelMultiplier: 1,
-    touchMultiplier: 1.5,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any);
-
-  function raf(time: number) {
-    lenis!.raf(time);
-    requestAnimationFrame(raf);
-  }
-
-  requestAnimationFrame(raf);
-
   return lenis;
 }
 
-// ✅ IMPORTANT for scrollbar
+export function setLenis(instance: Lenis | null) {
+  lenis = instance;
+}
+
 export function getLenis() {
   return lenis;
 }

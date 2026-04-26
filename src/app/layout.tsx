@@ -121,12 +121,12 @@ export default async function RootLayout({ children }: Readonly<RootLayoutProps>
                     <SkyBackground />
 
                     {/* Dark overlay — fixed to viewport */}
-                    <div className="pointer-events-none fixed inset-0 -z-40 overflow-hidden">
+                    <div className="pointer-events-none fixed inset-0 -z-40">
                       <div className="h-full w-full bg-black/35" />
                     </div>
 
                     {/* Ambient glow blobs — fixed to viewport */}
-                    <div className="pointer-events-none fixed inset-0 -z-30 overflow-hidden">
+                    <div className="pointer-events-none fixed inset-0 -z-30">
                       <div className="absolute top-1/4 left-1/4 h-[50vw] w-[50vw] rounded-full bg-white/10 opacity-40" />
                       <div className="absolute right-1/4 bottom-1/4 h-[40vw] w-[40vw] rounded-full bg-white/5 opacity-30" />
                     </div>

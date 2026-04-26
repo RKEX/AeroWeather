@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || "re_123");
 
 export async function POST(request: Request) {
   try {
@@ -11,6 +11,11 @@ export async function POST(request: Request) {
     // Validate email: must include "@" and not be empty
     if (!email || typeof email !== "string" || !email.includes("@")) {
       return NextResponse.json({ error: "Please enter a valid email address" }, { status: 400 });
+    }
+
+    if (!process.env.RESEND_API_KEY) {
+      console.error("Missing RESEND_API_KEY environment variable");
+      return NextResponse.json({ error: "Newsletter service is temporarily unavailable" }, { status: 500 });
     }
 
     const { data, error } = await resend.emails.send({
