@@ -40,8 +40,8 @@ export function Footer() {
             </h4>
             <nav className="flex flex-col gap-3">
               <FooterLink href="/blog">Weather Blog</FooterLink>
-              <FooterLink href="/weather/today">{t("forecastWord")}</FooterLink>
-              <FooterLink href="/weather/tomorrow">{t("tomorrow")}</FooterLink>
+              <FooterLink href="/weather">{t("forecastWord")}</FooterLink>
+              <FooterLink href="/weather/london">{t("tomorrow")}</FooterLink>
               <FooterLink href="/analytics">Analytics</FooterLink>
               <FooterLink href="/">{t("home")}</FooterLink>
               <FooterLink href="/weather">{t("footerCityWeather") || "City Weather"}</FooterLink>
@@ -72,6 +72,9 @@ export function Footer() {
               <FooterLink href="/contact">{t("contactTitle") || "Contact Us"}</FooterLink>
               <FooterLink href="/about">{t("footerAboutAeroWeather") || "About Us"}</FooterLink>
               <FooterLink href="/rick-das">{t("footerRickDasFounder") || "Rick Das"}</FooterLink>
+              <FooterLink href="mailto:support@aeroweather.app" isStatic>
+                support@aeroweather.app
+              </FooterLink>
             </nav>
           </div>
         </div>

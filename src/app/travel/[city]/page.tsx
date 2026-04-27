@@ -19,13 +19,14 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { city } = await params;
-  const cityName = city.charAt(0).toUpperCase() + city.slice(1);
+  const normalizedCity = decodeURIComponent(city).toLowerCase();
+  const cityName = normalizedCity.charAt(0).toUpperCase() + normalizedCity.slice(1);
   
   return {
     title: `Travel Weather Intelligence for ${cityName} – Planning Guide`,
     description: `Expert travel weather planning for ${cityName}. Optimize your trip based on visibility, wind, and local climate intelligence.`,
     alternates: {
-      canonical: `https://www.aeroweather.app/travel/${city}`,
+      canonical: `https://www.aeroweather.app/travel/${encodeURIComponent(normalizedCity)}`,
     },
   };
 }

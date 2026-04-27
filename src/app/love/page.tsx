@@ -1,19 +1,15 @@
+import {
+    ArrowRight,
+    Calendar,
+    Flame,
+    Heart,
+    Moon,
+    Plane,
+    Users,
+    Wind
+} from "lucide-react";
 import { Metadata } from "next";
 import Link from "next/link";
-import { 
-  Heart, 
-  Sparkles, 
-  ArrowRight, 
-  Thermometer, 
-  CloudRain, 
-  Wind, 
-  Calendar, 
-  Plane,
-  Activity,
-  Users,
-  Flame,
-  Moon
-} from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Weather & Relationships – The Science of Atmospheric Connection",
@@ -37,7 +33,7 @@ export default function LovePage() {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link 
-              href="/dating-weather/london" 
+              href="/love/london" 
               className="px-8 py-4 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-2xl transition-all shadow-xl shadow-pink-600/20 flex items-center gap-2"
             >
               Get Your Love Forecast <ArrowRight className="w-4 h-4" />
@@ -142,13 +138,13 @@ export default function LovePage() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link 
-                href="/dating-weather/new-york" 
+                href="/love/new-york" 
                 className="w-full sm:w-auto px-10 py-4 bg-white text-black font-bold rounded-2xl hover:bg-white/90 transition-all"
               >
                 New York Love Forecast
               </Link>
               <Link 
-                href="/dating-weather/paris" 
+                href="/love/paris" 
                 className="w-full sm:w-auto px-10 py-4 bg-white/5 border border-white/10 text-white font-bold rounded-2xl hover:bg-white/10 transition-all"
               >
                 Paris Love Forecast

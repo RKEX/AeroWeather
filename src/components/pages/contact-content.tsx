@@ -2,7 +2,6 @@
 
 import { useLanguage } from "@/components/Providers/language-provider";
 import GlassCard from "@/components/ui/GlassCard";
-import { Link } from "@/navigation";
 import {
     CheckCircle,
     Github,
@@ -181,8 +180,8 @@ export default function ContactContent() {
             <ContactOption
               icon={Mail}
               label={t("contactEmail")}
-              value="rickd7587@gmail.com"
-              href="mailto:rickd7587@gmail.com"
+              value="support@aeroweather.app"
+              href="mailto:support@aeroweather.app"
             />
             <ContactOption
               icon={Github}

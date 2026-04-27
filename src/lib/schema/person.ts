@@ -36,7 +36,7 @@ export const personSchema = {
 
   // ── URLs & Social Profiles ────────────────────────────────
   url: "https://www.aeroweather.app",
-  email: "rickd7587@gmail.com",
+  email: "support@aeroweather.app",
 
   sameAs: [
     // Primary project
@@ -54,7 +54,7 @@ export const personSchema = {
   // ── Contact ───────────────────────────────────────────────
   contactPoint: {
     "@type": "ContactPoint",
-    email: "rickd7587@gmail.com",
+    email: "support@aeroweather.app",
     contactType: "Founder",
     url: "https://www.aeroweather.app/contact",
   },
@@ -102,14 +102,14 @@ export const organizationSchema = {
   alternateName: "Aero Weather",
   url: "https://www.aeroweather.app",
   logo: "https://www.aeroweather.app/og-image.png",
-  email: "rickd7587@gmail.com",
+  email: "support@aeroweather.app",
   description:
     "AeroWeather provides real-time weather forecasts, hourly predictions, 7-day outlooks, radar maps, and AI-powered weather insights for cities worldwide.",
   foundingDate: "2024",
   founder: {
     "@type": "Person",
     name: "Rick Das",
-    email: "rickd7587@gmail.com",
+    email: "support@aeroweather.app",
     sameAs: [
       "https://github.com/RKEX",
       "https://www.instagram.com/mr_rkex",
@@ -122,7 +122,7 @@ export const organizationSchema = {
   ],
   contactPoint: {
     "@type": "ContactPoint",
-    email: "rickd7587@gmail.com",
+    email: "support@aeroweather.app",
     contactType: "Customer Support",
     url: "https://www.aeroweather.app/contact",
   },

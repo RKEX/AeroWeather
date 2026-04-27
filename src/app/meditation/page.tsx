@@ -1,19 +1,16 @@
+import {
+    ArrowRight,
+    Calendar,
+    Cloud,
+    Droplets,
+    Heart,
+    Moon,
+    Plane,
+    Sparkles,
+    Wind
+} from "lucide-react";
 import { Metadata } from "next";
 import Link from "next/link";
-import { 
-  Wind, 
-  Sparkles, 
-  ArrowRight, 
-  Moon, 
-  Sun, 
-  CloudRain, 
-  Activity, 
-  Calendar, 
-  Heart, 
-  Plane,
-  Droplets,
-  Cloud
-} from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Meditation & Mood Sync – Find Your Atmospheric Flow",
@@ -37,7 +34,7 @@ export default function MeditationPage() {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link 
-              href="/meditation-forecast/london" 
+              href="/meditation/london" 
               className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition-all shadow-xl shadow-emerald-600/20 flex items-center gap-2"
             >
               Get Your Mood Forecast <ArrowRight className="w-4 h-4" />
@@ -142,13 +139,13 @@ export default function MeditationPage() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link 
-                href="/meditation-forecast/new-york" 
+                href="/meditation/new-york" 
                 className="w-full sm:w-auto px-10 py-4 bg-white text-black font-bold rounded-2xl hover:bg-white/90 transition-all"
               >
                 New York Mood Sync
               </Link>
               <Link 
-                href="/meditation-forecast/kyoto" 
+                href="/meditation/kyoto" 
                 className="w-full sm:w-auto px-10 py-4 bg-white/5 border border-white/10 text-white font-bold rounded-2xl hover:bg-white/10 transition-all"
               >
                 Kyoto Mood Sync

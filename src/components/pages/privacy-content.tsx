@@ -2,7 +2,6 @@
 
 import { useLanguage } from "@/components/Providers/language-provider";
 import GlassCard from "@/components/ui/GlassCard";
-import { Link } from "@/navigation";
 import { Database, LucideIcon, Mail, MapPin, Share2, Shield } from "lucide-react";
 
 export default function PrivacyContent() {
@@ -62,7 +61,7 @@ export default function PrivacyContent() {
           <h2 className="text-xl font-bold text-white mb-4">{t("privacyQuestionsTitle")}</h2>
           <p className={`${textSecondary} mb-6`}>{t("privacyQuestionsBody")}</p>
           <a
-            href="mailto:rickd7587@gmail.com"
+            href="mailto:support@aeroweather.app"
             className="inline-flex items-center gap-2 px-8 py-3 rounded-2xl bg-indigo-600 border border-indigo-400/30 text-white font-bold transition-all hover:bg-indigo-500 hover:shadow-[0_0_20px_rgba(99,102,241,0.3)]"
           >
             <Mail className="w-5 h-5" />

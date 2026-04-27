@@ -1,12 +1,12 @@
-import { CookieBanner } from "@/components/ui/CookieBanner";
 import { Footer } from "@/components/footer";
-import LenisProvider from "@/components/lenis-provider";
-import CustomScrollbar from "@/components/ui/custom-scrollbar";
-import { OfflineStatus } from "@/components/ui/offline-status";
 import LanguageRootLayout from "@/components/layout/language-root-layout";
+import LenisProvider from "@/components/lenis-provider";
 import { LanguageProvider } from "@/components/Providers/language-provider";
 import { PerformanceProvider } from "@/components/Providers/performance-provider";
 import { SettingsProvider } from "@/components/Providers/settings-provider";
+import { CookieBanner } from "@/components/ui/CookieBanner";
+import CustomScrollbar from "@/components/ui/custom-scrollbar";
+import { OfflineStatus } from "@/components/ui/offline-status";
 import SkyBackground from "@/components/weather/sky-background";
 import { geistMono, geistSans } from "@/lib/fonts";
 import { DEFAULT_LOCALE, isRtlLocale } from "@/lib/locales";
@@ -23,11 +23,18 @@ import { NextIntlClientProvider } from "next-intl";
 import Script from "next/script";
 import { ReactNode } from "react";
 
-import { generateMetadataFromConfig } from "@/config/seoconfig";
 import { ToastProvider } from "@/components/ui/premium-toast";
 import "./globals.css";
 
-export const metadata: Metadata = generateMetadataFromConfig();
+export const metadata: Metadata = {
+  title: {
+    default: "AeroWeather - Ultra Accurate Weather Forecast",
+    template: "%s | AeroWeather",
+  },
+  description:
+    "AeroWeather provides real-time weather forecasts, hourly predictions, 7-day outlooks, and AI-powered atmospheric insights.",
+  metadataBase: new URL("https://www.aeroweather.app"),
+};
 
 type RootLayoutProps = {
   children: ReactNode;

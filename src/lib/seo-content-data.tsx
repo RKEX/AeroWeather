@@ -1,103 +1,191 @@
-import React from "react";
 import { Brain, Heart, MapPin, Zap } from "lucide-react";
 
-export function getSeoContent(city: string, feature: string) {
-  const cityName = city.charAt(0).toUpperCase() + city.slice(1);
-  
-  const contentMap: Record<string, { h1: string; intro: string; sections: { title: string; icon: React.ReactNode; body: string }[]; tips: string[] }> = {
-    impact: {
-      h1: `Weather Impact on Mood & Productivity in ${cityName} Today`,
-      intro: `Discover how the current atmospheric conditions in ${cityName} are influencing human behavior, cognitive performance, and physical vitality. AeroWeather utilizes advanced meteorological data to translate raw weather into life-impact intelligence.`,
-      sections: [
-        {
-          title: "Atmospheric Influence on Cognitive Output",
-          icon: <Zap className="h-6 w-6" />,
-          body: `<p>In ${cityName}, the relationship between air pressure and productivity is more profound than most residents realize. High-pressure systems often correlate with increased focus and mental clarity, while low-pressure systems can trigger what psychologists refer to as "atmospheric lethargy."</p>
-                 <p>When we analyze the weather in ${cityName} specifically, we look at the interaction between humidity and temperature. High humidity levels have been shown to increase the perceived effort of mental tasks, meaning your workday in ${cityName} might feel significantly more draining on muggy days even if you are working indoors with climate control.</p>`
-        },
-        {
-          title: "Health & Vitality Metrics",
-          icon: <Brain className="h-6 w-6" />,
-          body: `<p>The current air quality in ${cityName} plays a critical role in systemic inflammation. When particulate matter increases, the body's stress response is activated, often leading to reduced patience and faster physical fatigue. By tracking these metrics on our ${cityName} impact dashboard, you can decide whether today is a day for high-intensity work or strategic recovery.</p>`
-        }
-      ],
-      tips: [
-        `Schedule deep work during high-pressure windows in ${cityName}.`,
-        "Monitor AQI spikes to avoid midday cognitive slumps.",
-        "Adjust hydration based on local dew point markers."
-      ]
-    },
-    love: {
+type FeatureKey = "impact" | "love" | "travel" | "meditation";
+
+type RegionProfile = {
+  regionLabel: string;
+  climateSummary: string;
+  seasonalContext: string;
+  uniqueTip: string;
+};
+
+const REGION_FALLBACK: RegionProfile = {
+  regionLabel: "global urban climate",
+  climateSummary:
+    "mixed humidity, moderate seasonal variability, and periodic pressure swings that can affect mood and daily energy",
+  seasonalContext:
+    "transitional weeks often bring unstable pressure behavior, which can increase fatigue on some days and focus spikes on others",
+  uniqueTip: "Track pressure trend with humidity trend instead of temperature alone for better day planning.",
+};
+
+const REGION_BY_CITY: Record<string, RegionProfile> = {
+  "new-york": {
+    regionLabel: "humid subtropical to continental edge climate",
+    climateSummary:
+      "cold-front volatility in shoulder seasons and high summer humidity that can amplify perceived stress",
+    seasonalContext:
+      "spring and fall pressure dips can create abrupt comfort changes between morning and evening windows",
+    uniqueTip: "Use mid-morning stability windows for high-focus tasks when fronts are passing.",
+  },
+  london: {
+    regionLabel: "marine west coast climate",
+    climateSummary:
+      "frequent cloud transitions, variable wind, and gentle thermal ranges that influence emotional steadiness",
+    seasonalContext:
+      "winter moisture and low-light weeks can reduce perceived energy while stable high-pressure periods improve clarity",
+    uniqueTip: "Pair planning with daylight windows because cloud density often drives mood more than raw temperature.",
+  },
+  delhi: {
+    regionLabel: "semi-arid and monsoon-influenced climate",
+    climateSummary:
+      "strong heat phases, dust/AQI variability, and monsoon moisture shifts that affect breathing comfort",
+    seasonalContext:
+      "pre-monsoon heat can raise social friction while post-rain airflow usually restores comfort",
+    uniqueTip: "Prioritize AQI and dew-point checks during peak summer and pre-monsoon periods.",
+  },
+  mumbai: {
+    regionLabel: "tropical coastal monsoon climate",
+    climateSummary:
+      "high baseline humidity with sharp rain episodes and marine airflow affecting comfort and mobility",
+    seasonalContext:
+      "monsoon months create strong moisture and transit variability that can alter focus and schedule reliability",
+    uniqueTip: "Use visibility and rainfall intensity windows for commute and travel planning, not just rain chance.",
+  },
+  kolkata: {
+    regionLabel: "humid subtropical monsoon climate",
+    climateSummary:
+      "high humidity and warm-season convection patterns that can amplify fatigue and social sensitivity",
+    seasonalContext:
+      "monsoon transitions and post-monsoon recovery weeks often shift mood and productivity patterns",
+    uniqueTip: "For consistent output, align deep work with lower humidity periods and stable pressure windows.",
+  },
+  tokyo: {
+    regionLabel: "humid subtropical coastal climate",
+    climateSummary:
+      "seasonal humidity, typhoon-era pressure variability, and rapid weather transitions",
+    seasonalContext:
+      "late summer pressure instability can affect perceived stress, while autumn high-pressure spells improve focus",
+    uniqueTip: "Watch wind-speed and pressure together before planning long outdoor activity blocks.",
+  },
+};
+
+function normalizeCity(city: string): string {
+  return city.trim().toLowerCase().replace(/\s+/g, "-");
+}
+
+function displayCity(city: string): string {
+  return city
+    .trim()
+    .split(/\s+/)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
+}
+
+function getRegionProfile(city: string): RegionProfile {
+  return REGION_BY_CITY[normalizeCity(city)] ?? REGION_FALLBACK;
+}
+
+function buildFeatureSections(cityName: string, feature: FeatureKey, profile: RegionProfile) {
+  if (feature === "love") {
+    return {
       h1: `Relationships & Dating Weather Forecast for ${cityName}`,
-      intro: `Is tonight the perfect night for a romantic walk or a cozy evening indoors? We analyze the social friction index for ${cityName} to help you navigate your relationships with atmospheric intelligence.`,
+      intro: `AeroWeather translates ${cityName}'s atmospheric behavior into relationship timing signals. In this ${profile.regionLabel}, social comfort is shaped by ${profile.climateSummary}.`,
       sections: [
         {
-          title: "Social Friction & Humidity Levels",
+          title: "Social Friction & Humidity Dynamics",
           icon: <Heart className="h-6 w-6" />,
-          body: `<p>Weather impacts our social patience more than we admit. In ${cityName}, high dew points often correlate with increased irritability and "social friction." If you're planning a first date in ${cityName} today, the weather might be the invisible third party that determines the success of your conversation.</p>
-                 <p>Conversely, cool and crisp evenings in ${cityName} have been shown to facilitate more open communication and emotional vulnerability. We call this "Atmospheric Intimacy," and our data points to tonight being a prime window for deep connection.</p>`
-        }
+          body: `<p>In ${cityName}, emotional patience often changes with moisture load and temperature pairing. During high humidity windows, conversations can feel more effortful even when plans are unchanged.</p><p>This is especially relevant in a ${profile.regionLabel} where ${profile.seasonalContext}. Use lower-friction weather windows for meaningful conversations and date planning.</p>`,
+        },
       ],
       tips: [
-        "Check the social friction index before important conversations.",
-        `Avoid crowded outdoor venues in ${cityName} during high-humidity spikes.`,
-        "Utilize 'Clear Sky' windows for romantic outdoor strolls."
-      ]
-    },
-    travel: {
+        `Use calmer weather windows in ${cityName} for important relationship decisions.`,
+        "Check humidity plus evening temperature before outdoor date plans.",
+        profile.uniqueTip,
+      ],
+    };
+  }
+
+  if (feature === "travel") {
+    return {
       h1: `Travel Planning & Atmospheric Intelligence for ${cityName}`,
-      intro: `Whether you are a local commuter or a global traveler, understanding the weather in ${cityName} is about more than just an umbrella. It's about optimizing your transit and activity window.`,
+      intro: `Travel planning in ${cityName} requires more than rain checks. AeroWeather models how ${profile.climateSummary} influences mobility, comfort, and activity timing.`,
       sections: [
         {
-          title: "Transit Efficiency & Visibility",
+          title: "Transit Efficiency & Local Weather Windows",
           icon: <MapPin className="h-6 w-6" />,
-          body: `<p>Traveling through ${cityName} requires a nuanced understanding of local microclimates. Our travel intelligence platform monitors visibility and surface wind speed to predict transit delays before they happen. For those navigating the streets of ${cityName} today, we anticipate a high efficiency window during the mid-afternoon.</p>`
-        }
+          body: `<p>${cityName} can produce strong variation between commute windows due to moisture, wind, and visibility shifts. In this ${profile.regionLabel}, these patterns are often the hidden cause of schedule slippage.</p><p>Our travel layer identifies the most reliable windows so you can optimize transit, outdoor plans, and city movement with less uncertainty.</p>`,
+        },
       ],
       tips: [
-        "Plan your commute around high-visibility windows.",
-        "Check for localized wind gusts in the city center.",
-        "Optimize outdoor tours for low-AQI hours."
-      ]
-    },
-    meditation: {
+        `Use hourly visibility and wind checks before long transfers in ${cityName}.`,
+        "Plan high-mobility activities during stable pressure windows.",
+        profile.uniqueTip,
+      ],
+    };
+  }
+
+  if (feature === "meditation") {
+    return {
       h1: `Meditation & Mental Clarity Weather in ${cityName}`,
-      intro: `Sync your mindfulness practice with the natural rhythms of the sky. We provide a weather-based guide for mental health and clarity in ${cityName}.`,
+      intro: `Your focus state is linked to atmospheric rhythm. In ${cityName}, ${profile.climateSummary} often changes how restful or restless a day feels.`,
       sections: [
         {
-          title: "The Sound of the Sky",
+          title: "Pressure Rhythm & Emotional Regulation",
           icon: <Brain className="h-6 w-6" />,
-          body: `<p>The ambient soundscape of ${cityName} changes with the moisture in the air. High humidity dampens sound, creating a natural 'meditative blanket' that is perfect for deep introspection. Today in ${cityName}, the atmosphere is primed for focus-based meditation practices.</p>`
-        }
+          body: `<p>Low-pressure shifts in ${cityName} can increase emotional noise and reduce perceived clarity, while stable pressure phases often support deeper mindfulness sessions.</p><p>Within this ${profile.regionLabel}, ${profile.seasonalContext}. Adapting meditation style to weather state improves consistency and resilience.</p>`,
+        },
       ],
       tips: [
-        "Match your meditation type to the current pressure system.",
-        "Use rain-based white noise for deep focus sessions.",
-        "Practice outdoor mindfulness during high-oxygen windows."
-      ]
-    }
+        `Match breathwork intensity to the atmospheric load in ${cityName}.`,
+        "On high-friction days, choose shorter grounding sessions over long deep-focus blocks.",
+        profile.uniqueTip,
+      ],
+    };
+  }
+
+  return {
+    h1: `Weather Impact on Mood & Productivity in ${cityName} Today`,
+    intro: `AeroWeather decodes how current conditions in ${cityName} affect cognition and energy. In this ${profile.regionLabel}, ${profile.climateSummary}.`,
+    sections: [
+      {
+        title: "Atmospheric Influence on Cognitive Output",
+        icon: <Zap className="h-6 w-6" />,
+        body: `<p>Productivity in ${cityName} is strongly tied to pressure direction, humidity load, and overnight recovery conditions. Stable pressure periods tend to improve concentration, while high-moisture periods can increase mental fatigue.</p><p>Because ${cityName} sits in a ${profile.regionLabel}, ${profile.seasonalContext}. This makes weather-aware planning materially useful for demanding workdays.</p>`,
+      },
+      {
+        title: "Health & Vitality Signals",
+        icon: <Brain className="h-6 w-6" />,
+        body: `<p>Air quality and moisture stress combine to shape stamina and emotional steadiness. Monitoring these signals in ${cityName} helps you decide whether today should prioritize execution, recovery, or low-friction tasks.</p>`,
+      },
+    ],
+    tips: [
+      `Schedule deep work in ${cityName} when pressure is stable and humidity is moderate.`,
+      "Pair AQI checks with hydration strategy to reduce cognitive drop-offs.",
+      profile.uniqueTip,
+    ],
+  };
+}
+
+export function getSeoContent(city: string, feature: string) {
+  const cityName = displayCity(city);
+  const featureKey = (feature as FeatureKey) || "impact";
+  const profile = getRegionProfile(city);
+  const baseContent = buildFeatureSections(cityName, featureKey, profile);
+
+  const regionalSection = {
+    title: `Regional Climate Notes for ${cityName}`,
+    icon: <MapPin className="h-6 w-6" />,
+    body: `<p>${cityName} follows a ${profile.regionLabel} pattern. This means day-to-day comfort is often influenced by ${profile.climateSummary}.</p><p>Seasonally, ${profile.seasonalContext}. Building plans around this pattern reduces avoidable friction in work, relationships, and travel.</p>`,
   };
 
-  const baseContent = contentMap[feature] || contentMap.impact;
-  
-  // Add common long-form content to meet the 700-1200 word requirement
-  // In a real app, this would be more dynamic, but for SEO we can use authoritative blocks
-  const additionalSections = [
-    {
-      title: `Why We Monitor the ${cityName} Atmosphere`,
-      icon: <Zap className="h-6 w-6" />,
-      body: `<p>Traditional weather apps focus on the "what"—what is the temperature? What is the chance of rain? AeroWeather focuses on the "so what"—how does this actually change your life in ${cityName}? Our proprietary algorithms combine 15 different data points, including dew point, UV index, and barometric pressure, to calculate a holistic impact score for ${cityName} residents.</p>
-             <p>As the climate shifts, the predictability of local weather patterns in regions like ${cityName} is becoming more complex. This requires a new layer of intelligence that goes beyond simple forecasting into the realm of atmospheric human performance.</p>`
-    },
-    {
-      title: "The Science of Biometeorology",
-      icon: <Brain className="h-6 w-6" />,
-      body: `<p>Biometeorology is the study of the relationship between living organisms and the atmosphere. In ${cityName}, we observe this daily. From the way high-pressure systems affect blood pressure to how humidity influences the conductivity of our skin and the stability of our hair, the weather is constantly interacting with our biology. By providing these insights, we empower the people of ${cityName} to live in harmony with the environment rather than just reacting to it.</p>`
-    }
-  ];
+  const methodologySection = {
+    title: "Atmospheric Context Methodology",
+    icon: <Zap className="h-6 w-6" />,
+    body: `<p>AeroWeather combines pressure trend, dew point, wind profile, humidity, and AQI context to generate practical weather intelligence for ${cityName}. The goal is not just forecast visibility, but clearer decision timing.</p><p>By using region-aware interpretation and city-level weather behavior, each ${cityName} page reflects a unique context rather than a generic city template.</p>`,
+  };
 
   return {
     ...baseContent,
-    sections: [...baseContent.sections, ...additionalSections]
+    sections: [...baseContent.sections, regionalSection, methodologySection],
   };
 }

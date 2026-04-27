@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     const smtpPort = Number(process.env.SMTP_PORT) || 587;
     const smtpUser = process.env.SMTP_USER;
     const smtpPass = process.env.SMTP_PASS;
-    const receiver = process.env.CONTACT_RECEIVER || "rickd7587@gmail.com";
+    const receiver = process.env.CONTACT_RECEIVER || "support@aeroweather.app";
 
     if (!smtpHost || !smtpUser || !smtpPass) {
       console.error("Missing SMTP environment variables");

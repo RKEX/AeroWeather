@@ -19,13 +19,14 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { city } = await params;
-  const cityName = city.charAt(0).toUpperCase() + city.slice(1);
+  const normalizedCity = decodeURIComponent(city).toLowerCase();
+  const cityName = normalizedCity.charAt(0).toUpperCase() + normalizedCity.slice(1);
   
   return {
     title: `Meditation & Mindfulness Weather in ${cityName}`,
     description: `Sync your meditation practice with the weather in ${cityName}. Discover the best times for mindfulness based on atmospheric flow.`,
     alternates: {
-      canonical: `https://www.aeroweather.app/meditation/${city}`,
+      canonical: `https://www.aeroweather.app/meditation/${encodeURIComponent(normalizedCity)}`,
     },
   };
 }

@@ -1,7 +1,7 @@
 // ============================================================
 // AeroWeather SEO Configuration
 // Founder: Rick Das
-// Email:   rickd7587@gmail.com
+// Email:   support@aeroweather.app
 // GitHub:  github.com/RKEX
 // Instagram: @mr_rkex
 // Website: https://www.aeroweather.app
@@ -23,7 +23,7 @@ export const defaultSEO = {
 
   founder: {
     name: "Rick Das",
-    email: "rickd7587@gmail.com",
+    email: "support@aeroweather.app",
     github: "https://github.com/RKEX",
     instagram: "@mr_rkex",
     instagramUrl: "https://www.instagram.com/mr_rkex",

@@ -19,13 +19,14 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { city } = await params;
-  const cityName = city.charAt(0).toUpperCase() + city.slice(1);
+  const normalizedCity = decodeURIComponent(city).toLowerCase();
+  const cityName = normalizedCity.charAt(0).toUpperCase() + normalizedCity.slice(1);
   
   return {
     title: `Dating & Relationship Weather in ${cityName} – Social Insights`,
     description: `Is today a good day for a date in ${cityName}? Discover how weather impacts social friction and romance using AI insights.`,
     alternates: {
-      canonical: `https://www.aeroweather.app/love/${city}`,
+      canonical: `https://www.aeroweather.app/love/${encodeURIComponent(normalizedCity)}`,
     },
   };
 }

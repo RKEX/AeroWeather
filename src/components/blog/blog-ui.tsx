@@ -1,8 +1,8 @@
 "use client";
+import GlassCard from "@/components/ui/GlassCard";
 import { BLOG_POSTS, BlogPost } from "@/lib/blog-content";
 import { Link } from "@/navigation";
 import { ArrowRight, Calendar, Clock, User } from "lucide-react";
-import GlassCard from "@/components/ui/GlassCard";
 
 // --- Header Component ---
 export function BlogHeader({ post }: { post: BlogPost }) {
@@ -155,15 +155,15 @@ export function BlogSchema({ post, url }: { post: BlogPost; url: string }) {
     "articleSection": post.category,
     "author": {
       "@type": "Person",
-      "name": "AeroWeather Meteorology Team",
-      "url": "https://www.aeroweather.app/about"
+      "name": "Rick Das",
+      "url": "https://www.aeroweather.app/rick-das"
     },
     "publisher": {
       "@type": "Organization",
       "name": "AeroWeather",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://www.aeroweather.app/public/logo.png"
+        "url": "https://www.aeroweather.app/og-image.png"
       }
     },
     "datePublished": post.date,
