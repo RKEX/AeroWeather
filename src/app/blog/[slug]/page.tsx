@@ -1,7 +1,7 @@
 import { BlogHeader, BlogImage, BlogSchema, RelatedPosts } from "@/components/blog/blog-ui";
-import GlassCard from "@/components/ui/GlassCard";
 import { ShareButtons } from "@/components/blog/share-buttons";
 import { TableOfContents } from "@/components/blog/table-of-contents";
+import GlassCard from "@/components/ui/GlassCard";
 import { generateMetadataFromConfig } from "@/config/seoconfig";
 import { BLOG_POSTS, getBlogPost } from "@/lib/blog-content";
 import { Link } from "@/navigation";
@@ -85,6 +85,12 @@ export default async function BlogPostPage({ params }: Props) {
 
   const fullUrl = `https://www.aeroweather.app/blog/${slug}`;
   const processedContent = processBlogContent(post.content, post.keywords, post.title);
+  const ctas: Array<{ name: string; href: "/impact" | "/love" | "/travel" | "/meditation"; color: string }> = [
+    { name: "Impact Calendar", href: "/impact", color: "from-blue-500 to-cyan-500" },
+    { name: "Love Insights", href: "/love", color: "from-pink-500 to-rose-500" },
+    { name: "Travel Planning", href: "/travel", color: "from-amber-500 to-orange-500" },
+    { name: "Mood Sync", href: "/meditation", color: "from-indigo-500 to-purple-500" },
+  ];
 
   console.log(`[Blog Detail Debug] slug: ${slug}, cover: ${post.coverImage}, img: ${post.image}`);
 
@@ -162,6 +168,33 @@ export default async function BlogPostPage({ params }: Props) {
               prose-img:rounded-2xl prose-img:border prose-img:border-white/10"
               dangerouslySetInnerHTML={{ __html: processedContent }}
             />
+
+            {/* --- CONTEXTUAL CTA BLOCK --- */}
+            <section className="mt-20 p-8 md:p-12 rounded-3xl bg-gradient-to-br from-indigo-500/10 via-blue-500/5 to-transparent border border-white/10 backdrop-blur-xl relative overflow-hidden group">
+              <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]" />
+              <div className="relative z-10">
+                <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter mb-4">
+                  Plan Smarter with AeroWeather
+                </h2>
+                <p className="text-xl text-white/50 font-medium mb-10 max-w-xl leading-relaxed">
+                  Go beyond the forecast. See exactly how the atmosphere impacts your productivity, relationships, and global travel in real-time.
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  {ctas.map((cta) => (
+                    <Link 
+                      key={cta.name}
+                      href={cta.href}
+                      className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-sm font-black uppercase tracking-widest text-white/70 hover:bg-white hover:text-slate-900 hover:border-white transition-all duration-300"
+                    >
+                      {cta.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Decorative Glow */}
+              <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full" />
+            </section>
 
             <div className="lg:hidden mt-20 border-t border-white/10 pt-16">
                <h4 className="mb-8 text-center text-[10px] font-black uppercase tracking-widest text-white/40">Share with the World</h4>

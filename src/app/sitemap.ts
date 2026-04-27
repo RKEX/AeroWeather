@@ -1,24 +1,18 @@
 import { MetadataRoute } from "next";
 import { BLOG_POSTS } from "@/lib/blog-content";
 
+import { POPULAR_CITIES } from "@/config/cities";
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://www.aeroweather.app";
-
-  const popularCities = [
-    "kolkata","delhi","mumbai","bangalore","chennai","hyderabad","pune",
-    "ahmedabad","surat","jaipur","lucknow","kanpur","nagpur","indore",
-    "bhopal","patna","ranchi","guwahati","bhubaneswar","coimbatore",
-    "kochi","visakhapatnam","london","new-york","tokyo","seoul",
-    "singapore","dubai","paris","berlin","rome","madrid","toronto",
-    "sydney","melbourne","los-angeles","chicago","san-francisco",
-    "hong-kong","shanghai","beijing","bangkok","kuala-lumpur",
-    "jakarta","manila","cape-town","johannesburg","istanbul",
-    "moscow","rio-de-janeiro"
-  ];
 
   const staticRoutes = [
     { path: "", changeFrequency: "hourly" as const, priority: 1 },
     { path: "/about", changeFrequency: "monthly" as const, priority: 0.6 },
+    { path: "/impact", changeFrequency: "weekly" as const, priority: 0.9 },
+    { path: "/love", changeFrequency: "weekly" as const, priority: 0.9 },
+    { path: "/travel", changeFrequency: "weekly" as const, priority: 0.8 },
+    { path: "/meditation", changeFrequency: "weekly" as const, priority: 0.8 },
     { path: "/rick-das", changeFrequency: "monthly" as const, priority: 0.7 },
     { path: "/blog", changeFrequency: "daily" as const, priority: 0.9 },
     { path: "/contact", changeFrequency: "monthly" as const, priority: 0.5 },
@@ -53,12 +47,49 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  const cityUrls = popularCities.map((city) => ({
+  const cityUrls = POPULAR_CITIES.map((city) => ({
     url: `${baseUrl}/weather/${city}`,
     lastModified: new Date(),
     changeFrequency: "daily" as const,
     priority: 0.8,
   }));
 
-  return [...staticPages, ...forecastPages, ...blogPostPages, ...cityUrls];
+  const impactCityUrls = POPULAR_CITIES.map((city) => ({
+    url: `${baseUrl}/impact/${city}`,
+    lastModified: new Date(),
+    changeFrequency: "daily" as const,
+    priority: 0.7,
+  }));
+
+  const loveCityUrls = POPULAR_CITIES.map((city) => ({
+    url: `${baseUrl}/love/${city}`,
+    lastModified: new Date(),
+    changeFrequency: "daily" as const,
+    priority: 0.7,
+  }));
+
+  const travelCityUrls = POPULAR_CITIES.map((city) => ({
+    url: `${baseUrl}/travel/${city}`,
+    lastModified: new Date(),
+    changeFrequency: "daily" as const,
+    priority: 0.7,
+  }));
+
+  const meditationCityUrls = POPULAR_CITIES.map((city) => ({
+    url: `${baseUrl}/meditation/${city}`,
+    lastModified: new Date(),
+    changeFrequency: "daily" as const,
+    priority: 0.7,
+  }));
+
+  return [
+    ...staticPages, 
+    ...forecastPages, 
+    ...blogPostPages, 
+    ...cityUrls,
+    ...impactCityUrls,
+    ...loveCityUrls,
+    ...travelCityUrls,
+    ...meditationCityUrls
+  ];
 }

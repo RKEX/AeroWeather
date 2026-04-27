@@ -1,27 +1,27 @@
 "use client";
 
 import GlassCard from "@/components/ui/GlassCard";
+import { LoveCalendarSkeleton } from "@/components/weather/CardSkeletons";
 import { useLoveCalendar } from "@/hooks/useLoveCalendar";
 import {
-  LoveDay,
-  LoveSubTab,
-  findBestLoveDay,
-  getLoveLabelEmoji,
-  getLoveScoreColor,
-  getLoveSubTabValue,
+    LoveDay,
+    LoveSubTab,
+    findBestLoveDay,
+    getLoveLabelEmoji,
+    getLoveScoreColor,
+    getLoveSubTabValue,
 } from "@/lib/love-intelligence";
-import { LoveCalendarSkeleton } from "@/components/weather/CardSkeletons";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  AlertTriangle,
-  Heart,
-  Sparkles,
-  MessageCircleHeart,
-  Flame,
-  Brain,
-  TrendingUp,
-  Shield,
-  Users,
+    AlertTriangle,
+    Brain,
+    Flame,
+    Heart,
+    MessageCircleHeart,
+    Shield,
+    Sparkles,
+    TrendingUp,
+    Users,
 } from "lucide-react";
 import React, { memo, useMemo, useState } from "react";
 
@@ -54,20 +54,17 @@ function getAudienceLabel(hint: "singles" | "couples" | "married"): string {
   }
 }
 
-function getAudienceIcon(hint: "singles" | "couples" | "married") {
-  switch (hint) {
-    case "singles": return TrendingUp;
-    case "couples": return Heart;
-    case "married": return Users;
-  }
+function AudienceIcon({ hint, className }: { hint: "singles" | "couples" | "married"; className?: string }) {
+  if (hint === "singles") return <TrendingUp className={className} />;
+  if (hint === "couples") return <Heart className={className} />;
+  return <Users className={className} />;
 }
 
 export const LoveCalendar = memo(function LoveCalendar({ lat, lon }: LoveCalendarProps) {
   const [activeTab, setActiveTab] = useState<LoveSubTab>("romance");
   const [selectedDay, setSelectedDay] = useState<number>(0);
   const { data, loading, error } = useLoveCalendar(lat, lon);
-
-  const days = data?.days ?? [];
+  const days = useMemo(() => data?.days ?? [], [data?.days]);
 
   const boundedSelectedDay = useMemo(() => {
     if (days.length === 0) return 0;
@@ -97,8 +94,6 @@ export const LoveCalendar = memo(function LoveCalendar({ lat, lon }: LoveCalenda
       </GlassCard>
     );
   }
-
-  const AudienceIcon = activeDay ? getAudienceIcon(activeDay.audienceHint) : Heart;
 
   return (
     <GlassCard className="w-full p-6 border-white/10 bg-white/5 overflow-hidden">
@@ -199,7 +194,7 @@ export const LoveCalendar = memo(function LoveCalendar({ lat, lon }: LoveCalenda
               <span className="text-base">{getLoveLabelEmoji(activeDay.loveLabel)}</span>
               <span className="text-xs font-bold text-white">{activeDay.loveLabel} Love Day</span>
               <span className="ml-auto flex items-center gap-1.5 text-[10px] font-bold text-white/50">
-                <AudienceIcon className="w-3 h-3" />
+                <AudienceIcon hint={activeDay.audienceHint} className="w-3 h-3" />
                 {getAudienceLabel(activeDay.audienceHint)}
               </span>
             </div>

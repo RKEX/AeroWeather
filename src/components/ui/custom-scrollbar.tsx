@@ -3,12 +3,28 @@
 
 import { useEffect, useState } from "react";
 
+interface LenisScrollData {
+  scroll: number;
+  limit: number;
+}
+
+type LenisCallback = (data: LenisScrollData) => void;
+
+interface LenisLike {
+  on: (event: string, callback: LenisCallback) => void;
+  off: (event: string, callback: LenisCallback) => void;
+}
+
+type WindowWithLenis = {
+  lenis?: LenisLike;
+};
+
 export default function CustomScrollbar() {
   const [scroll, setScroll] = useState(0);
   const [thumbHeight, setThumbHeight] = useState(20);
 
   useEffect(() => {
-    let lenisInstance: any = null;
+    let lenisInstance: LenisLike | null = null;
 
     const handleLenisScroll = ({ scroll, limit }: { scroll: number; limit: number }) => {
       const percent = limit > 0 ? scroll / limit : 0;
@@ -22,15 +38,16 @@ export default function CustomScrollbar() {
     };
 
     const attachListener = () => {
-      lenisInstance.on("scroll", handleLenisScroll);
+      lenisInstance?.on("scroll", handleLenisScroll);
       window.addEventListener("resize", handleResize);
       handleResize(); // Initial calculation
     };
 
     // Poll until LenisProvider exposes window.lenis
     const checkLenis = setInterval(() => {
-      if ((window as any).lenis) {
-        lenisInstance = (window as any).lenis;
+      const win = window as unknown as WindowWithLenis;
+      if (win.lenis) {
+        lenisInstance = win.lenis;
         clearInterval(checkLenis);
         attachListener();
       }

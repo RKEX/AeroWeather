@@ -12,15 +12,11 @@ type AboutPageProps = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const language = await resolveUiLanguageFromRequest();
-  const dictionary = await getLocaleDictionary(language);
-
-  return generateMetadataFromConfig({
-    title: dictionary.aboutTitle,
-    description: dictionary.aboutIntro,
-    locale: language,
-    pathname: "/about",
-  });
+  return {
+    title: "About AeroWeather – AI Weather Impact Intelligence Platform",
+    description:
+      "Discover how AeroWeather uses AI weather insights to analyze weather impact on mood, relationships, travel, and productivity.",
+  };
 }
 
 export default function AboutPage() {

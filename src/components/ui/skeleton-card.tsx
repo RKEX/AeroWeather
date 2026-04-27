@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import React from "react";
-import { Skeleton } from "./skeleton";
+
 
 interface SkeletonCardProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;

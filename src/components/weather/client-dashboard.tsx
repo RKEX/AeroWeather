@@ -220,7 +220,7 @@ function ClientDashboard({
       cancelP2();
       cancelP3();
     };
-  }, []);
+  }, [initialLocation]);
 
   const handleLocationSelect = (loc: LocationResult) => {
     setActiveLocation({

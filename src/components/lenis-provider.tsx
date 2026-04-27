@@ -4,6 +4,10 @@
 import Lenis from "@studio-freight/lenis";
 import { ReactNode, useEffect } from "react";
 
+type WindowWithLenis = {
+  lenis?: Lenis;
+};
+
 interface LenisProviderProps {
   children: ReactNode;
 }
@@ -18,11 +22,10 @@ export default function LenisProvider({ children }: LenisProviderProps) {
       infinite: false,
       gestureOrientation: "vertical",
       normalizeWheel: true,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    } as ConstructorParameters<typeof Lenis>[0]);
 
     // Expose globally for CustomScrollbar
-    (window as any).lenis = lenis;
+    (window as unknown as WindowWithLenis).lenis = lenis;
 
     function raf(time: number) {
       lenis?.raf(time);
@@ -33,7 +36,7 @@ export default function LenisProvider({ children }: LenisProviderProps) {
 
     return () => {
       lenis?.destroy();
-      delete (window as any).lenis;
+      delete (window as unknown as WindowWithLenis).lenis;
     };
   }, []);
 

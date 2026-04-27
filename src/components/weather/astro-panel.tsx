@@ -9,10 +9,7 @@ import {
   Sun, 
   Sparkles, 
   Info, 
-  Telescope,
-  ChevronRight,
-  Wind,
-  Cloud
+  Telescope
 } from "lucide-react";
 import React, { memo, useEffect, useId, useMemo, useState } from "react";
 import SunCalc from "suncalc";
@@ -162,7 +159,7 @@ export const AstroPanel = memo(function AstroPanel({
       isPurnima: mPhase === 0.5, // 0.5 is full moon in suncalc
       moonStatus: moonIsUp ? "Moon is up" : (mRise && now < mRise ? `Rising at ${mRise.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}` : "Moon is set")
     };
-  }, [now, lat, lon, weather.current.cloudCover]);
+  }, [now, lat, lon, weather.current.cloudCover, dayIndex, weather.moon, weather.dailyMoon]);
 
   // Sun Arc logic
   const sunriseStr = weather.daily.sunrise[actualIndex];
@@ -296,7 +293,6 @@ export const AstroPanel = memo(function AstroPanel({
             rise={astro.moonRise} 
             set={astro.moonSet} 
             now={now} 
-            illum={astro.moonIllum}
             uid={uid} 
           />
 
@@ -494,7 +490,7 @@ const MiniPhaseCard = ({ label, date }: { label: string, date: Date }) => (
 
 /* ---------- SUB-COMPONENTS ---------- */
 
-const MoonPathArc = memo(({ rise, set, now, illum, uid }: { rise: Date | null, set: Date | null, now: Date, illum: number, uid: string }) => {
+const MoonPathArc = memo(({ rise, set, now, uid }: { rise: Date | null, set: Date | null, now: Date, uid: string }) => {
   const r = 85;
   const cx = 150;
   const cy = 100;
