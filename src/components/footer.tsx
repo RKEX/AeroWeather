@@ -72,9 +72,7 @@ export function Footer() {
               <FooterLink href="/contact">{t("contactTitle") || "Contact Us"}</FooterLink>
               <FooterLink href="/about">{t("footerAboutAeroWeather") || "About Us"}</FooterLink>
               <FooterLink href="/rick-das">{t("footerRickDasFounder") || "Rick Das"}</FooterLink>
-              <FooterLink href="mailto:support@aeroweather.app" isStatic>
-                support@aeroweather.app
-              </FooterLink>
+              
             </nav>
           </div>
         </div>
