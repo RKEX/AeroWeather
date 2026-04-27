@@ -1,13 +1,13 @@
 "use client";
 
 import type { SkyTimeData } from "@/lib/sky-time";
+import { useLocationStore } from "@/store/useLocationStore";
 import { useSkyStore } from "@/store/useSkyStore";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import SkyEngine from "./SkyEngine";
 
 const HOME_SKY_STATE_KEY = "aeroweather_home_sky_state";
-const HOME_LOCATION_KEY = "aeroweather_location";
 
 type PersistedSkyState = {
   weatherCode: number;
@@ -55,17 +55,7 @@ function parsePersistedSkyState(raw: string | null): PersistedSkyState | null {
   }
 }
 
-function parseSavedLocation(raw: string | null): { lat: number; lon: number } | null {
-  if (!raw) return null;
 
-  try {
-    const parsed = JSON.parse(raw) as LocationPayload;
-    if (typeof parsed.lat !== "number" || typeof parsed.lon !== "number") return null;
-    return { lat: parsed.lat, lon: parsed.lon };
-  } catch {
-    return null;
-  }
-}
 
 async function fetchSkyBootstrapData(lat: number, lon: number): Promise<SkyBootstrapData | null> {
   const apiUrl = new URL("https://api.open-meteo.com/v1/forecast");
@@ -119,6 +109,7 @@ async function fetchSkyBootstrapData(lat: number, lon: number): Promise<SkyBoots
 export default function SkyBackground() {
   const [engineReady, setEngineReady] = useState(false);
   const pathname = usePathname();
+  const { location: storeLocation } = useLocationStore();
   const {
     weather,
     timezone,
@@ -171,7 +162,9 @@ export default function SkyBackground() {
         return;
       }
 
-      const savedLocation = parseSavedLocation(localStorage.getItem(HOME_LOCATION_KEY));
+      const savedLocation = (storeLocation.lat && storeLocation.lon)
+        ? { lat: storeLocation.lat, lon: storeLocation.lon }
+        : null;
       if (!savedLocation) return;
 
       try {
@@ -198,7 +191,7 @@ export default function SkyBackground() {
     return () => {
       cancelled = true;
     };
-  }, [pathname, setTimeData, setTimezone, setWeather, timeData, timezone]);
+  }, [pathname, setTimeData, setTimezone, setWeather, timeData, timezone, storeLocation]);
 
   return (
     <div className="pointer-events-none fixed inset-0 -z-50 h-dvh w-full max-w-full">

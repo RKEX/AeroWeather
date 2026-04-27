@@ -21,6 +21,7 @@ import { WindPressureCard } from "@/components/weather/wind-pressure-card";
 import { useWeather } from "@/hooks/useWeather";
 import { extractSkyTimeData } from "@/lib/sky-time";
 import { getCurrentWindKmh } from "@/lib/wind";
+import { useLocationStore } from "@/store/useLocationStore";
 import { useSkyStore } from "@/store/useSkyStore";
 import { LocationResult, WeatherData } from "@/types/weather";
 import { Navigation } from "lucide-react";
@@ -117,31 +118,6 @@ function scheduleIdleTask(callback: () => void, timeout = 200): () => void {
   return () => clearTimeout(timer);
 }
 
-function getInitialLocation(fallback: {
-  lat: number;
-  lon: number;
-  name: string;
-}) {
-  if (typeof window === "undefined") return fallback;
-  try {
-    const saved = localStorage.getItem("aeroweather_location");
-    if (!saved) return fallback;
-    const parsed = JSON.parse(saved) as {
-      lat?: number;
-      lon?: number;
-      name?: string;
-    };
-    if (
-      typeof parsed.lat === "number" &&
-      typeof parsed.lon === "number" &&
-      typeof parsed.name === "string"
-    ) {
-      return { lat: parsed.lat, lon: parsed.lon, name: parsed.name };
-    }
-  } catch {}
-  return fallback;
-}
-
 function codeToWeatherKind(
   code: number,
 ): "clear" | "cloudy" | "rain" | "snow" | "fog" | "storm" {
@@ -162,7 +138,9 @@ function ClientDashboard({
   initialWeather: WeatherData;
   initialLocation: { lat: number; lon: number; name: string };
 }) {
-  const [activeLocation, setActiveLocation] = useState(initialLocation);
+  // ── Global location store (single source of truth) ──
+  const { location: activeLocation, setLocation, hydrated, hydrate } =
+    useLocationStore();
 
   const [priority2Ready, setPriority2Ready] = useState(false);
   const [priority3Ready, setPriority3Ready] = useState(false);
@@ -170,9 +148,26 @@ function ClientDashboard({
   const { t } = useLanguage();
   const isLowEnd = tier === "LOW";
 
+  // Hydrate the global store from localStorage on mount (idempotent).
+  // Uses server-provided initialLocation as the fallback when localStorage is empty.
+  useEffect(() => {
+    hydrate(initialLocation);
+  }, [hydrate, initialLocation]);
+
+  // Schedule deferred content rendering.
+  useEffect(() => {
+    const cancelP2 = scheduleIdleTask(() => setPriority2Ready(true), 160);
+    const cancelP3 = scheduleIdleTask(() => setPriority3Ready(true), 360);
+    return () => {
+      cancelP2();
+      cancelP3();
+    };
+  }, []);
+
   const { weather, error } = useWeather(activeLocation.lat, activeLocation.lon);
   const safeWeather = weather ?? initialWeather;
 
+  // ── Sky store sync (unchanged) ──
   const { setWeather: setSkyWeather, setTimezone, setTimeData } = useSkyStore();
   useEffect(() => {
     // Only sync sky state from real fetched weather to avoid dummy/fallback flashes.
@@ -200,35 +195,17 @@ function ClientDashboard({
     }
   }, [weather, setSkyWeather, setTimezone, setTimeData]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    localStorage.setItem(
-      "aeroweather_location",
-      JSON.stringify(activeLocation),
-    );
-  }, [activeLocation]);
-
-  useEffect(() => {
-    const saved = getInitialLocation(initialLocation);
-    if (saved.name !== initialLocation.name) {
-      requestAnimationFrame(() => setActiveLocation(saved));
-    }
-
-    const cancelP2 = scheduleIdleTask(() => setPriority2Ready(true), 160);
-    const cancelP3 = scheduleIdleTask(() => setPriority3Ready(true), 360);
-    return () => {
-      cancelP2();
-      cancelP3();
-    };
-  }, [initialLocation]);
-
+  // ── Location selection handler ──
   const handleLocationSelect = (loc: LocationResult) => {
-    setActiveLocation({
+    setLocation({
       lat: loc.latitude,
       lon: loc.longitude,
       name: loc.name,
     });
   };
+
+  // Prevent flicker: don't render until store is hydrated from localStorage.
+  if (!hydrated) return null;
 
   const isNight = safeWeather.current.isDay === 0;
   const windSourceKmh = getCurrentWindKmh(safeWeather);

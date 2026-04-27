@@ -23,6 +23,7 @@ import { extractSkyTimeData } from "@/lib/sky-time";
 import { getThemeClasses, getWeatherTheme } from "@/lib/weather-theme";
 import { getCurrentWindKmh } from "@/lib/wind";
 import { Link } from "@/navigation";
+import { useLocationStore } from "@/store/useLocationStore";
 import { useSkyStore } from "@/store/useSkyStore";
 import { WeatherData } from "@/types/weather";
 import {
@@ -85,8 +86,7 @@ const RadarMap = dynamic(
   { ssr: false, loading: () => <MapSkeleton /> },
 );
 
-// ✅ Default: Kolkata
-const DEFAULT_LOCATION = { lat: 22.5726, lon: 88.3639, name: "Kolkata" };
+// DEFAULT_LOCATION removed — useLocationStore provides the default.
 
 interface WeatherSlugClientProps {
   initialWeather: WeatherData;
@@ -126,35 +126,19 @@ export function WeatherSlugClient({
   lon,
 }: WeatherSlugClientProps) {
   const { setWeather: setSkyWeather, setTimezone, setTimeData } = useSkyStore();
+  const { location: storeLocation, hydrated, hydrate } = useLocationStore();
   const { t, language } = useLanguage();
 
   const isDaySlug = checkIsDaySlug(slug);
 
-  const clientLocation = useMemo<{
-    lat: number;
-    lon: number;
-    name: string;
-  } | null>(() => {
-    if (!isDaySlug || typeof window === "undefined") return null;
-    try {
-      const saved = localStorage.getItem("aeroweather_location");
-      if (saved) {
-        const parsed = JSON.parse(saved) as {
-          lat?: number;
-          lon?: number;
-          name?: string;
-        };
-        if (
-          typeof parsed.lat === "number" &&
-          typeof parsed.lon === "number" &&
-          typeof parsed.name === "string"
-        ) {
-          return { lat: parsed.lat, lon: parsed.lon, name: parsed.name };
-        }
-      }
-    } catch {}
-    return DEFAULT_LOCATION;
-  }, [isDaySlug]);
+  // Hydrate from localStorage for direct-navigation scenarios (e.g. /weather/today).
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
+
+  // For day slugs (today/tomorrow) → use global store location.
+  // For city slugs (/weather/delhi) → use server-provided lat/lon.
+  const clientLocation = isDaySlug && hydrated ? storeLocation : null;
 
   const fetchLat = isDaySlug && clientLocation ? clientLocation.lat : null;
   const fetchLon = isDaySlug && clientLocation ? clientLocation.lon : null;

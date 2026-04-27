@@ -1,0 +1,90 @@
+﻿bun : $ next build
+At line:1 char:1
++ bun run build 2>&1 | Out-File -FilePath build_output.txt -Encoding ut ...
++ ~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ next build:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Ôû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+- Experiments (use with caution):
+  ┬À optimizePackageImports
+
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 18.4s
+  Running TypeScript ...
+  Collecting page data using 7 workers ...
+ÔÜá Using edge runtime on a page currently disables static generation for that page
+  Generating static pages using 7 workers (0/232) ...
+  Generating static pages using 7 workers (58/232) 
+  Generating static pages using 7 workers (116/232) 
+  Generating static pages using 7 workers (174/232) 
+Ô£ô Generating static pages using 7 workers (232/232) in 4.6s
+  Finalizing page optimization ...
+
+Route (app)                              Revalidate  Expire
+Ôöî Ôùï /                                            1m      1y
+Ôö£ Ôùï /_not-found
+Ôö£ Ôùï /about
+Ôö£ Ôùï /analytics
+Ôö£ ãÆ /api/contact
+Ôö£ ãÆ /api/i18n/generate
+Ôö£ ãÆ /api/impact-intelligence
+Ôö£ ãÆ /api/locale
+Ôö£ ãÆ /api/love-intelligence
+Ôö£ ãÆ /api/subscribe
+Ôö£ ãÆ /api/weather
+Ôö£ Ôùï /blog
+Ôö£ ÔùÅ /blog/[slug]
+Ôöé Ôö£ /blog/how-weather-forecasting-works
+Ôöé Ôö£ /blog/understanding-aqi
+Ôöé Ôö£ /blog/humidity-vs-temperature
+Ôöé Ôöö [+5 more paths]
+Ôö£ Ôùï /contact
+Ôö£ ãÆ /dating-weather/[city]
+Ôö£ Ôùï /impact
+Ôö£ ãÆ /impact/[city]
+Ôö£ ÔùÅ /impact/[city]
+Ôöé Ôö£ /impact/new-york                             1h      1y
+Ôöé Ôö£ /impact/los-angeles                          1h      1y
+Ôöé Ôö£ /impact/san-francisco                        1h      1y
+Ôöé Ôöö [+4 more paths]
+Ôö£ Ôùï /love
+Ôö£ ãÆ /love-forecast/[city]
+Ôö£ ãÆ /love/[city]
+Ôö£ ÔùÅ /love/[city]
+Ôöé Ôö£ /love/new-york                               1h      1y
+Ôöé Ôö£ /love/los-angeles                            1h      1y
+Ôöé Ôö£ /love/san-francisco                          1h      1y
+Ôöé Ôöö [+4 more paths]
+Ôö£ Ôùï /meditation
+Ôö£ ãÆ /meditation-forecast/[city]
+Ôö£ ãÆ /meditation/[city]
+Ôö£ ÔùÅ /meditation/[city]
+Ôöé Ôö£ /meditation/new-york                         1h      1y
+Ôöé Ôö£ /meditation/los-angeles                      1h      1y
+Ôöé Ôö£ /meditation/san-francisco                    1h      1y
+Ôöé Ôöö [+4 more paths]
+Ôö£ Ôùï /privacy
+Ôö£ Ôùï /rick-das
+Ôö£ Ôùï /robots.txt
+Ôö£ Ôùï /sitemap.xml
+Ôö£ Ôùï /terms
+Ôö£ Ôùï /travel
+Ôö£ ãÆ /travel/[city]
+Ôö£ ÔùÅ /travel/[city]
+Ôöé Ôö£ /travel/new-york                             1h      1y
+Ôöé Ôö£ /travel/los-angeles                          1h      1y
+Ôöé Ôö£ /travel/san-francisco                        1h      1y
+Ôöé Ôöö [+4 more paths]
+Ôö£ Ôùï /weather
+Ôö£ ãÆ /weather/[slug]
+Ôöö Ôùï /who-is-rick-das
+
+
+ãÆ Proxy (Middleware)
+
+Ôùï  (Static)   prerendered as static content
+ÔùÅ  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ãÆ  (Dynamic)  server-rendered on demand
+

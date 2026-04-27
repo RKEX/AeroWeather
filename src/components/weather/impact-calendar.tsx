@@ -25,6 +25,7 @@ import {
     Wind,
 } from "lucide-react";
 import Link from "next/link";
+import { useLocationStore } from "@/store/useLocationStore";
 import React, { memo, useMemo, useState } from "react";
 
 type CategoryType = "health" | "travel" | "outdoor" | "airQuality" | "pests" | "allergies" | "love" | "meditation";
@@ -145,17 +146,8 @@ export const ImpactCalendar = memo(function ImpactCalendar({ lat, lon }: ImpactC
   const [loveSubTab, setLoveSubTab] = useState<LoveSubTab>("romance");
   const [mindSubTab, setMindSubTab] = useState<MindSubTab>("focus");
   const [selectedDay, setSelectedDay] = useState<number>(0);
-  const [locationName] = useState(() => {
-    if (typeof window === "undefined") return "your location";
-    try {
-      const saved = localStorage.getItem("aeroweather_location");
-      if (saved) {
-        const parsed = JSON.parse(saved) as { name?: string };
-        if (parsed.name) return parsed.name;
-      }
-    } catch { /* ignore */ }
-    return "your location";
-  });
+  const { location: storeLocation } = useLocationStore();
+  const locationName = storeLocation.name || "your location";
 
   const { data, loading, error } = useImpactCalendar(lat, lon);
   const days = useMemo(() => data?.days ?? [], [data?.days]);

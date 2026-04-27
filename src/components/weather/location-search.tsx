@@ -5,6 +5,7 @@ import { useLanguage } from "@/components/Providers/language-provider";
 import { useDebounce } from "@/hooks/useDebounce";
 import { searchLocations } from "@/lib/geocode";
 import { prefetchWeather } from "@/lib/prefetch";
+import { useLocationStore } from "@/store/useLocationStore";
 import { LocationResult } from "@/types/weather";
 import { Loader2, MapPin, Navigation, Search } from "lucide-react";
 import type { Route } from "next";
@@ -17,6 +18,7 @@ interface LocationSearchProps {
 
 export function LocationSearch({ onSelect }: LocationSearchProps) {
   const { t } = useLanguage();
+  const { setLocation } = useLocationStore();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<LocationResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -61,17 +63,12 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
     setOpen(false);
     onSelect(location);
 
-    // ✅ Selected location localStorage এ save করো
-    if (typeof window !== "undefined") {
-      localStorage.setItem(
-        "aeroweather_location",
-        JSON.stringify({
-          lat: location.latitude,
-          lon: location.longitude,
-          name: location.name,
-        })
-      );
-    }
+    // ✅ Persist via global store (store handles localStorage).
+    setLocation({
+      lat: location.latitude,
+      lon: location.longitude,
+      name: location.name,
+    });
 
     const weatherPath = `/weather/${location.name
       .toLowerCase()
@@ -112,17 +109,12 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
             timezone,
           };
 
-          // ✅ Current location localStorage এ save করো
-          if (typeof window !== "undefined") {
-            localStorage.setItem(
-              "aeroweather_location",
-              JSON.stringify({
-                lat: latitude,
-                lon: longitude,
-                name: city,
-              })
-            );
-          }
+          // ✅ Persist via global store (store handles localStorage).
+          setLocation({
+            lat: latitude,
+            lon: longitude,
+            name: city,
+          });
 
           setLocating(false);
           onSelect(location);
