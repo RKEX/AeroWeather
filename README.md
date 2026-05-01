@@ -1,186 +1,94 @@
-# 🌦 AeroWeather
+🌦️ AeroWeather  
+Weather with Intelligence. Life with Insight.
 
-Modern **AI-enhanced weather dashboard** built with **Next.js 16**, **Bun package manager**, and deployed on **Vercel**.
+AeroWeather is an AI-enhanced weather platform that goes beyond traditional forecasts by transforming environmental data into meaningful lifestyle insights — helping users make smarter daily decisions.
 
-🔗 **Live at:**
+🔗 Live Demo  
 https://aeroweather-mauve.vercel.app/
 
 ---
 
-# ✨ Features
+✨ Key Features
 
-* 🌤 Real-time Weather Data
-* 📍 Location-based Forecast
-* 📊 Hourly & Daily Weather Forecast
-* 🌫 Air Quality Index (AQI)
-* 🌌 Animated Sky Background
-* ⚡ Smooth Scrolling UI (Lenis)
-* 📱 Responsive Modern UI
-* 🚀 Fast build with Bun
+🌤 Real-Time Weather Intelligence  
+- Accurate live weather data  
+- Location-based forecasts  
+- Hourly and daily predictions  
 
----
+🌫 Air Quality Insights (AQI)  
+- Real-time air pollution data  
+- Health-aware environmental indicators  
 
-# 🧠 Tech Stack
+🌌 Dynamic Sky Engine  
+- Real-time animated sky based on live conditions  
+- Day/night transitions, clouds, haze, and rain effects  
+- Smooth, optimized visual experience  
 
-| Technology     | Purpose                   |
-| -------------- | ------------------------- |
-| Next.js 16     | React Framework           |
-| Bun            | Package Manager & Runtime |
-| TypeScript     | Type Safety               |
-| Open-Meteo API | Weather Data              |
-| Tailwind CSS   | Styling                   |
-| Vercel         | Deployment                |
+📅 Impact Intelligence Calendar (Flagship)  
+A unique system that translates weather into real-life insights:  
+- 💕 Social & lifestyle suitability  
+- 🧠 Mood and energy indicators  
+- 🌿 Daily experience insights  
+- 🏆 Best day recommendations  
 
----
-
-# 📦 Package Manager
-
-This project uses **Bun** instead of npm or yarn.
-
-Bun includes:
-
-* JavaScript runtime
-* package manager
-* bundler
-* test runner
-
-All in one fast developer toolkit.
+Enables users to plan their day based on experience — not just raw data.
 
 ---
 
-# ⚙️ Installation
+⚡ Experience
 
-## 1️⃣ Install Bun
-
-```bash
-curl -fsSL https://bun.sh/install | bash
-```
-
-Check installation
-
-```bash
-bun --version
-```
+- Smooth and responsive modern UI  
+- Clean, distraction-free design  
+- Optimized performance across devices  
 
 ---
 
-# 📥 Clone the Repository
+🧠 Tech Stack
 
-```bash
-git clone https://github.com/RKEX/aeroweather.git
-cd aeroweather
-```
-
----
-
-# 📦 Install Dependencies
-
-```bash
-bun install
-```
+- Next.js (React Framework)  
+- TypeScript  
+- Bun (Runtime & Package Manager)  
+- Tailwind CSS  
+- Open-Meteo APIs  
+- Vercel (Deployment)  
 
 ---
 
-# ▶ Run Development Server
+🌍 APIs Used
 
-Create a local environment file before starting:
-
-```bash
-cp .env.example .env.local
-```
-
-Set this value in `.env.local`:
-
-```bash
-OPENWEATHER_API_KEY=your_openweather_api_key_here
-```
-
-The Impact Intelligence Calendar uses OpenWeather One Call and Air Pollution APIs through a server route and requires this key.
-
-```bash
-bun run dev
-```
-
-Open in browser
-
-```
-http://localhost:3000
-```
+- Open-Meteo Weather API  
+- Open-Meteo Air Quality API  
 
 ---
 
-# 🏗 Build for Production
+🚀 Deployment
 
-```bash
-bun run build
-```
+Optimized for Vercel for fast and scalable deployment.
 
 ---
 
-# 🚀 Start Production Server
+🎯 Vision
 
-```bash
-bun run start
-```
+AeroWeather aims to redefine weather as a decision-making tool:
 
----
-
-# 📁 Project Structure
-
-```
-src
- ├─ app
- │   ├─ layout.tsx
- │   ├─ page.tsx
- │
- ├─ components
- │   └─ weather
- │       └─ sky-background.tsx
- │
- ├─ lib
- │   └─ fonts.ts
- │
- ├─ types
- │   └─ weather.ts
- │
- └─ styles
-     └─ globals.css
-```
+- From forecasts → to actionable insights  
+- From raw data → to real-life impact  
 
 ---
 
-# 🌍 API
+👨‍💻 Author
 
-Weather data powered by:
-
-* Open-Meteo Weather API
-* Open-Meteo Air Quality API
+Rick Das  
+GitHub: https://github.com/RKEX  
 
 ---
 
-# 🚀 Deployment
+⭐ Support
 
-Deployed on **Vercel**
-
-```bash
-bun run build
-vercel deploy
-```
+If you found this project useful:  
+- ⭐ Star the repository  
+- 🚀 Share it with others  
 
 ---
 
-# 👨‍💻 Author
-
-**RKEX**
-
-GitHub
-https://github.com/RKEX
-
----
-
-# ⭐ Support
-
-If you like this project:
-
-⭐ Star the repository
-🚀 Share with developers
+Built with a focus on performance, clarity, and intelligent user experience.
